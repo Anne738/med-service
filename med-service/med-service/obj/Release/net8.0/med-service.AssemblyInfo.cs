@@ -13,7 +13,7 @@ using System.Reflection;
 
 [assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("aspnet-med_service-32725165-8d2f-4ebc-b77d-db79dcab6c58")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("med-service")]
-[assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
+[assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d218e49e2dc2933c7f7f9b9e0421287f7819c90f")]
 [assembly: System.Reflection.AssemblyProductAttribute("med-service")]
