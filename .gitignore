@@ -1,5 +1,40 @@
-﻿################################################################################
+################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs
+# Відстеження файлів Visual Studio
+.vs/
+*.user
+*.suo
+*.cache
+*.pdb
+
+# Файли збірки та тимчасові файли
+bin/
+obj/
+*.exe
+*.dll
+*.log
+
+# Налаштування та залежності
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+# Пакети та залежності
+node_modules/
+packages/
+*.nupkg
+
+# Docker та Kubernetes
+.docker/
+docker-compose.override.yml
+
+# IDE-сумісність
+*.sln.ide
+.vscode/
+
+# Інші тимчасові файли
+*.tmp
+*.bak
+Thumbs.db
