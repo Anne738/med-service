@@ -8,6 +8,6 @@ namespace med_service.Models
         }
 
         public DateTime DateOfBirth { get; set; }
-        public List<Appointment> Appointments { get; set; } = new List<Appointment>();
+        public List<Appointment> Appointments { get; set; }
     }
 }
