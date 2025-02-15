@@ -14,7 +14,7 @@ namespace med_service.Models
         public int SpecializationId { get; set; }
         public Specialization Specialization { get; set; }
 
-        public int ScheduleId { get; set; }
+        //public int ScheduleId { get; set; }
         public List<Schedule> Schedules { get; set; }
 
         public int ExperienceYears { get; set; }
