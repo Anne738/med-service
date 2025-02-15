@@ -4,10 +4,9 @@ namespace med_service.Models
 {
     public class Doctor : User
     {
-        public Doctor()
-        {
-            Role = UserRole.Doctor;
-        }
+        public int Id { get; set; }
+        public string UserId { get; set; }
+        public User User { get; set; }
 
         public int HospitalId { get; set; }
         public Hospital Hospital { get; set; }
@@ -24,4 +23,4 @@ namespace med_service.Models
         public List<Appointment> Appointments { get; set; }
     }
 }
-}
+
