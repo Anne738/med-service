@@ -15,7 +15,7 @@ namespace med_service.Models
         }
 
         public int Id { get; set; }
-        public List<TimeSlot> AvailableSlots { get; set; };
+        public List<TimeSlot> AvailableSlots { get; set; }
         public DayOfWeek Day { get; set; }
 
         public int DoctorId { get; set; }

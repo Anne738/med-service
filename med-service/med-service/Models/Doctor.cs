@@ -2,7 +2,7 @@
 
 namespace med_service.Models
 {
-    public class Doctor : User
+    public class Doctor
     {
         public int Id { get; set; }
         public string UserId { get; set; }
