@@ -6,6 +6,7 @@ namespace med_service.Data
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {
+        public DbSet<User> Users { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<Patient> Patients { get; set; }
@@ -22,6 +23,19 @@ namespace med_service.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            #region User
+            // Configure User entity
+            modelBuilder.Entity<User>()
+                .HasKey(u => u.Id);
+            modelBuilder.Entity<User>()
+                .Property(u => u.UserName)
+                .IsRequired()
+                .HasMaxLength(100);
+            modelBuilder.Entity<User>()
+                .Property(u => u.Email)
+                .IsRequired();
+            #endregion
 
             #region Appointment
             // primary key
