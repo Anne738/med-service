@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using med_service.Models
+using med_service.Models;
 
 namespace med_service.Data
 {
