@@ -14,12 +14,12 @@ namespace med_service.Models
             Friday
         }
 
-        [Key]
-        public long Id { get; set; }
-        public List<string> AvailableSlots { get; set; } = new List<string>();
+        public int Id { get; set; }
+        public List<TimeSlot> AvailableSlots { get; set; }
         public DayOfWeek Day { get; set; }
 
-        //Foreign key - doctor
+        public int DoctorId { get; set; }
+        public Doctor Doctor { get; set; }
     }
 
 }

@@ -2,28 +2,25 @@
 
 namespace med_service.Models
 {
-    public class Doctor : User
+    public class Doctor
     {
-        public Doctor()
-        {
-            Role = UserRole.Doctor;
-        }
+        public int Id { get; set; }
+        public string UserId { get; set; }
+        public User User { get; set; }
 
-        [ForeignKey("Hospital")]
-        public long HospitalId { get; set; }
+        public int HospitalId { get; set; }
         public Hospital Hospital { get; set; }
 
-        [ForeignKey("Specialization")]
-        public long SpecializationId { get; set; }
+        public int SpecializationId { get; set; }
         public Specialization Specialization { get; set; }
 
-        [ForeignKey("Schedule")]
-        public long ScheduleId { get; set; }
-        public List<Scgedule> Schedules { get; set; }
+        //public int ScheduleId { get; set; }
+        public List<Schedule> Schedules { get; set; }
 
         public int ExperienceYears { get; set; }
         public string WorkingHours { get; set; }
-        public List<Appointment> Appointments { get; set; } = new List<Appointment>();
+
+        public List<Appointment> Appointments { get; set; }
     }
 }
-}
+
