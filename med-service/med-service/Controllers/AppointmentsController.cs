@@ -49,8 +49,8 @@ namespace med_service.Controllers
         // GET: Appointments/Create
         public IActionResult Create()
         {
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id");
-            ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id");
+            ViewBag.DoctorId = new SelectList(_context.Doctors, "Id", "Id");
+            ViewBag.PatientId = new SelectList(_context.Patients, "Id", "Id");
             return View();
         }
 
