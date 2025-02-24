@@ -1,4 +1,4 @@
-﻿using static med_service.Models.Scgedule;
+﻿using static med_service.Models.Schedule;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
