@@ -1,59 +1,49 @@
 ﻿@model IEnumerable<med_service.Models.Appointment>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Appointments";
 }
 
-<h1>Index</h1>
+<h1>Appointments</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
 </p>
+
+<form asp-action="Index" method="get" class="form-inline mb-3">
+    <label for="status" class="mr-2">Filter by Status:</label>
+    <select name="status" asp-items="ViewBag.Statuses" class="form-control mr-2">
+        <option value="">All</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Patient)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Doctor)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AppointmentDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Notes)
-            </th>
-            <th></th>
+            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th>@Html.DisplayNameFor(model => model.Patient.Id)</th>
+            <th>@Html.DisplayNameFor(model => model.Doctor.Id)</th>
+            <th>@Html.DisplayNameFor(model => model.AppointmentDate)</th>
+            <th>@Html.DisplayNameFor(model => model.Notes)</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Patient.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Doctor.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AppointmentDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Notes)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">Edit</a>
-                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Details</a>
-                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                <td>@Html.DisplayFor(modelItem => item.Patient.Id)</td>
+                <td>@Html.DisplayFor(modelItem => item.Doctor.Id)</td>
+                <td>@Html.DisplayFor(modelItem => item.AppointmentDate)</td>
+                <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
