@@ -15,7 +15,9 @@
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
                 <label asp-for="Day" class="control-label"></label>
-                <select asp-for="Day" class="form-control"></select>
+                <select asp-for="Day" asp-items="Html.GetEnumSelectList<med_service.Models.Schedule.DayOfWeek>()" class="form-control">
+                    <option value="" selected disabled>Select a Day</option>
+                </select>
                 <span asp-validation-for="Day" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -35,5 +37,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
