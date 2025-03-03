@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
+using static med_service.Models.Appointment;
 
 namespace med_service.Controllers
 {
@@ -19,11 +20,28 @@ namespace med_service.Controllers
             _context = context;
         }
 
-        // GET: Appointments
-        public async Task<IActionResult> Index()
+        //// GET: Appointments
+        //public async Task<IActionResult> Index()
+        //{
+        //    var applicationDbContext = _context.Appointments.Include(a => a.Doctor).Include(a => a.Patient);
+        //    return View(await applicationDbContext.ToListAsync());
+        //}
+
+        [HttpGet]
+        public async Task<IActionResult> Index(Appointment.AppointmentStatus? status)
         {
-            var applicationDbContext = _context.Appointments.Include(a => a.Doctor).Include(a => a.Patient);
-            return View(await applicationDbContext.ToListAsync());
+            var appointments = _context.Appointments
+                .Include(a => a.Patient)
+                .Include(a => a.Doctor)
+                .AsQueryable();
+
+            // If status filter is applied, filter appointments
+            if (status.HasValue)
+            {
+                appointments = appointments.Where(a => a.Status == status.Value);
+            }
+
+            return View(await appointments.ToListAsync());
         }
 
         // GET: Appointments/Details/5
@@ -49,8 +67,8 @@ namespace med_service.Controllers
         // GET: Appointments/Create
         public IActionResult Create()
         {
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id");
-            ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id");
+            ViewBag.DoctorId = new SelectList(_context.Doctors, "Id", "Id");
+            ViewBag.PatientId = new SelectList(_context.Patients, "Id", "Id");
             return View();
         }
 
@@ -166,5 +184,27 @@ namespace med_service.Controllers
         {
             return _context.Appointments.Any(e => e.Id == id);
         }
+
+
+
+        //public async Task<IActionResult> Index(Appointment.AppointmentStatus? status)
+        //{
+        //    var query = _context.Appointments
+        //        .Include(a => a.Doctor)
+        //        .Include(a => a.Patient)
+        //        .AsQueryable(); //Ensures compatibility
+
+        //    if (status.HasValue)
+        //    {
+        //        query = query.Where(a => a.Status == status.Value);
+        //    }
+
+        //    ViewData["CurrentStatus"] = status;
+        //    ViewData["Statuses"] = new SelectList(Enum.GetValues(typeof(Appointment.AppointmentStatus)));
+
+        //    return View(await query.ToListAsync());
+
+        //}
+
     }
 }

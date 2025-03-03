@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace med_service.Controllers
 {
     public class PatientsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public PatientsController(ApplicationDbContext context)
+        public PatientsController(ApplicationDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Patients
@@ -48,7 +51,7 @@ namespace med_service.Controllers
         // GET: Patients/Create
         public IActionResult Create()
         {
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName");
             return View();
         }
 
@@ -59,15 +62,38 @@ namespace med_service.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,UserId,DateOfBirth")] Patient patient)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.SelectMany(x => x.Value.Errors).Select(x => x.ErrorMessage);
+                return Content("Ошибки: " + string.Join("; ", errors));
+            }
+
             if (ModelState.IsValid)
             {
+                if (!string.IsNullOrEmpty(patient.UserId))
+                {
+                    var user = await _userManager.FindByIdAsync(patient.UserId);
+                    if (user == null)
+                    {
+                        ModelState.AddModelError("UserId", "Пользователь с таким UserId не найден.");
+                        return View(patient);
+                    }
+                    patient.User = user;
+                }
+                else
+                {
+                    ModelState.AddModelError("UserId", "UserId является обязательным полем.");
+                    return View(patient);
+                }
+
                 _context.Add(patient);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", patient.UserId);
             return View(patient);
         }
+
+ 
 
         // GET: Patients/Edit/5
         public async Task<IActionResult> Edit(int? id)

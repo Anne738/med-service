@@ -1,5 +1,6 @@
 ﻿using med_service.Data;
 using med_service.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,17 +8,17 @@ namespace med_service.Controllers
 {
     public class UsersController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public UsersController(ApplicationDbContext context)
+        public UsersController(UserManager<User> userManager)
         {
-            _context = context;
+            _userManager = userManager;
         }
 
         // GET: Users
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Users.ToListAsync());
+            return View(await _userManager.Users.ToListAsync());
         }
 
         // GET: Users/Details/5
@@ -28,7 +29,7 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
+            var user = await _userManager.Users.FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
                 return NotFound();
@@ -50,9 +51,12 @@ namespace med_service.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(user);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var result = await _userManager.CreateAsync(user);
+                if (result.Succeeded) return RedirectToAction(nameof(Index));
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
             return View(user);
         }
@@ -65,7 +69,7 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -89,15 +93,22 @@ namespace med_service.Controllers
                 try
                 {
                     // Ensure the user is being tracked by the context
-                    var existingUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == user.Id);
+                    var existingUser = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
                     if (existingUser == null)
                     {
                         return NotFound();
                     }
 
+                    existingUser.FirstName = user.FirstName;
+                    existingUser.LastName = user.LastName;
+                    existingUser.Role = user.Role;
+                    existingUser.Email = user.Email;
+                    existingUser.UserName = user.UserName;
+
                     // Update the user entity
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
+                    var identityResult = await _userManager.UpdateAsync(existingUser);
+
+                    if(identityResult.Succeeded) return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -112,7 +123,6 @@ namespace med_service.Controllers
                     }
                 }
 
-                return RedirectToAction(nameof(Index));  // Redirect to the user list after successful edit
             }
             return View(user);  // Return the view if the model is invalid
         }
@@ -125,7 +135,7 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
+            var user = await _userManager.Users.FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
                 return NotFound();
@@ -139,18 +149,18 @@ namespace med_service.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userManager.FindByIdAsync(id);
             if (user != null)
             {
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
+                var result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded) return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            return NotFound();
         }
 
         private bool UserExists(string id)
         {
-            return _context.Users.Any(e => e.Id == id);
+            return _userManager.Users.Any(e => e.Id == id);
         }
     }
 }
