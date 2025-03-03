@@ -25,7 +25,9 @@ namespace med_service.Models
         [ValidateNever]
         public Doctor Doctor { get; set; }
 
-        public DateTime AppointmentDate { get; set; }
+        public int TimeslotId { get; set; }
+        public TimeSlot TimeSlotId { get; set; }
+
         public string Notes { get; set; }
     }
 }
