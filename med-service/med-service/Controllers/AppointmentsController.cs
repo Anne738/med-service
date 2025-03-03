@@ -30,19 +30,27 @@ namespace med_service.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(Appointment.AppointmentStatus? status)
         {
+            // Get all appointments including related Patient and Doctor data
             var appointments = _context.Appointments
                 .Include(a => a.Patient)
                 .Include(a => a.Doctor)
                 .AsQueryable();
 
-            // If status filter is applied, filter appointments
+            // Pass all possible status values to the view for the filter dropdown
+            ViewBag.Statuses = Enum.GetValues(typeof(Appointment.AppointmentStatus))
+                                   .Cast<Appointment.AppointmentStatus>()
+                                   .ToList();
+
+            // If a status is selected, filter the appointments
             if (status.HasValue)
             {
                 appointments = appointments.Where(a => a.Status == status.Value);
             }
 
+            // Return the filtered list of appointments to the view
             return View(await appointments.ToListAsync());
         }
+
 
         // GET: Appointments/Details/5
         public async Task<IActionResult> Details(int? id)
