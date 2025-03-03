@@ -22,7 +22,7 @@ namespace med_service.Controllers
         // GET: TimeSlots
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.TimeSlots.Include(t => t.Doctor).Include(t => t.Schedule);
+            var applicationDbContext = _context.TimeSlots.Include(t => t.Schedule);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -35,7 +35,6 @@ namespace med_service.Controllers
             }
 
             var timeSlot = await _context.TimeSlots
-                .Include(t => t.Doctor)
                 .Include(t => t.Schedule)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (timeSlot == null)
@@ -49,7 +48,6 @@ namespace med_service.Controllers
         // GET: TimeSlots/Create
         public IActionResult Create()
         {
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id");
             ViewData["ScheduleId"] = new SelectList(_context.Schedules, "Id", "Id");
             return View();
         }
@@ -59,7 +57,7 @@ namespace med_service.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ScheduleId,StartTime,EndTime,DoctorId")] TimeSlot timeSlot)
+        public async Task<IActionResult> Create([Bind("Id,ScheduleId,StartTime,EndTime,isBooked")] TimeSlot timeSlot)
         {
             if (ModelState.IsValid)
             {
@@ -67,7 +65,6 @@ namespace med_service.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", timeSlot.DoctorId);
             ViewData["ScheduleId"] = new SelectList(_context.Schedules, "Id", "Id", timeSlot.ScheduleId);
             return View(timeSlot);
         }
@@ -85,7 +82,6 @@ namespace med_service.Controllers
             {
                 return NotFound();
             }
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", timeSlot.DoctorId);
             ViewData["ScheduleId"] = new SelectList(_context.Schedules, "Id", "Id", timeSlot.ScheduleId);
             return View(timeSlot);
         }
@@ -95,7 +91,7 @@ namespace med_service.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ScheduleId,StartTime,EndTime,DoctorId")] TimeSlot timeSlot)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ScheduleId,StartTime,EndTime,isBooked")] TimeSlot timeSlot)
         {
             if (id != timeSlot.Id)
             {
@@ -122,7 +118,6 @@ namespace med_service.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", timeSlot.DoctorId);
             ViewData["ScheduleId"] = new SelectList(_context.Schedules, "Id", "Id", timeSlot.ScheduleId);
             return View(timeSlot);
         }
@@ -136,7 +131,6 @@ namespace med_service.Controllers
             }
 
             var timeSlot = await _context.TimeSlots
-                .Include(t => t.Doctor)
                 .Include(t => t.Schedule)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (timeSlot == null)

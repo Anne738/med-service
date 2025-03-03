@@ -58,11 +58,11 @@ namespace med_service.Data
                 .HasForeignKey(a => a.DoctorId)
                 .OnDelete(DeleteBehavior.Restrict); // При видаленні лікаря, прийоми не видаляються автоматично.
 
-            modelBuilder.Entity<Appointment>()
-               .HasOne(a => a.TimeSlot)
-               .WithMany()
-               .HasForeignKey(a => a.TimeSlotId)
-               .OnDelete(DeleteBehavior.Restrict);
+            //  modelBuilder.Entity<Appointment>()
+            //  .HasOne(a => a.TimeSlot)
+            //  .WithMany(t=>t.times)
+            // .HasForeignKey(a => a.TimeSlotId)
+            // .OnDelete(DeleteBehavior.Restrict);
 
             #endregion
 
@@ -128,7 +128,7 @@ namespace med_service.Data
                 .OnDelete(DeleteBehavior.Cascade); // При видаленні розкладу, його часові інтервали видаляються.
             #endregion
             
-            #region TimeSlot
+            /*#region TimeSlot
             // primary key
             modelBuilder.Entity<TimeSlot>()
                 .HasKey(ts => ts.Id);
@@ -140,7 +140,7 @@ namespace med_service.Data
                 .WithMany()
                 .HasForeignKey(ts => ts.DoctorId)
                 .OnDelete(DeleteBehavior.Restrict);
-            #endregion
+            #endregion*/
 
             #region Specialization
             // primary key
