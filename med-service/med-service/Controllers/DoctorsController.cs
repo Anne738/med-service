@@ -22,27 +22,28 @@ namespace med_service.Controllers
         // GET: Doctors
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Doctors.Include(d => d.Hospital).Include(d => d.Specialization).Include(d => d.User);
-            return View(await applicationDbContext.ToListAsync());
+            // Include Hospital, Specialization, and User for display
+            var doctors = _context.Doctors
+                .Include(d => d.Hospital)
+                .Include(d => d.Specialization)
+                .Include(d => d.User);
+            return View(await doctors.ToListAsync());
         }
 
         // GET: Doctors/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var doctor = await _context.Doctors
                 .Include(d => d.Hospital)
                 .Include(d => d.Specialization)
                 .Include(d => d.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (doctor == null)
-            {
                 return NotFound();
-            }
 
             return View(doctor);
         }
@@ -50,95 +51,171 @@ namespace med_service.Controllers
         // GET: Doctors/Create
         public IActionResult Create()
         {
-            ViewData["HospitalId"] = new SelectList(_context.Hospitals, "Id", "Id");
-            ViewData["SpecializationId"] = new SelectList(_context.Specializations, "Id", "Id");
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Id");
+            ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Id");
+            ViewBag.UserId = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
         // POST: Doctors/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,UserId,HospitalId,SpecializationId,ExperienceYears,WorkingHours")] Doctor doctor)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(doctor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
+                ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
+                ViewBag.UserId = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
+                return View(doctor);
             }
-            ViewData["HospitalId"] = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
-            ViewData["SpecializationId"] = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
-            return View(doctor);
+
+            // Find and assign Hospital 
+            if (doctor.HospitalId > 0)
+            {
+                var hospital = await _context.Hospitals.FindAsync(doctor.HospitalId);
+                if (hospital == null)
+                {
+                    ModelState.AddModelError("HospitalId", "Указанная больница не найдена.");
+                    ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
+                    ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
+                    ViewBag.UserId = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
+                    return View(doctor);
+                }
+                doctor.Hospital = hospital;
+            }
+
+            // Find and assign Specialization
+            if (doctor.SpecializationId > 0)
+            {
+                var specialization = await _context.Specializations.FindAsync(doctor.SpecializationId);
+                if (specialization == null)
+                {
+                    ModelState.AddModelError("SpecializationId", "Указанная специализация не найдена.");
+                    ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
+                    ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
+                    ViewBag.UserId = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
+                    return View(doctor);
+                }
+                doctor.Specialization = specialization;
+            }
+
+            // Find and assign User
+            if (!string.IsNullOrEmpty(doctor.UserId))
+            {
+                var user = await _context.Users.FindAsync(doctor.UserId);
+                if (user == null)
+                {
+                    ModelState.AddModelError("UserId", "Указанный пользователь не найден.");
+                    ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
+                    ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
+                    ViewBag.UserId = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
+                    return View(doctor);
+                }
+                doctor.User = user;
+            }
+
+            _context.Add(doctor);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Doctors/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var doctor = await _context.Doctors.FindAsync(id);
             if (doctor == null)
-            {
                 return NotFound();
-            }
-            ViewData["HospitalId"] = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
-            ViewData["SpecializationId"] = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
+
+            ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
+            ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
+            ViewBag.UserId = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
             return View(doctor);
         }
 
         // POST: Doctors/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,HospitalId,SpecializationId,ExperienceYears,WorkingHours")] Doctor doctor)
         {
             if (id != doctor.Id)
-            {
                 return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
+                ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
+                ViewBag.UserId = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
+                return View(doctor);
             }
 
-            if (ModelState.IsValid)
+            // Find references again, similar to Create
+            if (doctor.HospitalId > 0)
             {
-                try
+                var hospital = await _context.Hospitals.FindAsync(doctor.HospitalId);
+                if (hospital == null)
                 {
-                    _context.Update(doctor);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("HospitalId", "Указанная больница не найдена.");
+                    ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
+                    ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
+                    ViewBag.UserId = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
+                    return View(doctor);
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!DoctorExists(doctor.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                doctor.Hospital = hospital;
             }
-            ViewData["HospitalId"] = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
-            ViewData["SpecializationId"] = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
-            return View(doctor);
+
+            if (doctor.SpecializationId > 0)
+            {
+                var specialization = await _context.Specializations.FindAsync(doctor.SpecializationId);
+                if (specialization == null)
+                {
+                    ModelState.AddModelError("SpecializationId", "Указанная специализация не найдена.");
+                    ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
+                    ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
+                    ViewBag.UserId = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
+                    return View(doctor);
+                }
+                doctor.Specialization = specialization;
+            }
+
+            if (!string.IsNullOrEmpty(doctor.UserId))
+            {
+                var user = await _context.Users.FindAsync(doctor.UserId);
+                if (user == null)
+                {
+                    ModelState.AddModelError("UserId", "Указанный пользователь не найден.");
+                    ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Id", doctor.HospitalId);
+                    ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Id", doctor.SpecializationId);
+                    ViewBag.UserId = new SelectList(_context.Users, "Id", "Id", doctor.UserId);
+                    return View(doctor);
+                }
+                doctor.User = user;
+            }
+
+            try
+            {
+                _context.Update(doctor);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!DoctorExists(doctor.Id))
+                    return NotFound();
+
+                throw;
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Doctors/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var doctor = await _context.Doctors
                 .Include(d => d.Hospital)
@@ -146,9 +223,7 @@ namespace med_service.Controllers
                 .Include(d => d.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (doctor == null)
-            {
                 return NotFound();
-            }
 
             return View(doctor);
         }
@@ -162,9 +237,8 @@ namespace med_service.Controllers
             if (doctor != null)
             {
                 _context.Doctors.Remove(doctor);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

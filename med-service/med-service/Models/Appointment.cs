@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Numerics;
 
 namespace med_service.Models
@@ -17,9 +18,11 @@ namespace med_service.Models
         public int Id { get; set; }
 
         public int PatientId { get; set; }
+        [ValidateNever]
         public Patient Patient { get; set; }
 
         public int DoctorId { get; set; }
+        [ValidateNever]
         public Doctor Doctor { get; set; }
 
         public DateTime AppointmentDate { get; set; }
