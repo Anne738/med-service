@@ -14,6 +14,8 @@ namespace med_service.Models
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
 
+        public bool isBooked { get; set; } = false;
+
         public int DoctorId { get; set; }
         public Doctor Doctor { get; set; }
     }

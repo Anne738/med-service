@@ -22,7 +22,9 @@ namespace med_service.Models
         public int DoctorId { get; set; }
         public Doctor Doctor { get; set; }
 
-        public DateTime AppointmentDate { get; set; }
+        public int TimeslotId { get; set; }
+        public TimeSlot TimeSlotId { get; set; }
+
         public string Notes { get; set; }
     }
 }
