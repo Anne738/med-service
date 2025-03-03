@@ -16,7 +16,7 @@ namespace med_service.Models
 
         public bool isBooked { get; set; } = false;
 
-        public int DoctorId { get; set; }
-        public Doctor Doctor { get; set; }
+        //public int DoctorId { get; set; }
+        //public Doctor Doctor { get; set; }
     }
 }
