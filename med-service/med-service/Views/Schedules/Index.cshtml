@@ -1,27 +1,27 @@
 ﻿@model IEnumerable<med_service.Models.Schedule>
 
 @{
-    ViewData["Title"] = "Расписания";
+    ViewData["Title"] = "Розклади";
 }
 
-<h1>Расписания</h1>
+<h1>Розклади</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Создать новое расписание</a>
+    <a asp-action="Create" class="btn btn-primary">Створити новий розклад</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                День недели
+                День тижня
             </th>
             <th>
-                Врач
+                Лікар
             </th>
             <th>
-                Рабочие часы
+                Робочі години
             </th>
-            <th>Действия</th>
+            <th>Дії</th>
         </tr>
     </thead>
     <tbody>
@@ -45,9 +45,9 @@
                     @item.WorkingHours
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редактировать</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Детали</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Удалить</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редагувати</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Деталі</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Видалити</a>
                 </td>
             </tr>
         }

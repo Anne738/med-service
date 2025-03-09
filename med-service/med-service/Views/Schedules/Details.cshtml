@@ -1,23 +1,23 @@
 ﻿@model med_service.Models.Schedule
 
 @{
-    ViewData["Title"] = "Детали";
+    ViewData["Title"] = "Деталі";
 }
 
-<h1>Детали</h1>
+<h1>Деталі</h1>
 
 <div>
-    <h4>Расписание</h4>
+    <h4>Розклад</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            День недели
+            День тижня
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Day)
         </dd>
         <dt class="col-sm-2">
-            Врач
+            Лікар
         </dt>
         <dd class="col-sm-10">
             @if (Model.Doctor?.User != null)
@@ -30,7 +30,7 @@
             }
         </dd>
         <dt class="col-sm-2">
-            Рабочие часы
+            Робочі години
         </dt>
         <dd class="col-sm-10">
             @Model.WorkingHours
@@ -38,6 +38,6 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Редактировать</a>
-    <a asp-action="Index" class="btn btn-secondary">Вернуться к списку</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Редагувати</a>
+    <a asp-action="Index" class="btn btn-secondary">Повернутися до списку</a>
 </div>

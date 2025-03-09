@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<med_service.Models.TimeSlot>
 
 @{
-    ViewData["Title"] = "Временные слоты";
+    ViewData["Title"] = "Часові слоти";
 }
 
-<h1>Временные слоты</h1>
+<h1>Часові слоти</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Создать новый</a>
+    <a asp-action="Create" class="btn btn-primary">Створити новий</a>
 </p>
 <table class="table">
     <thead>
@@ -16,12 +16,12 @@
                 @Html.DisplayNameFor(model => model.Schedule)
             </th>
             <th>
-                Время
+                Час
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.isBooked)
             </th>
-            <th>Действия</th>
+            <th>Дії</th>
         </tr>
     </thead>
     <tbody>
@@ -44,17 +44,17 @@
                 <td>
                     @if (item.isBooked)
                     {
-                        <span class="badge bg-danger">Занят</span>
+                        <span class="badge bg-danger">Зайнято</span>
                     }
                     else
                     {
-                        <span class="badge bg-success">Свободен</span>
+                        <span class="badge bg-success">Вільно</span>
                     }
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Изменить</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Детали</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Удалить</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Змінити</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Деталі</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Видалити</a>
                 </td>
             </tr>
         }

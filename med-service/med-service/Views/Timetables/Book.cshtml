@@ -1,25 +1,25 @@
 ﻿@model med_service.Controllers.BookAppointmentViewModel
 @{
-    ViewData["Title"] = "Запись на приём";
+    ViewData["Title"] = "Запис на прийом";
 }
 
-<h1>Запись на приём</h1>
+<h1>Запис на прийом</h1>
 
 <div class="card mb-4">
     <div class="card-header bg-info text-white">
-        <h4>Информация о записи</h4>
+        <h4>Інформація про запис</h4>
     </div>
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
                 <dl class="row">
-                    <dt class="col-sm-4">Врач:</dt>
+                    <dt class="col-sm-4">Лікар:</dt>
                     <dd class="col-sm-8">@Model.DoctorName</dd>
 
                     <dt class="col-sm-4">День:</dt>
                     <dd class="col-sm-8">@Model.ScheduleDay</dd>
 
-                    <dt class="col-sm-4">Время:</dt>
+                    <dt class="col-sm-4">Час:</dt>
                     <dd class="col-sm-8">@Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</dd>
                 </dl>
             </div>
@@ -29,7 +29,7 @@
 
 <div class="card">
     <div class="card-header">
-        <h4>Данные пациента</h4>
+        <h4>Дані пацієнта</h4>
     </div>
     <div class="card-body">
         <form asp-action="Book" method="post">
@@ -42,21 +42,21 @@
             <input type="hidden" asp-for="DoctorName" />
 
             <div class="form-group mb-3">
-                <label asp-for="PatientId" class="control-label">Пациент</label>
+                <label asp-for="PatientId" class="control-label">Пацієнт</label>
                 <select asp-for="PatientId" asp-items="Model.PatientsList" class="form-select">
-                    <option value="">-- Выберите пациента --</option>
+                    <option value="">-- Виберіть пацієнта --</option>
                 </select>
                 <span asp-validation-for="PatientId" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="Notes" class="control-label">Примечания</label>
-                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Укажите причину визита или дополнительную информацию"></textarea>
+                <label asp-for="Notes" class="control-label">Примітки</label>
+                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Вкажіть причину візиту або додаткову інформацію"></textarea>
             </div>
 
             <div class="form-group mt-3">
-                <input type="submit" value="Записаться" class="btn btn-primary" />
-                <a asp-action="Doctor" asp-route-id="@Model.DoctorId" class="btn btn-secondary">Отмена</a>
+                <input type="submit" value="Записатися" class="btn btn-primary" />
+                <a asp-action="Doctor" asp-route-id="@Model.DoctorId" class="btn btn-secondary">Скасувати</a>
             </div>
         </form>
     </div>

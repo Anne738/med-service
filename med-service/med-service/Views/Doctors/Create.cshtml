@@ -1,43 +1,43 @@
 ﻿@model med_service.Models.Doctor
 
 @{
-    ViewData["Title"] = "Создание";
+    ViewData["Title"] = "Створення";
 }
 
-<h1>Создание</h1>
+<h1>Створення</h1>
 
-<h4>Врач</h4>
+<h4>Лікар</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group mb-3">
-                <label asp-for="UserId" class="control-label">Пользователь</label>
+                <label asp-for="UserId" class="control-label">Користувач</label>
                 <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="HospitalId" class="control-label">Больница</label>
+                <label asp-for="HospitalId" class="control-label">Лікарня</label>
                 <select asp-for="HospitalId" class="form-control" asp-items="ViewBag.HospitalId"></select>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="SpecializationId" class="control-label">Специализация</label>
+                <label asp-for="SpecializationId" class="control-label">Спеціалізація</label>
                 <select asp-for="SpecializationId" class="form-control" asp-items="ViewBag.SpecializationId"></select>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="ExperienceYears" class="control-label">Опыт работы (годы)</label>
+                <label asp-for="ExperienceYears" class="control-label">Досвід роботи (роки)</label>
                 <input asp-for="ExperienceYears" class="form-control" />
                 <span asp-validation-for="ExperienceYears" class="text-danger"></span>
             </div>
             <div class="form-group mt-3">
-                <input type="submit" value="Создать" class="btn btn-primary" />
+                <input type="submit" value="Створити" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Вернуться к списку</a>
+    <a asp-action="Index">Повернутися до списку</a>
 </div>
 
 @section Scripts {
