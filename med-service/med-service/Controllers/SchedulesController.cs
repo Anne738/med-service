@@ -63,7 +63,6 @@ namespace med_service.Controllers
 
             ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text");
 
-            // Подготавливаем список часов для выпадающих списков
             ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
             {
                 Value = h.ToString(),
@@ -84,7 +83,6 @@ namespace med_service.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Day,DoctorId,WorkDayStart,WorkDayEnd")] Schedule schedule)
         {
-            // Проверка корректности времени работы
             if (schedule.WorkDayEnd <= schedule.WorkDayStart)
             {
                 ModelState.AddModelError("WorkDayEnd", "Конец рабочего дня должен быть позже начала");
@@ -117,7 +115,6 @@ namespace med_service.Controllers
 
             ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", schedule.DoctorId);
 
-            // Подготавливаем список часов для выпадающих списков
             ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
             {
                 Value = h.ToString(),
@@ -153,7 +150,6 @@ namespace med_service.Controllers
 
             ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", schedule.DoctorId);
 
-            // Подготавливаем список часов для выпадающих списков
             ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
             {
                 Value = h.ToString(),
@@ -173,7 +169,6 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            // Проверка корректности времени работы
             if (schedule.WorkDayEnd <= schedule.WorkDayStart)
             {
                 ModelState.AddModelError("WorkDayEnd", "Конец рабочего дня должен быть позже начала");
@@ -217,7 +212,6 @@ namespace med_service.Controllers
 
             ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", schedule.DoctorId);
 
-            // Подготавливаем список часов для выпадающих списков
             ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
             {
                 Value = h.ToString(),
@@ -260,7 +254,6 @@ namespace med_service.Controllers
 
             if (schedule != null)
             {
-                // Удаляем все связанные appointments вручную
                 foreach (var slot in schedule.AvailableSlots)
                 {
                     if (slot.Appointment != null)
@@ -269,13 +262,11 @@ namespace med_service.Controllers
                     }
                 }
 
-                // Удаляем все timeslots вручную
                 foreach (var slot in schedule.AvailableSlots.ToList())
                 {
                     _context.TimeSlots.Remove(slot);
                 }
 
-                // Удаляем само расписание
                 _context.Schedules.Remove(schedule);
             }
 

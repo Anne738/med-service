@@ -1,30 +1,30 @@
 ﻿@model IEnumerable<med_service.Models.Doctor>
 
 @{
-    ViewData["Title"] = "Список врачей";
+    ViewData["Title"] = "Список лікарів";
 }
 
-<h1>Список врачей</h1>
+<h1>Список лікарів</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Создать нового</a>
+    <a asp-action="Create" class="btn btn-primary">Створити нового</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                ФИО
+                ПІБ
             </th>
             <th>
-                Больница
+                Лікарня
             </th>
             <th>
-                Специализация
+                Спеціалізація
             </th>
             <th>
-                Опыт работы
+                Досвід роботи
             </th>
-            <th>Действия</th>
+            <th>Дії</th>
         </tr>
     </thead>
     <tbody>
@@ -48,12 +48,12 @@
                     @Html.DisplayFor(modelItem => item.Specialization.Name)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.ExperienceYears) лет
+                    @Html.DisplayFor(modelItem => item.ExperienceYears) років
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редактировать</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Детали</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Удалить</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редагувати</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Деталі</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Видалити</a>
                 </td>
             </tr>
         }
