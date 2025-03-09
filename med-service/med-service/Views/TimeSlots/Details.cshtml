@@ -1,42 +1,50 @@
 ﻿@model med_service.Models.TimeSlot
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Детали временного слота";
 }
 
-<h1>Details</h1>
+<h1>Детали</h1>
 
 <div>
-    <h4>TimeSlot</h4>
+    <h4>Временной слот</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Schedule)
+        <dt class="col-sm-2">
+            Расписание
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Schedule.Id)
+        <dd class="col-sm-10">
+            @if (Model.Schedule != null && Model.Schedule.Doctor != null && Model.Schedule.Doctor.User != null)
+            {
+                @($"{Model.Schedule.Doctor.User.LastName} - {Model.Schedule.Day}")
+            }
+            else
+            {
+                @Html.DisplayFor(model => model.Schedule.Id)
+            }
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartTime)
+        <dt class="col-sm-2">
+            Время
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartTime)
+        <dd class="col-sm-10">
+            @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndTime)
-        </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.isBooked)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.isBooked)
+        <dd class="col-sm-10">
+            @if (Model.isBooked)
+            {
+                <span class="badge bg-danger">Занят</span>
+            }
+            else
+            {
+                <span class="badge bg-success">Свободен</span>
+            }
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Изменить</a>
+    <a asp-action="Index" class="btn btn-secondary">Вернуться к списку</a>
 </div>

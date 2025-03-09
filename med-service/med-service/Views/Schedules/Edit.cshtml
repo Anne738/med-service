@@ -2,11 +2,12 @@
 
 @{
     ViewData["Title"] = "Edit";
+    var hours = ViewBag.Hours as IEnumerable<SelectListItem>;
 }
 
-<h1>Edit</h1>
+<h1>Редактирование</h1>
 
-<h4>Schedule</h4>
+<h4>Расписание</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -14,30 +15,58 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
-                <label asp-for="Day" class="control-label"></label>
+                <label asp-for="Day" class="control-label">День недели</label>
                 <select asp-for="Day" asp-items="Html.GetEnumSelectList<med_service.Models.Schedule.DayOfWeek>()" class="form-control">
-                    <option value="" selected disabled>Select a Day</option>
+                    <option value="" selected disabled>Выберите день</option>
                 </select>
                 <span asp-validation-for="Day" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="DoctorId" class="control-label"></label>
+                <label asp-for="DoctorId" class="control-label">Врач</label>
                 <select asp-for="DoctorId" class="form-control" asp-items="ViewBag.DoctorId"></select>
                 <span asp-validation-for="DoctorId" class="text-danger"></span>
             </div>
+            
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <label asp-for="WorkDayStart" class="control-label">Начало рабочего дня</label>
+                <select asp-for="WorkDayStart" class="form-control" asp-items="hours"></select>
+                <span asp-validation-for="WorkDayStart" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="WorkDayEnd" class="control-label">Конец рабочего дня</label>
+                <select asp-for="WorkDayEnd" class="form-control" asp-items="hours"></select>
+                <span asp-validation-for="WorkDayEnd" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Сохранить" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Вернуться к списку</a>
 </div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function() {
+            // Проверка валидности времени работы
+            $('form').submit(function(e) {
+                var start = parseInt($('#WorkDayStart').val());
+                var end = parseInt($('#WorkDayEnd').val());
+
+                if (end <= start) {
+                    alert('Конец рабочего дня должен быть позже начала');
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 }

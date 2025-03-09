@@ -25,8 +25,9 @@ namespace med_service.Models
         [ValidateNever]
         public Doctor Doctor { get; set; }
 
-        ///public int TimeSlotId { get; set; }
-        //public TimeSlot TimeSlot { get; set; }
+        public int TimeSlotId { get; set; }
+        [ValidateNever]
+        public TimeSlot TimeSlot { get; set; }
 
         public string Notes { get; set; }
     }

@@ -1,42 +1,112 @@
 ﻿@model med_service.Models.TimeSlot
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Создание временного слота";
 }
 
-<h1>Create</h1>
+<h1>Создание временного слота</h1>
 
-<h4>TimeSlot</h4>
+<h4>Временной слот</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <div class="form-group">
-                <label asp-for="ScheduleId" class="control-label"></label>
-                <select asp-for="ScheduleId" class ="form-control" asp-items="ViewBag.ScheduleId"></select>
+                <label asp-for="ScheduleId" class="control-label">Расписание</label>
+                <select asp-for="ScheduleId" class="form-control" asp-items="ViewBag.ScheduleId" id="scheduleSelect">
+                    <option value="">-- Выберите расписание --</option>
+                </select>
+                <span asp-validation-for="ScheduleId" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="StartTime" class="control-label"></label>
-                <input asp-for="StartTime" class="form-control" />
+                <label asp-for="StartTime" class="control-label">Время начала</label>
+                <select asp-for="StartTime" class="form-control" id="timeSelect" disabled>
+                    <option value="">-- Сначала выберите расписание --</option>
+                </select>
                 <span asp-validation-for="StartTime" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="EndTime" class="control-label"></label>
-                <input asp-for="EndTime" class="form-control" />
-                <span asp-validation-for="EndTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Создать" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Вернуться к списку</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Получаем данные о рабочих часах расписаний
+            var schedulesWorkHours = @Html.Raw(ViewBag.SchedulesWorkHours);
+
+            // Обрабатываем изменение расписания
+            $('#scheduleSelect').change(function() {
+                var scheduleId = $(this).val();
+                var timeSelect = $('#timeSelect');
+
+                // Очищаем список времени
+                timeSelect.empty();
+
+                if (!scheduleId) {
+                    timeSelect.append('<option value="">-- Сначала выберите расписание --</option>');
+                    timeSelect.prop('disabled', true);
+                    return;
+                }
+
+                // Получаем рабочие часы для выбранного расписания
+                var workHours = schedulesWorkHours[scheduleId];
+                if (!workHours) {
+                    timeSelect.append('<option value="">-- Нет доступного времени --</option>');
+                    timeSelect.prop('disabled', true);
+                    return;
+                }
+
+                var startHour = workHours.Start;
+                var endHour = workHours.End;
+
+                // Генерируем временные слоты с шагом 30 минут
+                for (var hour = startHour; hour < endHour; hour++) {
+                    // Добавляем слот XX:00
+                    timeSelect.append(
+                        $('<option></option>')
+                            .val(hour.toString().padStart(2, '0') + ':00:00')
+                            .text(hour.toString().padStart(2, '0') + ':00 - ' + hour.toString().padStart(2, '0') + ':30')
+                    );
+
+                    // Добавляем слот XX:30, если это не последний час рабочего дня
+                    if (hour < endHour - 1 || endHour == startHour + 1) {
+                        timeSelect.append(
+                            $('<option></option>')
+                                .val(hour.toString().padStart(2, '0') + ':30:00')
+                                .text(hour.toString().padStart(2, '0') + ':30 - ' + (hour + 1).toString().padStart(2, '0') + ':00')
+                        );
+                    }
+                }
+
+                timeSelect.prop('disabled', false);
+            });
+
+            // При отправке формы добавляем секунды в формат времени
+            $('form').submit(function() {
+                var timeValue = $('#timeSelect').val();
+                if (timeValue) {
+                    if (timeValue.split(':').length === 2) {
+                        $('#timeSelect').val(timeValue + ':00');
+                    }
+                }
+                return true;
+            });
+        });
+    </script>
 }

@@ -58,11 +58,11 @@ namespace med_service.Data
                 .HasForeignKey(a => a.DoctorId)
                 .OnDelete(DeleteBehavior.Restrict); // При видаленні лікаря, прийоми не видаляються автоматично.
 
-            //  modelBuilder.Entity<Appointment>()
-            //  .HasOne(a => a.TimeSlot)
-            //  .WithMany(t=>t.times)
-            // .HasForeignKey(a => a.TimeSlotId)
-            // .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Appointment>()
+                .HasOne(a => a.TimeSlot)
+                .WithOne(ts => ts.Appointment)
+                .HasForeignKey<Appointment>(a => a.TimeSlotId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             #endregion
 

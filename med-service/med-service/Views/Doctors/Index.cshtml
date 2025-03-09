@@ -1,59 +1,61 @@
 ﻿@model IEnumerable<med_service.Models.Doctor>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Список врачей";
 }
 
-<h1>Index</h1>
+<h1>Список врачей</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Создать нового</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.User)
+                ФИО
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Hospital)
+                Больница
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Specialization)
+                Специализация
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ExperienceYears)
+                Опыт работы
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.WorkingHours)
-            </th>
-            <th></th>
+            <th>Действия</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Hospital.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Specialization.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExperienceYears)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.WorkingHours)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @if (item.User != null)
+                    {
+                        @($"{item.User.LastName} {item.User.FirstName}")
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.User.Id)
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Hospital.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Specialization.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ExperienceYears) лет
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редактировать</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Детали</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Удалить</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

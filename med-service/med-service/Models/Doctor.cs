@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace med_service.Models
 {
@@ -19,13 +20,10 @@ namespace med_service.Models
         [ValidateNever]
         public Specialization Specialization { get; set; }
 
-        //public int ScheduleId { get; set; }
         public List<Schedule> Schedules { get; set; } = new List<Schedule>();
 
         public int ExperienceYears { get; set; }
-        public string WorkingHours { get; set; }
 
         public List<Appointment> Appointments { get; set; } = new List<Appointment>();
     }
 }
-
