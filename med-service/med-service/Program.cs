@@ -1,7 +1,9 @@
 using med_service.Data;
 using med_service.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +17,29 @@ builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfi
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
+
+const string EN_US_CULTURE = "en-US", UK_UA_CULTURE = "uk-UA";
+
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddControllersWithViews()
+.AddViewLocalization()
+.AddDataAnnotationsLocalization();
+
+
 var app = builder.Build();
+
+var supportedCultures = new[] { new CultureInfo(UK_UA_CULTURE), new CultureInfo(EN_US_CULTURE) };
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(UK_UA_CULTURE),
+    // Formatting numbers, dates, etc.
+    SupportedCultures = supportedCultures,
+    // UI strings that we have localized.
+    SupportedUICultures = supportedCultures
+});
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
