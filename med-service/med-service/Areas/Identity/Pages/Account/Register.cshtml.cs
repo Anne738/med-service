@@ -1,8 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
-
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -15,10 +11,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace med_service.Areas.Identity.Pages.Account
 {
@@ -56,7 +52,7 @@ namespace med_service.Areas.Identity.Pages.Account
 
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
-        // Додаємо властивості для випадаючих списків
+        // Випадаючі списки
         public SelectList Hospitals { get; set; }
         public SelectList Specializations { get; set; }
 
@@ -90,12 +86,11 @@ namespace med_service.Areas.Identity.Pages.Account
             [Display(Name = "Роль")]
             public User.UserRole Role { get; set; }
 
-            // Поля для пацієнта
+            // Сделать поле датой с nullable, чтобы избежать ошибок при пустом вводе
             [Display(Name = "Дата народження")]
             [DataType(DataType.Date)]
-            public DateTime DateOfBirth { get; set; }
+            public DateTime? DateOfBirth { get; set; }
 
-            // Поля для лікаря
             [Display(Name = "Лікарня")]
             public int? HospitalId { get; set; }
 
@@ -111,8 +106,6 @@ namespace med_service.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
-            // Завантажуємо дані для випадаючих списків
             await PrepareDropdownListsAsync();
         }
 
@@ -127,14 +120,19 @@ namespace med_service.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-            // Якщо вибрана роль лікаря, валідуємо поля лікаря
+            // Дополнительная проверка для поля Дата рождения, если роль - Пациент
+            if (Input.Role == Models.User.UserRole.Patient && !Input.DateOfBirth.HasValue)
+            {
+                ModelState.AddModelError("Input.DateOfBirth", "Укажіть дату народження!");
+            }
+
+            // Если роль - Доктор, проверяем больницу и специализацию
             if (Input.Role == Models.User.UserRole.Doctor)
             {
                 if (!Input.HospitalId.HasValue)
                 {
                     ModelState.AddModelError("Input.HospitalId", "Виберіть лікарню");
                 }
-
                 if (!Input.SpecializationId.HasValue)
                 {
                     ModelState.AddModelError("Input.SpecializationId", "Виберіть спеціалізацію");
@@ -150,8 +148,8 @@ namespace med_service.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                var result = await _userManager.CreateAsync(user, Input.Password);
 
+                var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("Користувач створив новий аккаунт з паролем.");
@@ -163,7 +161,7 @@ namespace med_service.Areas.Identity.Pages.Account
                             var patient = new Patient
                             {
                                 UserId = user.Id,
-                                DateOfBirth = Input.DateOfBirth
+                                DateOfBirth = Input.DateOfBirth ?? DateTime.MinValue
                             };
                             _context.Patients.Add(patient);
                             await _context.SaveChangesAsync();
@@ -187,7 +185,6 @@ namespace med_service.Areas.Identity.Pages.Account
                     {
                         _logger.LogError($"Помилка при створенні запису для користувача {user.Id}: {ex.Message}");
                         ModelState.AddModelError(string.Empty, $"Помилка при створенні профілю: {ex.Message}");
-                        // Видаляємо користувача, оскільки сутність не створена
                         await _userManager.DeleteAsync(user);
                         await PrepareDropdownListsAsync();
                         return Page();
@@ -197,30 +194,31 @@ namespace med_service.Areas.Identity.Pages.Account
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = user.Id, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
+                        null,
+                        new { area = "Identity", userId = user.Id, code, returnUrl },
+                        Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Підтвердіть вашу електронну пошту",
-                        $"Будь ласка, підтвердіть ваш обліковий запис <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>натиснувши тут</a>.");
+                    await _emailSender.SendEmailAsync(
+                        Input.Email,
+                        "Підтвердіть вашу електронну пошту",
+                        $"Будь ласка, підтвердіть ваш обліковий запис <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>натиснувши тут</a>."
+                    );
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl });
                     }
-                    else
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
-                    }
+
+                    await _signInManager.SignInAsync(user, false);
+                    return LocalRedirect(returnUrl);
                 }
+
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
 
-            // Якщо ми дійшли до цього місця, щось пішло не так, підготовлюємо списки знову
             await PrepareDropdownListsAsync();
             return Page();
         }
@@ -233,8 +231,8 @@ namespace med_service.Areas.Identity.Pages.Account
             }
             catch
             {
-                throw new InvalidOperationException($"Не вдалося створити екземпляр '{nameof(User)}'. " +
-                    $"Переконайтеся, що '{nameof(User)}' не є абстрактним класом і має конструктор без параметрів.");
+                throw new InvalidOperationException(
+                    $"Не вдалося створити екземпляр '{nameof(User)}'. Переконайтеся, що він має конструктор без параметрів.");
             }
         }
 
