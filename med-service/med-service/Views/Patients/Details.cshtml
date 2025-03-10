@@ -1,35 +1,41 @@
 ﻿@model med_service.Models.Patient
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Інформація про пацієнта";
 }
 
-<h1>Details</h1>
+<h1>Інформація про пацієнта</h1>
 
 <div>
-    <h4>Patient</h4>
+    <h4>Пацієнт</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
+        <dt class="col-sm-2">
+            Ім'я
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
+        <dd class="col-sm-10">
+            @Model.User?.FirstName
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
+            Прізвище
+        </dt>
+        <dd class="col-sm-10">
+            @Model.User?.LastName
+        </dd>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DateOfBirth)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DateOfBirth)
         </dd>
     </dl>
 </div>
 <div class="mt-3 mb-3 d-flex gap-2">
     <a href="@Url.Action("GetPatientHistory", "Appointments", new { patientId = Model.Id })" class="btn btn-outline-success">
-        📅 Ваша історія записів 
+        📅 Ваша історія записів
     </a>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Змінити</a> |
+    <a asp-action="Index">Повернутися до списку</a>
 </div>
