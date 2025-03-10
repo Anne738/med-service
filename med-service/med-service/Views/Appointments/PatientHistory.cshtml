@@ -1,49 +1,48 @@
 ﻿@model List<med_service.Models.Appointment>
 
 @{
-    ViewData["Title"] = "Історія прийомів пацієнта";
+    ViewData["Title"] = "Історія записів пацієнта";
 }
 
-<h2>@ViewData["Title"]</h2>
-
-<!-- Фільтр за статусом -->
-<form method="get" action="@Url.Action("GetPatientHistory", "Appointments")">
-    <input type="hidden" name="patientId" value="@ViewBag.PatientId" />
-    <label for="status">Фільтр за статусом:</label>
-    <select name="status" id="status" onchange="this.form.submit()">
-        <option value="">Всі статуси</option>
-        <option value="PENDING">Очікується</option>
-        <option value="CONFIRMED">Підтверджено</option>
-        <option value="COMPLETED">Завершено</option>
-        <option value="CANCELED">Скасовано</option>
-    </select>
-</form>
+<h1>@ViewData["Title"]</h1>
 
 @if (Model.Any())
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Дата</th>
-                <th>Лікар</th>
-                <th>Час</th>
-                <th>Статус</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var appointment in Model)
-            {
-                <tr>
-                    <td>@appointment.TimeSlot.StartTime.ToString("yyyy-MM-dd")</td>
-                    <td>@appointment.Doctor.User.LastName</td>
-                    <td>@appointment.TimeSlot.StartTime.ToString("HH:mm") - @appointment.TimeSlot.EndTime.ToString("HH:mm")</td>
-                    <td>@appointment.Status</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    @foreach (var appointment in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Прийом № @appointment.Id</h5>
+                <dl class="row">
+                    <dt class="col-sm-2">Статус</dt>
+                    <dd class="col-sm-10">@appointment.Status</dd>
+
+                    <dt class="col-sm-2">Лікар</dt>
+                    <dd class="col-sm-10">
+                        @(appointment.Doctor != null && appointment.Doctor.User != null
+                            ? $"{appointment.Doctor.User.LastName} {appointment.Doctor.User.FirstName}"
+                            : "Невідомо")
+                    </dd>
+
+
+                    <dt class="col-sm-2">Примітки</dt>
+                    <dd class="col-sm-10">@appointment.Notes</dd>
+
+                    <dt class="col-sm-2">Час прийому</dt>
+                    <dd class="col-sm-10">
+                        @(appointment.TimeSlot?.StartTime != null ? appointment.TimeSlot.StartTime.ToString(@"hh\:mm") : "Невідомо")
+                        -
+                        @(appointment.TimeSlot?.EndTime != null ? appointment.TimeSlot.EndTime.ToString(@"hh\:mm") : "Невідомо")
+                    </dd>
+                </dl>
+                <a asp-action="Edit" asp-route-id="@appointment.Id" class="btn btn-warning">Редагувати</a>
+            </div>
+        </div>
+    }
 }
 else
 {
-    <p>Немає записів.</p>
+    <p>Немає записів про прийоми.</p>
 }
+
+<a asp-action="Index" class="btn btn-secondary">Повернутися до списку</a>
