@@ -40,6 +40,7 @@ namespace med_service.Controllers
             return View(await appointments.ToListAsync());
         }
 
+
         // GET: Appointments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -248,5 +249,50 @@ namespace med_service.Controllers
         {
             return _context.Appointments.Any(e => e.Id == id);
         }
+
+        // отримати історію прийомів пацієнта
+        [HttpGet("patient/{patientId}/history")]
+        public async Task<IActionResult> GetPatientHistory(int patientId, Appointment.AppointmentStatus? status)
+        {
+            var query = _context.Appointments
+                .Where(a => a.PatientId == patientId)
+                .Include(a => a.Doctor)
+                .Include(a => a.TimeSlot)
+                .OrderByDescending(a => a.TimeSlot.StartTime)
+                .AsQueryable();
+
+            if (status.HasValue)
+            {
+                query = query.Where(a => a.Status == status.Value);
+            }
+
+            var history = await query.AsNoTracking().ToListAsync();
+            return View("PatientHistory", history);
+            //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
+        }
+
+        // отримати історію прийомів лікаря
+
+        [HttpGet("doctor/{doctorId}/history")]
+        public async Task<IActionResult> GetDoctorHistory(int doctorId, Appointment.AppointmentStatus? status)
+        {
+            var query = _context.Appointments
+                .Where(a => a.DoctorId == doctorId)
+                .Include(a => a.Patient)
+                .Include(a => a.TimeSlot)
+                .OrderByDescending(a => a.TimeSlot.StartTime)
+                .AsQueryable();
+
+            if (status.HasValue)
+            {
+                query = query.Where(a => a.Status == status.Value);
+            }
+
+            var history = await query.AsNoTracking().ToListAsync();
+            return View("DoctorHistory", history);
+       
+            //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
+        }
+
     }
 }

@@ -63,6 +63,11 @@
         </dd>
     </dl>
 </div>
+<div class="mt-3 mb-3 d-flex gap-2">
+    <a href="@Url.Action("GetDoctorHistory", "Appointments", new { doctorId = Model.Id })" class="btn btn-primary">
+        📅 Переглянути історію записів
+    </a>
+</div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Редагувати</a>
     <a asp-action="Index" class="btn btn-secondary">Повернутися до списку</a>
