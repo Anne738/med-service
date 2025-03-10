@@ -25,8 +25,10 @@ namespace med_service.Controllers
         // GET: Patients
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Patients.Include(p => p.User);
-            return View(await applicationDbContext.ToListAsync());
+            var patients = await _context.Patients
+                .Include(p => p.User)
+                .ToListAsync();
+            return View(patients);
         }
 
         // GET: Patients/Details/5

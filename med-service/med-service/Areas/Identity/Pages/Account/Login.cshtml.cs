@@ -105,36 +105,68 @@ namespace med_service.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             if (ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
+                try
                 {
-                    _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+                    // Шукаємо користувача за Email для діагностики
+                    var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+
+                    // Додамо діагностичну інформацію
+                    if (user == null)
+                    {
+                        ModelState.AddModelError(string.Empty, $"Діагностика: користувач з Email {Input.Email} не знайдений в базі даних.");
+                        return Page();
+                    }
+
+                    ModelState.AddModelError(string.Empty,
+                        $"Діагностика: Користувач знайдений. ID: {user.Id}, UserName: {user.UserName}, Email: {user.Email}, " +
+                        $"NormalizedUserName: {user.NormalizedUserName}, NormalizedEmail: {user.NormalizedEmail}, " +
+                        $"HasPassword: {await _signInManager.UserManager.HasPasswordAsync(user)}");
+
+                    var result = await _signInManager.PasswordSignInAsync(user.UserName,
+                                                                           Input.Password,
+                                                                           Input.RememberMe,
+                                                                           lockoutOnFailure: false);
+
+                    if (result.Succeeded)
+                    {
+                        _logger.LogInformation("Користувач увійшов в систему.");
+                        return LocalRedirect(returnUrl);
+                    }
+                    if (result.IsNotAllowed)
+                    {
+                        // Якщо помилка IsNotAllowed, можливо, Email не підтверджено
+                        if (!user.EmailConfirmed)
+                        {
+                            ModelState.AddModelError(string.Empty, "Email не підтверджено. Будь ласка, підтвердіть Email, перейшовши за посиланням з листа.");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, "Вхід не дозволено для даного користувача.");
+                        }
+                        return Page();
+                    }
+                    if (result.IsLockedOut)
+                    {
+                        _logger.LogWarning("Обліковий запис користувача заблоковано.");
+                        return RedirectToPage("./Lockout");
+                    }
+
+                    ModelState.AddModelError(string.Empty, "Невірні облікові дані. Будь ласка, перевірте Email та пароль.");
                 }
-                if (result.RequiresTwoFactor)
+                catch (Exception ex)
                 {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
+                    ModelState.AddModelError(string.Empty, $"Помилка при вході: {ex.Message}");
+                    if (ex.InnerException != null)
+                    {
+                        ModelState.AddModelError(string.Empty, $"Вкладена помилка: {ex.InnerException.Message}");
+                    }
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
     }
