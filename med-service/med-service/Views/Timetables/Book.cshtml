@@ -1,0 +1,69 @@
+﻿@model med_service.Controllers.BookAppointmentViewModel
+@{
+    ViewData["Title"] = "Запис на прийом";
+}
+
+<h1>Запис на прийом</h1>
+
+<div class="card mb-4">
+    <div class="card-header bg-info text-white">
+        <h4>Інформація про запис</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Лікар:</dt>
+                    <dd class="col-sm-8">@Model.DoctorName</dd>
+
+                    <dt class="col-sm-4">День:</dt>
+                    <dd class="col-sm-8">@Model.ScheduleDay</dd>
+
+                    <dt class="col-sm-4">Час:</dt>
+                    <dd class="col-sm-8">@Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h4>Дані пацієнта</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Book" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="TimeSlotId" />
+            <input type="hidden" asp-for="DoctorId" />
+            <input type="hidden" asp-for="StartTime" />
+            <input type="hidden" asp-for="EndTime" />
+            <input type="hidden" asp-for="ScheduleDay" />
+            <input type="hidden" asp-for="DoctorName" />
+
+            <div class="form-group mb-3">
+                <label asp-for="PatientId" class="control-label">Пацієнт</label>
+                <select asp-for="PatientId" asp-items="Model.PatientsList" class="form-select">
+                    <option value="">-- Виберіть пацієнта --</option>
+                </select>
+                <span asp-validation-for="PatientId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Notes" class="control-label">Примітки</label>
+                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Вкажіть причину візиту або додаткову інформацію"></textarea>
+            </div>
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Записатися" class="btn btn-primary" />
+                <a asp-action="Doctor" asp-route-id="@Model.DoctorId" class="btn btn-secondary">Скасувати</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

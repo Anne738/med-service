@@ -1,6 +1,7 @@
 ﻿using static med_service.Models.Schedule;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace med_service.Models
 {
@@ -9,12 +10,15 @@ namespace med_service.Models
         public int Id { get; set; }
 
         public int ScheduleId { get; set; }
+        [ValidateNever]
         public Schedule Schedule { get; set; }
 
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
 
-        public int DoctorId { get; set; }
-        public Doctor Doctor { get; set; }
+        public bool isBooked { get; set; } = false;
+
+        [ValidateNever]
+        public Appointment Appointment { get; set; }
     }
 }

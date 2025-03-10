@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<med_service.Models.TimeSlot>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Часові слоти";
 }
 
-<h1>Index</h1>
+<h1>Часові слоти</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Створити новий</a>
 </p>
 <table class="table">
     <thead>
@@ -16,38 +16,47 @@
                 @Html.DisplayNameFor(model => model.Schedule)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.StartTime)
+                Час
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.EndTime)
+                @Html.DisplayNameFor(model => model.isBooked)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Doctor)
-            </th>
-            <th></th>
+            <th>Дії</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Schedule.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Doctor.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @if (item.Schedule != null && item.Schedule.Doctor != null && item.Schedule.Doctor.User != null)
+                    {
+                        @($"{item.Schedule.Doctor.User.LastName} - {item.Schedule.Day}")
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.Schedule.Id)
+                    }
+                </td>
+                <td>
+                    @item.StartTime.ToString(@"hh\:mm") - @item.EndTime.ToString(@"hh\:mm")
+                </td>
+                <td>
+                    @if (item.isBooked)
+                    {
+                        <span class="badge bg-danger">Зайнято</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Вільно</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Змінити</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Деталі</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Видалити</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

@@ -22,44 +22,35 @@ namespace med_service.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(Appointment.AppointmentStatus? status)
         {
-            // Get all appointments including related Patient and Doctor data
             var appointments = _context.Appointments
                 .Include(a => a.Patient)
                 .Include(a => a.Doctor)
+                .Include(a => a.TimeSlot)
                 .AsQueryable();
 
-            // Pass all possible status values to the view for the filter dropdown
             ViewBag.Statuses = Enum.GetValues(typeof(Appointment.AppointmentStatus))
                                    .Cast<Appointment.AppointmentStatus>()
                                    .ToList();
 
-            // If a status is selected, filter the appointments
             if (status.HasValue)
             {
                 appointments = appointments.Where(a => a.Status == status.Value);
             }
 
-            // Return the filtered list of appointments to the view
             return View(await appointments.ToListAsync());
         }
-
 
         // GET: Appointments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var appointment = await _context.Appointments
                 .Include(a => a.Doctor)
                 .Include(a => a.Patient)
+                .Include(a => a.TimeSlot)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (appointment == null)
-            {
-                return NotFound();
-            }
+            if (appointment == null) return NotFound();
 
             return View(appointment);
         }
@@ -67,48 +58,60 @@ namespace med_service.Controllers
         // GET: Appointments/Create
         public IActionResult Create()
         {
-            ViewBag.DoctorId = new SelectList(_context.Doctors, "Id", "Id");
-            ViewBag.PatientId = new SelectList(_context.Patients, "Id", "Id");
+            var availableSlots = _context.TimeSlots
+                .Where(ts => !ts.isBooked)
+                .Include(ts => ts.Schedule)
+                    .ThenInclude(s => s.Doctor)
+                        .ThenInclude(d => d.User)
+                .ToList();
+
+            // Создаем список с полным описанием слота: день недели + имя врача + время
+            var timeSlotItems = availableSlots.Select(ts => new SelectListItem
+            {
+                Value = ts.Id.ToString(),
+                Text = $"{ts.Schedule.Day} - {ts.Schedule.Doctor?.User?.LastName} - {ts.StartTime:hh\\:mm} - {ts.EndTime:hh\\:mm}"
+            }).ToList();
+
+            ViewBag.TimeSlotId = new SelectList(timeSlotItems, "Value", "Text");
+            ViewBag.DoctorId = new SelectList(_context.Doctors.Include(d => d.User), "Id", "User.LastName");
+            ViewBag.PatientId = new SelectList(_context.Patients.Include(p => p.User), "Id", "User.LastName");
             return View();
         }
+
 
         // POST: Appointments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Status,Id,PatientId,DoctorId,AppointmentDate,Notes")] Appointment appointment)
+        public async Task<IActionResult> Create([Bind("Status,Id,PatientId,DoctorId,TimeSlotId,Notes")] Appointment appointment)
         {
             if (!ModelState.IsValid)
             {
-                ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", appointment.DoctorId);
-                ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id", appointment.PatientId);
+                var availableSlots = _context.TimeSlots
+                    .Where(ts => !ts.isBooked)
+                    .Include(ts => ts.Schedule)
+                        .ThenInclude(s => s.Doctor)
+                            .ThenInclude(d => d.User)
+                    .ToList();
+
+                var timeSlotItems = availableSlots.Select(ts => new SelectListItem
+                {
+                    Value = ts.Id.ToString(),
+                    Text = $"{ts.Schedule.Day} - {ts.Schedule.Doctor?.User?.LastName} - {ts.StartTime:hh\\:mm} - {ts.EndTime:hh\\:mm}",
+                    Selected = ts.Id == appointment.TimeSlotId
+                }).ToList();
+
+                ViewBag.TimeSlotId = new SelectList(timeSlotItems, "Value", "Text");
+                ViewBag.DoctorId = new SelectList(_context.Doctors.Include(d => d.User), "Id", "User.LastName", appointment.DoctorId);
+                ViewBag.PatientId = new SelectList(_context.Patients.Include(p => p.User), "Id", "User.LastName", appointment.PatientId);
                 return View(appointment);
             }
 
-            // Подтягиваем Doctor и Patient из базы по Id
-            if (appointment.DoctorId > 0)
+            // Обновляем состояние временного слота
+            var timeSlot = await _context.TimeSlots.FindAsync(appointment.TimeSlotId);
+            if (timeSlot != null)
             {
-                var doc = await _context.Doctors.FindAsync(appointment.DoctorId);
-                if (doc == null)
-                {
-                    ModelState.AddModelError("DoctorId", "Доктор с указанным Id не найден.");
-                    ViewBag.DoctorId = new SelectList(_context.Doctors, "Id", "Id", appointment.DoctorId);
-                    ViewBag.PatientId = new SelectList(_context.Patients, "Id", "Id", appointment.PatientId);
-                    return View(appointment);
-                }
-                appointment.Doctor = doc;
-            }
-
-            if (appointment.PatientId > 0)
-            {
-                var pat = await _context.Patients.FindAsync(appointment.PatientId);
-                if (pat == null)
-                {
-                    ModelState.AddModelError("PatientId", "Пациент с указанным Id не найден.");
-                    ViewBag.DoctorId = new SelectList(_context.Doctors, "Id", "Id", appointment.DoctorId);
-                    ViewBag.PatientId = new SelectList(_context.Patients, "Id", "Id", appointment.PatientId);
-                    return View(appointment);
-                }
-                appointment.Patient = pat;
+                timeSlot.isBooked = true;
+                _context.Update(timeSlot);
             }
 
             _context.Add(appointment);
@@ -119,101 +122,110 @@ namespace med_service.Controllers
         // GET: Appointments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var appointment = await _context.Appointments.FindAsync(id);
-            if (appointment == null)
+            if (appointment == null) return NotFound();
+
+            var availableSlots = _context.TimeSlots
+                .Where(ts => !ts.isBooked || ts.Id == appointment.TimeSlotId)
+                .Include(ts => ts.Schedule)
+                    .ThenInclude(s => s.Doctor)
+                        .ThenInclude(d => d.User)
+                .ToList();
+
+            var timeSlotItems = availableSlots.Select(ts => new SelectListItem
             {
-                return NotFound();
-            }
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", appointment.DoctorId);
-            ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id", appointment.PatientId);
+                Value = ts.Id.ToString(),
+                Text = $"{ts.Schedule.Day} - {ts.Schedule.Doctor?.User?.LastName} - {ts.StartTime:hh\\:mm} - {ts.EndTime:hh\\:mm}",
+                Selected = ts.Id == appointment.TimeSlotId
+            }).ToList();
+
+            ViewBag.TimeSlotId = new SelectList(timeSlotItems, "Value", "Text");
+            ViewData["DoctorId"] = new SelectList(_context.Doctors.Include(d => d.User), "Id", "User.LastName", appointment.DoctorId);
+            ViewData["PatientId"] = new SelectList(_context.Patients.Include(p => p.User), "Id", "User.LastName", appointment.PatientId);
             return View(appointment);
         }
 
         // POST: Appointments/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Status,Id,PatientId,DoctorId,AppointmentDate,Notes")] Appointment appointment)
+        public async Task<IActionResult> Edit(int id, [Bind("Status,Id,PatientId,DoctorId,TimeSlotId,Notes")] Appointment appointment)
         {
-            if (id != appointment.Id)
-            {
-                return NotFound();
-            }
+            if (id != appointment.Id) return NotFound();
 
             if (!ModelState.IsValid)
             {
-                ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", appointment.DoctorId);
-                ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id", appointment.PatientId);
+                var availableSlots = _context.TimeSlots
+                    .Where(ts => !ts.isBooked || ts.Id == appointment.TimeSlotId)
+                    .Include(ts => ts.Schedule)
+                        .ThenInclude(s => s.Doctor)
+                            .ThenInclude(d => d.User)
+                    .ToList();
+
+                var timeSlotItems = availableSlots.Select(ts => new SelectListItem
+                {
+                    Value = ts.Id.ToString(),
+                    Text = $"{ts.Schedule.Day} - {ts.Schedule.Doctor?.User?.LastName} - {ts.StartTime:hh\\:mm} - {ts.EndTime:hh\\:mm}",
+                    Selected = ts.Id == appointment.TimeSlotId
+                }).ToList();
+
+                ViewBag.TimeSlotId = new SelectList(timeSlotItems, "Value", "Text");
+                ViewData["DoctorId"] = new SelectList(_context.Doctors.Include(d => d.User), "Id", "User.LastName", appointment.DoctorId);
+                ViewData["PatientId"] = new SelectList(_context.Patients.Include(p => p.User), "Id", "User.LastName", appointment.PatientId);
                 return View(appointment);
-            }
-
-            // Подтягиваем Doctor и Patient из базы по Id
-            if (appointment.DoctorId > 0)
-            {
-                var doc = await _context.Doctors.FindAsync(appointment.DoctorId);
-                if (doc == null)
-                {
-                    ModelState.AddModelError("DoctorId", "Доктор с указанным Id не найден.");
-                    ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", appointment.DoctorId);
-                    ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id", appointment.PatientId);
-                    return View(appointment);
-                }
-                appointment.Doctor = doc;
-            }
-
-            if (appointment.PatientId > 0)
-            {
-                var pat = await _context.Patients.FindAsync(appointment.PatientId);
-                if (pat == null)
-                {
-                    ModelState.AddModelError("PatientId", "Пациент с указанным Id не найден.");
-                    ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", appointment.DoctorId);
-                    ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Id", appointment.PatientId);
-                    return View(appointment);
-                }
-                appointment.Patient = pat;
             }
 
             try
             {
+                // Получаем текущие данные из БД
+                var existingAppointment = await _context.Appointments.AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.Id == id);
+
+                if (existingAppointment != null && existingAppointment.TimeSlotId != appointment.TimeSlotId)
+                {
+                    // Освобождаем предыдущий слот
+                    var oldSlot = await _context.TimeSlots.FindAsync(existingAppointment.TimeSlotId);
+                    if (oldSlot != null)
+                    {
+                        oldSlot.isBooked = false;
+                        _context.Update(oldSlot);
+                    }
+
+                    // Бронируем новый слот
+                    var newSlot = await _context.TimeSlots.FindAsync(appointment.TimeSlotId);
+                    if (newSlot != null)
+                    {
+                        newSlot.isBooked = true;
+                        _context.Update(newSlot);
+                    }
+                }
+
                 _context.Update(appointment);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!AppointmentExists(appointment.Id))
-                {
                     return NotFound();
-                }
                 else
-                {
                     throw;
-                }
             }
-
             return RedirectToAction(nameof(Index));
         }
+
 
         // GET: Appointments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var appointment = await _context.Appointments
                 .Include(a => a.Doctor)
                 .Include(a => a.Patient)
+                .Include(a => a.TimeSlot)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (appointment == null)
-            {
-                return NotFound();
-            }
+            if (appointment == null) return NotFound();
 
             return View(appointment);
         }

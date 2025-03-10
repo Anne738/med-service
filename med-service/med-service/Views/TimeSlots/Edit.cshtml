@@ -1,12 +1,12 @@
 ﻿@model med_service.Models.TimeSlot
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Редагування";
 }
 
-<h1>Edit</h1>
+<h1>Редагування</h1>
 
-<h4>TimeSlot</h4>
+<h4>Часовий слот</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -14,36 +14,98 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
-                <label asp-for="ScheduleId" class="control-label"></label>
-                <select asp-for="ScheduleId" class="form-control" asp-items="ViewBag.ScheduleId"></select>
+                <label asp-for="ScheduleId" class="control-label">Розклад</label>
+                <select asp-for="ScheduleId" class="form-control" asp-items="ViewBag.ScheduleId" id="scheduleSelect"></select>
                 <span asp-validation-for="ScheduleId" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="StartTime" class="control-label"></label>
-                <input asp-for="StartTime" class="form-control" />
+                <label asp-for="StartTime" class="control-label">Час початку</label>
+                <select asp-for="StartTime" class="form-control" asp-items="ViewBag.TimeOptions" id="timeSelect"></select>
                 <span asp-validation-for="StartTime" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="EndTime" class="control-label"></label>
-                <input asp-for="EndTime" class="form-control" />
-                <span asp-validation-for="EndTime" class="text-danger"></span>
+
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="isBooked" /> @Html.DisplayNameFor(model => model.isBooked)
+                </label>
             </div>
             <div class="form-group">
-                <label asp-for="DoctorId" class="control-label"></label>
-                <select asp-for="DoctorId" class="form-control" asp-items="ViewBag.DoctorId"></select>
-                <span asp-validation-for="DoctorId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Зберегти" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Повернутися до списку</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Отримуємо дані про робочі години розкладів
+            var schedulesWorkHours = @Html.Raw(ViewBag.SchedulesWorkHours);
+
+            // Обробляємо зміну розкладу
+            $('#scheduleSelect').change(function() {
+                var scheduleId = $(this).val();
+                var timeSelect = $('#timeSelect');
+
+                // Очищаємо список часу
+                timeSelect.empty();
+
+                if (!scheduleId) {
+                    timeSelect.prop('disabled', true);
+                    return;
+                }
+
+                // Отримуємо робочі години для вибраного розкладу
+                var workHours = schedulesWorkHours[scheduleId];
+                if (!workHours) {
+                    timeSelect.prop('disabled', true);
+                    return;
+                }
+
+                var startHour = workHours.Start;
+                var endHour = workHours.End;
+
+                // Генеруємо часові слоти з кроком 30 хвилин
+                for (var hour = startHour; hour < endHour; hour++) {
+                    // Додаємо слот XX:00
+                    timeSelect.append(
+                        $('<option></option>')
+                            .val(hour.toString().padStart(2, '0') + ':00:00')
+                            .text(hour.toString().padStart(2, '0') + ':00 - ' + hour.toString().padStart(2, '0') + ':30')
+                    );
+
+                    // Додаємо слот XX:30, якщо це не остання година робочого дня
+                    if (hour < endHour - 1 || endHour == startHour + 1) {
+                        timeSelect.append(
+                            $('<option></option>')
+                                .val(hour.toString().padStart(2, '0') + ':30:00')
+                                .text(hour.toString().padStart(2, '0') + ':30 - ' + (hour + 1).toString().padStart(2, '0') + ':00')
+                        );
+                    }
+                }
+
+                timeSelect.prop('disabled', false);
+            });
+
+            // При відправці форми додаємо секунди у формат часу
+            $('form').submit(function() {
+                var timeValue = $('#timeSelect').val();
+                if (timeValue) {
+                    if (timeValue.split(':').length === 2) {
+                        $('#timeSelect').val(timeValue + ':00');
+                    }
+                }
+                return true;
+            });
+        });
+    </script>
 }

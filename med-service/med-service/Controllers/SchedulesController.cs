@@ -22,7 +22,9 @@ namespace med_service.Controllers
         // GET: Schedules
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Schedules.Include(s => s.Doctor);
+            var applicationDbContext = _context.Schedules
+                .Include(s => s.Doctor)
+                .ThenInclude(d => d.User);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -36,6 +38,7 @@ namespace med_service.Controllers
 
             var schedule = await _context.Schedules
                 .Include(s => s.Doctor)
+                .ThenInclude(d => d.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (schedule == null)
             {
@@ -48,24 +51,76 @@ namespace med_service.Controllers
         // GET: Schedules/Create
         public IActionResult Create()
         {
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id");
-            return View();
+            var doctors = _context.Doctors
+                .Include(d => d.User)
+                .ToList();
+
+            var doctorItems = doctors.Select(d => new SelectListItem
+            {
+                Value = d.Id.ToString(),
+                Text = $"{d.User?.LastName} {d.User?.FirstName}"
+            }).ToList();
+
+            ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text");
+
+            ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
+            {
+                Value = h.ToString(),
+                Text = $"{h}:00"
+            });
+
+            var schedule = new Schedule
+            {
+                WorkDayStart = 8,
+                WorkDayEnd = 18
+            };
+
+            return View(schedule);
         }
 
         // POST: Schedules/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Day,DoctorId")] Schedule schedule)
+        public async Task<IActionResult> Create([Bind("Id,Day,DoctorId,WorkDayStart,WorkDayEnd")] Schedule schedule)
         {
+            if (schedule.WorkDayEnd <= schedule.WorkDayStart)
+            {
+                ModelState.AddModelError("WorkDayEnd", "Конец рабочего дня должен быть позже начала");
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(schedule);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(schedule);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateException ex)
+                {
+                    ModelState.AddModelError("", "Не удалось сохранить. Проверьте, что все выбранные значения существуют.");
+                }
             }
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", schedule.DoctorId);
+
+            var doctors = _context.Doctors
+                .Include(d => d.User)
+                .ToList();
+
+            var doctorItems = doctors.Select(d => new SelectListItem
+            {
+                Value = d.Id.ToString(),
+                Text = $"{d.User?.LastName} {d.User?.FirstName}",
+                Selected = d.Id == schedule.DoctorId
+            }).ToList();
+
+            ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", schedule.DoctorId);
+
+            ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
+            {
+                Value = h.ToString(),
+                Text = $"{h}:00"
+            });
+
             return View(schedule);
         }
 
@@ -82,20 +137,41 @@ namespace med_service.Controllers
             {
                 return NotFound();
             }
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", schedule.DoctorId);
+
+            var doctors = _context.Doctors
+                .Include(d => d.User)
+                .ToList();
+
+            var doctorItems = doctors.Select(d => new SelectListItem
+            {
+                Value = d.Id.ToString(),
+                Text = $"{d.User?.LastName} {d.User?.FirstName}"
+            }).ToList();
+
+            ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", schedule.DoctorId);
+
+            ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
+            {
+                Value = h.ToString(),
+                Text = $"{h}:00"
+            });
+
             return View(schedule);
         }
 
         // POST: Schedules/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Day,DoctorId")] Schedule schedule)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Day,DoctorId,WorkDayStart,WorkDayEnd")] Schedule schedule)
         {
             if (id != schedule.Id)
             {
                 return NotFound();
+            }
+
+            if (schedule.WorkDayEnd <= schedule.WorkDayStart)
+            {
+                ModelState.AddModelError("WorkDayEnd", "Конец рабочего дня должен быть позже начала");
             }
 
             if (ModelState.IsValid)
@@ -104,6 +180,7 @@ namespace med_service.Controllers
                 {
                     _context.Update(schedule);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -116,9 +193,31 @@ namespace med_service.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (DbUpdateException)
+                {
+                    ModelState.AddModelError("", "Не удалось сохранить изменения. Проверьте, что все выбранные значения существуют.");
+                }
             }
-            ViewData["DoctorId"] = new SelectList(_context.Doctors, "Id", "Id", schedule.DoctorId);
+
+            var doctors = _context.Doctors
+                .Include(d => d.User)
+                .ToList();
+
+            var doctorItems = doctors.Select(d => new SelectListItem
+            {
+                Value = d.Id.ToString(),
+                Text = $"{d.User?.LastName} {d.User?.FirstName}",
+                Selected = d.Id == schedule.DoctorId
+            }).ToList();
+
+            ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", schedule.DoctorId);
+
+            ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
+            {
+                Value = h.ToString(),
+                Text = $"{h}:00"
+            });
+
             return View(schedule);
         }
 
@@ -132,7 +231,9 @@ namespace med_service.Controllers
 
             var schedule = await _context.Schedules
                 .Include(s => s.Doctor)
+                .ThenInclude(d => d.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (schedule == null)
             {
                 return NotFound();
@@ -146,9 +247,26 @@ namespace med_service.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var schedule = await _context.Schedules.FindAsync(id);
+            var schedule = await _context.Schedules
+                .Include(s => s.AvailableSlots)
+                .ThenInclude(ts => ts.Appointment)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
             if (schedule != null)
             {
+                foreach (var slot in schedule.AvailableSlots)
+                {
+                    if (slot.Appointment != null)
+                    {
+                        _context.Appointments.Remove(slot.Appointment);
+                    }
+                }
+
+                foreach (var slot in schedule.AvailableSlots.ToList())
+                {
+                    _context.TimeSlots.Remove(slot);
+                }
+
                 _context.Schedules.Remove(schedule);
             }
 

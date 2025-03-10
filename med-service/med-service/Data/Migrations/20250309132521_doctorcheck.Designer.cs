@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using med_service.Data;
 
@@ -11,9 +12,11 @@ using med_service.Data;
 namespace med_service.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250309132521_doctorcheck")]
+    partial class doctorcheck
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -216,6 +219,12 @@ namespace med_service.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("WorkDayEnd")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WorkDayStart")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("HospitalId");
@@ -287,12 +296,6 @@ namespace med_service.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("DoctorId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WorkDayEnd")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WorkDayStart")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

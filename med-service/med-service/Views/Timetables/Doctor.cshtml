@@ -1,0 +1,175 @@
+﻿@model List<med_service.Models.Schedule>
+@using med_service.Models
+@{
+    ViewData["Title"] = "Розклад лікаря";
+
+    // Дні тижня, на які складається розклад
+    var days = Enum.GetValues(typeof(Schedule.DayOfWeek)).Cast<Schedule.DayOfWeek>();
+
+    // Отримуємо вибраний день із запиту або встановлюємо за замовчуванням перший день із переліку
+    var selectedDay = Schedule.DayOfWeek.Monday;
+    if (ViewBag.SelectedDay != null)
+    {
+        selectedDay = (Schedule.DayOfWeek)ViewBag.SelectedDay;
+    }
+
+    // Знаходимо розклад (Schedule) для вибраного дня
+    var schedule = Model.FirstOrDefault(s => s.Day.Equals(selectedDay));
+
+    // Задаємо години роботи з schedule або використовуємо значення за замовчуванням, якщо розклад не знайдено
+    int startHour = schedule?.WorkDayStart ?? 8;
+    int endHour = schedule?.WorkDayEnd ?? 18;
+}
+
+<h1>Розклад лікаря: @ViewBag.DoctorName</h1>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <form id="daySelectForm" asp-action="Doctor" asp-route-id="@ViewBag.DoctorId" method="get">
+            <div class="input-group">
+                <label class="input-group-text" for="selectedDay">День тижня:</label>
+                <select id="selectedDay" name="selectedDay" class="form-select" onchange="this.form.submit()">
+                    @foreach (var day in days)
+                    {
+                        <option value="@((int)day)" selected="@(day == selectedDay)">@day</option>
+                    }
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="calendar-container mb-4">
+    <div class="calendar-header d-flex justify-content-between align-items-center bg-light p-2 rounded">
+        <div class="calendar-day fs-5 fw-bold">@selectedDay</div>
+        <div class="calendar-date fs-5">@DateTime.Now.ToString("dd.MM.yyyy")</div>
+        @if (schedule != null)
+        {
+            <div class="calendar-hours fs-6">Робочі години: @schedule.WorkingHours</div>
+        }
+    </div>
+
+    <div class="time-slots-grid">
+        @for (int hour = startHour; hour < endHour; hour++)
+        {
+            // Перша половина години (XX:00-XX:30)
+            {
+                var slotTime = new TimeSpan(hour, 0, 0);
+                var endTime = slotTime.Add(TimeSpan.FromMinutes(30));
+                var slot = schedule?.AvailableSlots.FirstOrDefault(ts =>
+                ts.StartTime.Hours == hour && ts.StartTime.Minutes == 0);
+                bool isBooked = slot?.isBooked ?? false;
+                string slotClass = isBooked ? "time-slot booked" : "time-slot available";
+
+                <div class="@slotClass">
+                    <div class="time-label">@hour:00 - @hour:30</div>
+                    <div class="slot-status">
+                        @if (schedule == null)
+                        {
+                            <span>Немає розкладу</span>
+                        }
+                        else if (isBooked)
+                        {
+                            <span class="badge bg-secondary">Зайнято</span>
+                        }
+                        else
+                        {
+                            <a asp-action="Book" asp-route-day="@selectedDay" asp-route-hour="@hour"
+                               asp-route-minute="0" asp-route-doctorId="@ViewBag.DoctorId"
+                               class="btn btn-sm btn-primary w-100">Записатися</a>
+                        }
+                    </div>
+                </div>
+            }
+
+            // Друга половина години (XX:30-YY:00)
+            {
+                var slotTime = new TimeSpan(hour, 30, 0);
+                var endTime = slotTime.Add(TimeSpan.FromMinutes(30));
+                var nextHour = hour + 1;
+                var slot = schedule?.AvailableSlots.FirstOrDefault(ts =>
+                ts.StartTime.Hours == hour && ts.StartTime.Minutes == 30);
+                bool isBooked = slot?.isBooked ?? false;
+                string slotClass = isBooked ? "time-slot booked" : "time-slot available";
+
+                <div class="@slotClass">
+                    <div class="time-label">@hour:30 - @nextHour:00</div>
+                    <div class="slot-status">
+                        @if (schedule == null)
+                        {
+                            <span>Немає розкладу</span>
+                        }
+                        else if (isBooked)
+                        {
+                            <span class="badge bg-secondary">Зайнято</span>
+                        }
+                        else
+                        {
+                            <a asp-action="Book" asp-route-day="@selectedDay" asp-route-hour="@hour"
+                               asp-route-minute="30" asp-route-doctorId="@ViewBag.DoctorId"
+                               class="btn btn-sm btn-primary w-100">Записатися</a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<div>
+    <a asp-controller="Doctors" asp-action="Index" class="btn btn-secondary">До списку лікарів</a>
+</div>
+
+<style>
+    .calendar-container {
+        max-width: 800px;
+        margin: 0 auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+    }
+
+    .calendar-header {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .time-slots-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .time-slot {
+        border-radius: 6px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.2s ease;
+    }
+
+        .time-slot.available {
+            background-color: #e3f2fd;
+            border: 1px solid #90caf9;
+        }
+
+        .time-slot.booked {
+            background-color: #f5f5f5;
+            border: 1px solid #e0e0e0;
+        }
+
+    .time-label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .slot-status {
+        text-align: center;
+    }
+
+    .time-slot:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>

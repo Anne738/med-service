@@ -30,7 +30,6 @@
             <th>@Html.DisplayNameFor(model => model.Status)</th>
             <th>@Html.DisplayNameFor(model => model.Patient.Id)</th>
             <th>@Html.DisplayNameFor(model => model.Doctor.Id)</th>
-            <th>@Html.DisplayNameFor(model => model.AppointmentDate)</th>
             <th>@Html.DisplayNameFor(model => model.Notes)</th>
             <th>Actions</th>
         </tr>
@@ -42,7 +41,6 @@
                 <td>@Html.DisplayFor(modelItem => item.Status)</td>
                 <td>@Html.DisplayFor(modelItem => item.Patient.Id)</td>
                 <td>@Html.DisplayFor(modelItem => item.Doctor.Id)</td>
-                <td>@Html.DisplayFor(modelItem => item.AppointmentDate)</td>
                 <td>@Html.DisplayFor(modelItem => item.Notes)</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">Edit</a>
