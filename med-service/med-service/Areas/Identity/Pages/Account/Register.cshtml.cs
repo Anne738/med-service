@@ -27,6 +27,7 @@ namespace med_service.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly ApplicationDbContext _context;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<User> userManager,
@@ -34,7 +35,8 @@ namespace med_service.Areas.Identity.Pages.Account
             SignInManager<User> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -43,6 +45,7 @@ namespace med_service.Areas.Identity.Pages.Account
             _logger = logger;
             _emailSender = emailSender;
             _context = context;
+            _roleManager = roleManager;
         }
 
         [BindProperty]
@@ -99,7 +102,7 @@ namespace med_service.Areas.Identity.Pages.Account
 
             [Display(Name = "Стаж роботи (років)")]
             [Range(0, 70, ErrorMessage = "Стаж має бути від 0 до 70 років")]
-            public int ExperienceYears { get; set; }
+            public int? ExperienceYears { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -120,6 +123,9 @@ namespace med_service.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
+            // Log the form data for debugging
+            _logger.LogInformation($"Registration attempt with role: {Input.Role}");
+
             // Дополнительная проверка для поля Дата рождения, если роль - Пациент
             if (Input.Role == Models.User.UserRole.Patient && !Input.DateOfBirth.HasValue)
             {
@@ -139,6 +145,13 @@ namespace med_service.Areas.Identity.Pages.Account
                 }
             }
 
+            if (Input.Role != Models.User.UserRole.Doctor)
+            {
+                Input.ExperienceYears = null;
+                Input.HospitalId = null;
+                Input.SpecializationId = null;
+            }
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
@@ -152,7 +165,22 @@ namespace med_service.Areas.Identity.Pages.Account
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("Користувач створив новий аккаунт з паролем.");
+                    _logger.LogInformation($"Користувач створив новий аккаунт з паролем. Role: {user.Role}");
+
+                    string roleName = user.Role.ToString();
+                    var roleResult = await _userManager.AddToRoleAsync(user, roleName);
+
+                    if (!roleResult.Succeeded)
+                    {
+                        _logger.LogError($"Не вдалося додати роль користувача {roleName}");
+                        foreach (var error in roleResult.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                        await _userManager.DeleteAsync(user);
+                        await PrepareDropdownListsAsync();
+                        return Page();
+                    }
 
                     try
                     {
@@ -161,7 +189,7 @@ namespace med_service.Areas.Identity.Pages.Account
                             var patient = new Patient
                             {
                                 UserId = user.Id,
-                                DateOfBirth = Input.DateOfBirth ?? DateTime.MinValue
+                                DateOfBirth = Input.DateOfBirth ?? DateTime.Now
                             };
                             _context.Patients.Add(patient);
                             await _context.SaveChangesAsync();
@@ -172,13 +200,18 @@ namespace med_service.Areas.Identity.Pages.Account
                             var doctor = new Doctor
                             {
                                 UserId = user.Id,
-                                ExperienceYears = Input.ExperienceYears,
+                                ExperienceYears = Input.ExperienceYears ?? 0,
                                 HospitalId = Input.HospitalId.Value,
                                 SpecializationId = Input.SpecializationId.Value
                             };
                             _context.Doctors.Add(doctor);
                             await _context.SaveChangesAsync();
                             _logger.LogInformation($"Створено запис лікаря для користувача {user.Id}");
+                        }
+                        else if (user.Role == Models.User.UserRole.Admin)
+                        {
+                            // Admin doesn't need additional records/properties
+                            _logger.LogInformation($"Створено адміністратора з ID {user.Id}");
                         }
                     }
                     catch (Exception ex)
@@ -216,6 +249,17 @@ namespace med_service.Areas.Identity.Pages.Account
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            else
+            {
+                // Log validation errors
+                foreach (var modelState in ModelState.Values)
+                {
+                    foreach (var error in modelState.Errors)
+                    {
+                        _logger.LogWarning($"Validation error: {error.ErrorMessage}");
+                    }
                 }
             }
 
