@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using med_service.Models;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace med_service.Controllers
 {
@@ -28,5 +30,22 @@ namespace med_service.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
+        public IActionResult SetLanguage(string culture, string returnUrl)
+        {
+            // Set the culture cookie
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+            );
+
+            // Redirect to the return URL (ensures the UI updates to the selected language)
+            return LocalRedirect(returnUrl);
+        }
+
+
+
     }
 }

@@ -1,6 +1,5 @@
 using med_service.Data;
 using med_service.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -15,31 +14,14 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddControllersWithViews();
 
-
-const string EN_US_CULTURE = "en-US", UK_UA_CULTURE = "uk-UA";
-
-
+// Add localization services
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddControllersWithViews()
-.AddViewLocalization()
-.AddDataAnnotationsLocalization();
-
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
 
 var app = builder.Build();
-
-var supportedCultures = new[] { new CultureInfo(UK_UA_CULTURE), new CultureInfo(EN_US_CULTURE) };
-app.UseRequestLocalization(new RequestLocalizationOptions
-{
-    DefaultRequestCulture = new RequestCulture(UK_UA_CULTURE),
-    // Formatting numbers, dates, etc.
-    SupportedCultures = supportedCultures,
-    // UI strings that we have localized.
-    SupportedUICultures = supportedCultures
-});
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -49,7 +31,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -59,6 +40,15 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+// Configure request localization
+var supportedCultures = new[] { new CultureInfo("en-US"), new CultureInfo("uk-UA") };
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en-US"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+});
 
 app.MapControllerRoute(
     name: "default",
