@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace med_service.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class DoctorsController : Controller
     {
         private readonly ApplicationDbContext _context;
