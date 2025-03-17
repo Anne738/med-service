@@ -1,8 +1,11 @@
 ﻿using med_service.Data;
 using med_service.Models;
+using med_service.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace med_service.Controllers
 {
@@ -15,10 +18,23 @@ namespace med_service.Controllers
             _userManager = userManager;
         }
 
-        // GET: Users
+        // GET: Users/Index
         public async Task<IActionResult> Index()
         {
-            return View(await _userManager.Users.ToListAsync());
+            var users = await _userManager.Users.ToListAsync();
+
+            // Convert to ViewModel
+            var userViewModels = users.Select(user => new UserViewModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                UserName = user.UserName,
+                Role = user.Role
+            }).ToList();
+
+            return View(userViewModels);
         }
 
         // GET: Users/Details/5
@@ -35,7 +51,17 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            return View(user);
+            var userViewModel = new UserViewModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                UserName = user.UserName,
+                Role = user.Role
+            };
+
+            return View(userViewModel);
         }
 
         // GET: Users/Create
@@ -52,7 +78,9 @@ namespace med_service.Controllers
             if (ModelState.IsValid)
             {
                 var result = await _userManager.CreateAsync(user);
-                if (result.Succeeded) return RedirectToAction(nameof(Index));
+                if (result.Succeeded)
+                    return RedirectToAction(nameof(Index));
+
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
@@ -75,15 +103,26 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            return View(user);
+            // Map User to UserViewModel
+            var userViewModel = new UserViewModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                UserName = user.UserName,
+                Role = user.Role
+            };
+
+            return View(userViewModel);
         }
 
         // POST: Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,FirstName,LastName,Role,Email,UserName")] User user)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,FirstName,LastName,Role,Email,UserName")] UserViewModel userViewModel)
         {
-            if (id != user.Id)
+            if (id != userViewModel.Id)
             {
                 return NotFound();
             }
@@ -92,40 +131,42 @@ namespace med_service.Controllers
             {
                 try
                 {
-                    // Ensure the user is being tracked by the context
-                    var existingUser = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
+                    var existingUser = await _userManager.FindByIdAsync(userViewModel.Id);
                     if (existingUser == null)
                     {
                         return NotFound();
                     }
 
-                    existingUser.FirstName = user.FirstName;
-                    existingUser.LastName = user.LastName;
-                    existingUser.Role = user.Role;
-                    existingUser.Email = user.Email;
-                    existingUser.UserName = user.UserName;
+                    // Update user data
+                    existingUser.FirstName = userViewModel.FirstName;
+                    existingUser.LastName = userViewModel.LastName;
+                    existingUser.Role = userViewModel.Role;
+                    existingUser.Email = userViewModel.Email;
+                    existingUser.UserName = userViewModel.UserName;
 
-                    // Update the user entity
                     var identityResult = await _userManager.UpdateAsync(existingUser);
 
-                    if(identityResult.Succeeded) return RedirectToAction(nameof(Index));
+                    if (identityResult.Succeeded)
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!UserExists(user.Id))
+                    if (!UserExists(userViewModel.Id))
                     {
                         return NotFound();
                     }
                     else
                     {
                         ModelState.AddModelError(string.Empty, "Concurrency error: the user was modified by another user.");
-                        return View(user);
+                        return View(userViewModel);
                     }
                 }
-
             }
-            return View(user);  // Return the view if the model is invalid
+            return View(userViewModel);
         }
+
 
         // GET: Users/Delete/5
         public async Task<IActionResult> Delete(string id)
@@ -141,7 +182,18 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            return View(user);
+            // Map User to UserViewModel
+            var userViewModel = new UserViewModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                UserName = user.UserName,
+                Role = user.Role
+            };
+
+            return View(userViewModel);
         }
 
         // POST: Users/Delete/5
@@ -157,6 +209,7 @@ namespace med_service.Controllers
             }
             return NotFound();
         }
+
 
         private bool UserExists(string id)
         {

@@ -1,7 +1,8 @@
 ﻿// Файл: Models/ViewModels/BookAppointmentViewModel.cs
+using med_service.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace med_service.Models.ViewModels
+namespace med_service.ViewModels
 {
     public class BookAppointmentViewModel
     {

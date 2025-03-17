@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Numerics;
 
@@ -29,6 +30,7 @@ namespace med_service.Models
         [ValidateNever]
         public TimeSlot TimeSlot { get; set; }
 
+        [DisplayName("lblNotes")]
         public string Notes { get; set; }
     }
 }

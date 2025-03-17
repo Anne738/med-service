@@ -1,10 +1,15 @@
-﻿@model IEnumerable<med_service.Models.Appointment>
+﻿@using Humanizer.Localisation
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+
+@model IEnumerable<med_service.Models.Appointment>
 
 @{
     ViewData["Title"] = "Appointments";
 }
 
-<h1>Appointments</h1>
+<h1>@Localizer["lblAppointments"]</h1>
 
 <p>
     <a asp-action="Create" class="btn btn-primary">Create New</a>
