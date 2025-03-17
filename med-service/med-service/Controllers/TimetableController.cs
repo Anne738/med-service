@@ -60,6 +60,7 @@ namespace med_service.Controllers
         }
 
         // GET: Timetables/Book
+        [HttpGet]
         [Authorize]
         public async Task<IActionResult> Book(string day, int hour, int minute, int doctorId)
         {
@@ -91,18 +92,7 @@ namespace med_service.Controllers
                 }
             }
 
-            // Парсинг рядка з днем тижня в enum (без урахування регістру)
-
-            return View(viewModel);
-        }
-
-        [HttpGet]
-
-        public async Task<IActionResult> Book(string day, int hour, int minute, int doctorId)
-        {
-            if (string.IsNullOrEmpty(day) || doctorId == 0)
-                return NotFound();
-
+            // Парсинг рядка з днем тижня в enum
             if (!Enum.TryParse<Schedule.DayOfWeek>(day, true, out var scheduleDay))
                 return NotFound();
 
@@ -157,7 +147,6 @@ namespace med_service.Controllers
                 return RedirectToAction("Doctor", new { id = doctorId });
             }
 
-            var patients = await _db.Patients.Include(p => p.User).ToListAsync();
             var viewModel = new BookAppointmentViewModel
             {
                 TimeSlotId = slot.Id,
@@ -497,7 +486,7 @@ namespace med_service.Controllers
             // Возвращаем результаты на главную страницу
             return View("~/Views/Home/Index.cshtml", model);
         }
-    }
+    
 
         private DateTime GetNextAvailableDate(Schedule.DayOfWeek targetDay)
         {
