@@ -20,10 +20,23 @@ builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfi
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// Add localization services
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddControllersWithViews()
     .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
     .AddDataAnnotationsLocalization();
+
+// Configure localization options
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    // Specify the supported cultures
+    var supportedCultures = new[] { EN_US_CULTURE, UK_UA_CULTURE };
+
+    // Set default culture and supported cultures
+    options.SetDefaultCulture(EN_US_CULTURE)
+        .AddSupportedCultures(supportedCultures)
+        .AddSupportedUICultures(supportedCultures);
+});
 
 var app = builder.Build();
 
@@ -35,30 +48,25 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-var supportedCultures = new[] { new CultureInfo(EN_US_CULTURE), new CultureInfo(UK_UA_CULTURE) };
-app.UseRequestLocalization(new RequestLocalizationOptions
-{
-    DefaultRequestCulture = new RequestCulture(UK_UA_CULTURE),
-    SupportedCultures = supportedCultures,
-    SupportedUICultures = supportedCultures
-});
+// Use request localization middleware to apply the user's selected culture
+app.UseRequestLocalization();
 
+// Configure the other middleware
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
 
+// Map routes
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
+// Seed roles (make sure these are created on application startup)
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();

@@ -259,9 +259,12 @@ namespace med_service.Controllers
             var query = _context.Appointments
                 .Where(a => a.PatientId == patientId)
                 .Include(a => a.Doctor)
+                .ThenInclude(d => d.User)
                 .Include(a => a.TimeSlot)
                 .OrderByDescending(a => a.TimeSlot.StartTime)
                 .AsQueryable();
+
+
 
             if (status.HasValue)
             {
@@ -269,6 +272,7 @@ namespace med_service.Controllers
             }
 
             var history = await query.AsNoTracking().ToListAsync();
+
             return View("PatientHistory", history);
             //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
         }
@@ -281,6 +285,7 @@ namespace med_service.Controllers
             var query = _context.Appointments
                 .Where(a => a.DoctorId == doctorId)
                 .Include(a => a.Patient)
+                .ThenInclude(p => p.User) 
                 .Include(a => a.TimeSlot)
                 .OrderByDescending(a => a.TimeSlot.StartTime)
                 .AsQueryable();
@@ -292,9 +297,10 @@ namespace med_service.Controllers
 
             var history = await query.AsNoTracking().ToListAsync();
             return View("DoctorHistory", history);
-       
-            //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
         }
 
+
+        //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
     }
+
 }

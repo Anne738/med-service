@@ -4,10 +4,12 @@ using System.Reflection;
 using med_service.Data;
 using med_service.Models;
 using med_service.ViewModels;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+
 
 namespace med_service.Controllers
 {
@@ -48,5 +50,29 @@ namespace med_service.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
+        [HttpPost]
+        public IActionResult SetLanguage(string culture, string returnUrl)
+        {
+            // Ensure the culture passed is valid
+            var cultureInfo = new CultureInfo(culture);
+            if (!new[] { "en-US", "uk-UA" }.Contains(cultureInfo.Name))
+            {
+                culture = "en-US";  // Fall back to English if an invalid culture is provided
+            }
+
+            // Set the culture cookie
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+            );
+
+            // Redirect to the return URL (ensures the UI updates to the selected language)
+            return LocalRedirect(returnUrl ?? "/");
+        }
+
+
     }
 }

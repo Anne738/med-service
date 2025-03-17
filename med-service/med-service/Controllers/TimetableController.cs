@@ -41,16 +41,20 @@ namespace med_service.Controllers
                 .Where(s => s.DoctorId == id)
                 .ToListAsync();
 
-            // Якщо день не вибрано, використовуємо перший день з переліку або понеділок за замовчуванням
-            Schedule.DayOfWeek daySelected = Schedule.DayOfWeek.Monday;
+
+            // За замовчуванням вибираємо понеділок
+            Schedule.DayOfWeek selectedWeekDay = Schedule.DayOfWeek.Monday;
             if (selectedDay.HasValue && Enum.IsDefined(typeof(Schedule.DayOfWeek), selectedDay.Value))
             {
-                daySelected = (Schedule.DayOfWeek)selectedDay.Value;
+                selectedWeekDay = (Schedule.DayOfWeek)selectedDay.Value;
             }
+
+            DateTime selectedDate = GetNextAvailableDate(selectedWeekDay);
 
             ViewBag.DoctorName = $"{doctor.User.FirstName} {doctor.User.LastName}";
             ViewBag.DoctorId = doctor.Id;
-            ViewBag.SelectedDay = daySelected;
+            ViewBag.SelectedDay = selectedWeekDay;
+            ViewBag.SelectedDate = selectedDate.ToString("yyyy-MM-dd"); // для HTML
 
             return View(schedules);
         }
@@ -88,8 +92,22 @@ namespace med_service.Controllers
             }
 
             // Парсинг рядка з днем тижня в enum (без урахування регістру)
+
+            return View(viewModel);
+        }
+
+        [HttpGet]
+
+        public async Task<IActionResult> Book(string day, int hour, int minute, int doctorId)
+        {
+            if (string.IsNullOrEmpty(day) || doctorId == 0)
+                return NotFound();
+
             if (!Enum.TryParse<Schedule.DayOfWeek>(day, true, out var scheduleDay))
                 return NotFound();
+
+            // Отримуємо найближчу відповідну дату
+            DateTime appointmentDate = GetNextAvailableDate(scheduleDay);
 
             var doctor = await _db.Doctors
                 .Include(d => d.User)
@@ -98,15 +116,12 @@ namespace med_service.Controllers
             if (doctor == null)
                 return NotFound();
 
-            // Отримуємо розклад для вказаного дня та лікаря
             var schedule = await _db.Schedules
                 .Include(s => s.AvailableSlots)
-                .Include(s => s.Doctor).ThenInclude(d => d.User)
                 .FirstOrDefaultAsync(s => s.DoctorId == doctorId && s.Day == scheduleDay);
 
             if (schedule == null)
             {
-                // Якщо розклад не існує, створюємо новий
                 schedule = new Schedule
                 {
                     Day = scheduleDay,
@@ -117,16 +132,12 @@ namespace med_service.Controllers
                 await _db.SaveChangesAsync();
             }
 
-            // Створюємо TimeSpan з вказаними годинами та хвилинами
             var startTime = new TimeSpan(hour, minute, 0);
-
-            // Шукаємо слот з початком у переданому часі
             var slot = schedule.AvailableSlots.FirstOrDefault(ts =>
                 ts.StartTime.Hours == hour && ts.StartTime.Minutes == minute);
 
             if (slot == null)
             {
-                // Створюємо новий слот, якщо його немає
                 slot = new TimeSlot
                 {
                     StartTime = startTime,
@@ -135,7 +146,6 @@ namespace med_service.Controllers
                 };
                 _db.TimeSlots.Add(slot);
                 await _db.SaveChangesAsync();
-
                 // Перезавантажуємо розклад, щоб отримати новий слот у колекції
                 await _db.Entry(schedule).ReloadAsync();
                 await _db.Entry(schedule).Collection(s => s.AvailableSlots).LoadAsync();
@@ -143,11 +153,11 @@ namespace med_service.Controllers
 
             if (slot.isBooked)
             {
-                // Якщо слот вже зайнятий, не даємо записуватися
-                TempData["Error"] = "Вибачте, цей часовий слот вже заброньовано";
+                TempData["Error"] = "Цей слот вже зайнятий.";
                 return RedirectToAction("Doctor", new { id = doctorId });
             }
 
+            var patients = await _db.Patients.Include(p => p.User).ToListAsync();
             var viewModel = new BookAppointmentViewModel
             {
                 TimeSlotId = slot.Id,
@@ -178,6 +188,8 @@ namespace med_service.Controllers
                 viewModel.PatientId = patient.Id;
                 viewModel.PatientName = $"{currentUser.FirstName} {currentUser.LastName}";
             }
+
+            ViewBag.AppointmentDate = appointmentDate.ToString("yyyy-MM-dd");
 
             return View("Book", viewModel);
         }
@@ -485,8 +497,19 @@ namespace med_service.Controllers
             // Возвращаем результаты на главную страницу
             return View("~/Views/Home/Index.cshtml", model);
         }
+    }
+
+        private DateTime GetNextAvailableDate(Schedule.DayOfWeek targetDay)
+        {
+            DateTime today = DateTime.Today;
+            DayOfWeek systemDayOfWeek = (DayOfWeek)targetDay; // Явне перетворення
+
+            int daysToAdd = ((int)systemDayOfWeek - (int)today.DayOfWeek + 8) % 7;
+            return today.AddDays(daysToAdd == 0 ? 7 : daysToAdd);
+        }
 
     }
+
 
     public class BookAppointmentViewModel
     {
