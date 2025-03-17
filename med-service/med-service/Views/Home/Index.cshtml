@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
 
 @{
@@ -6,7 +6,7 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">@Localizer["lblWelcome"]</h1>
+    <h1 class="display-4">@Localizer["homeTitle"]</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 
     <form asp-controller="Home" asp-action="SetLanguage" method="post">

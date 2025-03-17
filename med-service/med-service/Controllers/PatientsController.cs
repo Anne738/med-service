@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace med_service.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class PatientsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -25,8 +27,10 @@ namespace med_service.Controllers
         // GET: Patients
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Patients.Include(p => p.User);
-            return View(await applicationDbContext.ToListAsync());
+            var patients = await _context.Patients
+                .Include(p => p.User)
+                .ToListAsync();
+            return View(patients);
         }
 
         // GET: Patients/Details/5
