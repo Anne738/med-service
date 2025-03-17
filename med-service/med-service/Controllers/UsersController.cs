@@ -1,5 +1,6 @@
 ﻿using med_service.Data;
 using med_service.Models;
+using Microsoft.AspNetCore.Authorization;
 using med_service.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace med_service.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
         private readonly UserManager<User> _userManager;

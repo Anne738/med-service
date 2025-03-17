@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace med_service.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class TimeSlotsController : Controller
     {
         private readonly ApplicationDbContext _context;
