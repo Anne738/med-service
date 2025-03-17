@@ -54,7 +54,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 // Configure request localization
-var supportedCultures = new[] { new CultureInfo("en-US"), new CultureInfo("uk-UA") };
+//var supportedCultures = new[] { new CultureInfo("en-US"), new CultureInfo("uk-UA") };
 app.UseRequestLocalization(new RequestLocalizationOptions
 {
     DefaultRequestCulture = new RequestCulture("en-US"),
