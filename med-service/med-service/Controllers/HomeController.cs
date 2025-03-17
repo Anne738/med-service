@@ -125,8 +125,16 @@ namespace med_service.Controllers
         }
 
 
+        [HttpPost]
         public IActionResult SetLanguage(string culture, string returnUrl)
         {
+            // Ensure the culture passed is valid
+            var cultureInfo = new CultureInfo(culture);
+            if (!new[] { "en-US", "uk-UA" }.Contains(cultureInfo.Name))
+            {
+                culture = "en-US";  // Fall back to English if an invalid culture is provided
+            }
+
             // Set the culture cookie
             Response.Cookies.Append(
                 CookieRequestCultureProvider.DefaultCookieName,
@@ -135,9 +143,8 @@ namespace med_service.Controllers
             );
 
             // Redirect to the return URL (ensures the UI updates to the selected language)
-            return LocalRedirect(returnUrl);
+            return LocalRedirect(returnUrl ?? "/");
         }
-
 
 
     }

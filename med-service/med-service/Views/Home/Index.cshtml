@@ -8,12 +8,4 @@
 <div class="text-center">
     <h1 class="display-4">@Localizer["homeTitle"]</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-
-    <form asp-controller="Home" asp-action="SetLanguage" method="post">
-        <select name="culture" onchange="this.form.submit();">
-            <option value="en-US">English</option>
-            <option value="uk-UA">Українська</option>
-        </select>
-        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
-    </form>
 </div>
