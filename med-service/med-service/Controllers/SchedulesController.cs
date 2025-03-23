@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
 using Microsoft.AspNetCore.Authorization;
+using med_service.ViewModels;
+
 
 namespace med_service.Controllers
 {
@@ -47,8 +49,21 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            return View(schedule);
+            var model = new ScheduleViewModel
+            {
+                Id = schedule.Id,
+                Day = schedule.Day,
+                DoctorId = schedule.DoctorId,
+                WorkDayStart = schedule.WorkDayStart,
+                WorkDayEnd = schedule.WorkDayEnd,
+                DoctorFullName = $"{schedule.Doctor?.User?.LastName} {schedule.Doctor?.User?.FirstName}"
+            };
+
+            ViewData["DoctorFullName"] = $"{schedule.Doctor?.User?.LastName} {schedule.Doctor?.User?.FirstName}";
+
+            return View(model);
         }
+
 
         // GET: Schedules/Create
         public IActionResult Create()
@@ -71,51 +86,58 @@ namespace med_service.Controllers
                 Text = $"{h}:00"
             });
 
-            var schedule = new Schedule
+            var vm = new ScheduleViewModel
             {
                 WorkDayStart = 8,
                 WorkDayEnd = 18
             };
 
-            return View(schedule);
+            return View(vm);
         }
+
 
         // POST: Schedules/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Day,DoctorId,WorkDayStart,WorkDayEnd")] Schedule schedule)
+        public async Task<IActionResult> Create(ScheduleViewModel model)
         {
-            if (schedule.WorkDayEnd <= schedule.WorkDayStart)
+            if (model.WorkDayEnd <= model.WorkDayStart)
             {
-                ModelState.AddModelError("WorkDayEnd", "Конец рабочего дня должен быть позже начала");
+                ModelState.AddModelError("WorkDayEnd", "Кінець робочого дня повинен бути пізніше початку");
             }
 
             if (ModelState.IsValid)
             {
+                var schedule = new Schedule
+                {
+                    Day = (Schedule.DayOfWeek)model.Day,
+                    DoctorId = model.DoctorId,
+                    WorkDayStart = model.WorkDayStart,
+                    WorkDayEnd = model.WorkDayEnd
+                };
+
                 try
                 {
                     _context.Add(schedule);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateException ex)
+                catch (DbUpdateException)
                 {
-                    ModelState.AddModelError("", "Не удалось сохранить. Проверьте, что все выбранные значения существуют.");
+                    ModelState.AddModelError("", "Не вдалося зберегти. Перевірте правильність даних.");
                 }
             }
 
-            var doctors = _context.Doctors
-                .Include(d => d.User)
-                .ToList();
-
+            // Повторне заповнення даних для форми
+            var doctors = _context.Doctors.Include(d => d.User).ToList();
             var doctorItems = doctors.Select(d => new SelectListItem
             {
                 Value = d.Id.ToString(),
                 Text = $"{d.User?.LastName} {d.User?.FirstName}",
-                Selected = d.Id == schedule.DoctorId
+                Selected = d.Id == model.DoctorId
             }).ToList();
 
-            ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", schedule.DoctorId);
+            ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", model.DoctorId);
 
             ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
             {
@@ -123,8 +145,10 @@ namespace med_service.Controllers
                 Text = $"{h}:00"
             });
 
-            return View(schedule);
+            return View(model);
         }
+
+
 
         // GET: Schedules/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -134,11 +158,25 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            var schedule = await _context.Schedules.FindAsync(id);
+            var schedule = await _context.Schedules
+                .Include(s => s.Doctor)
+                .ThenInclude(d => d.User)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
             if (schedule == null)
             {
                 return NotFound();
             }
+
+            var model = new ScheduleViewModel
+            {
+                Id = schedule.Id,
+                Day = schedule.Day,
+                DoctorId = schedule.DoctorId,
+                WorkDayStart = schedule.WorkDayStart,
+                WorkDayEnd = schedule.WorkDayEnd,
+                DoctorFullName = $"{schedule.Doctor?.User?.LastName} {schedule.Doctor?.User?.FirstName}" // ✅ ДОДАНО
+            };
 
             var doctors = _context.Doctors
                 .Include(d => d.User)
@@ -147,10 +185,11 @@ namespace med_service.Controllers
             var doctorItems = doctors.Select(d => new SelectListItem
             {
                 Value = d.Id.ToString(),
-                Text = $"{d.User?.LastName} {d.User?.FirstName}"
+                Text = $"{d.User?.LastName} {d.User?.FirstName}",
+                Selected = d.Id == model.DoctorId
             }).ToList();
 
-            ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", schedule.DoctorId);
+            ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", model.DoctorId);
 
             ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
             {
@@ -158,35 +197,48 @@ namespace med_service.Controllers
                 Text = $"{h}:00"
             });
 
-            return View(schedule);
+            return View(model);
         }
+
+
 
         // POST: Schedules/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Day,DoctorId,WorkDayStart,WorkDayEnd")] Schedule schedule)
+        public async Task<IActionResult> Edit(int id, ScheduleViewModel model)
         {
-            if (id != schedule.Id)
+            if (id != model.Id)
             {
                 return NotFound();
             }
 
-            if (schedule.WorkDayEnd <= schedule.WorkDayStart)
+            if (model.WorkDayEnd <= model.WorkDayStart)
             {
-                ModelState.AddModelError("WorkDayEnd", "Конец рабочего дня должен быть позже начала");
+                ModelState.AddModelError("WorkDayEnd", "Кінець робочого дня повинен бути пізніше початку");
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var schedule = await _context.Schedules.FindAsync(id);
+                    if (schedule == null)
+                    {
+                        return NotFound();
+                    }
+
+                    schedule.Day = (Schedule.DayOfWeek)model.Day;
+                    schedule.DoctorId = model.DoctorId;
+                    schedule.WorkDayStart = model.WorkDayStart;
+                    schedule.WorkDayEnd = model.WorkDayEnd;
+
                     _context.Update(schedule);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ScheduleExists(schedule.Id))
+                    if (!ScheduleExists(model.Id))
                     {
                         return NotFound();
                     }
@@ -197,7 +249,7 @@ namespace med_service.Controllers
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError("", "Не удалось сохранить изменения. Проверьте, что все выбранные значения существуют.");
+                    ModelState.AddModelError("", "Не вдалося зберегти зміни. Перевірте, що всі дані заповнені правильно.");
                 }
             }
 
@@ -209,10 +261,10 @@ namespace med_service.Controllers
             {
                 Value = d.Id.ToString(),
                 Text = $"{d.User?.LastName} {d.User?.FirstName}",
-                Selected = d.Id == schedule.DoctorId
+                Selected = d.Id == model.DoctorId
             }).ToList();
 
-            ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", schedule.DoctorId);
+            ViewData["DoctorId"] = new SelectList(doctorItems, "Value", "Text", model.DoctorId);
 
             ViewBag.Hours = Enumerable.Range(0, 24).Select(h => new SelectListItem
             {
@@ -220,7 +272,7 @@ namespace med_service.Controllers
                 Text = $"{h}:00"
             });
 
-            return View(schedule);
+            return View(model);
         }
 
         // GET: Schedules/Delete/5
@@ -241,8 +293,21 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            return View(schedule);
+            var model = new ScheduleViewModel
+            {
+                Id = schedule.Id,
+                Day = schedule.Day,
+                DoctorId = schedule.DoctorId,
+                WorkDayStart = schedule.WorkDayStart,
+                WorkDayEnd = schedule.WorkDayEnd,
+                DoctorFullName = $"{schedule.Doctor?.User?.LastName} {schedule.Doctor?.User?.FirstName}"
+            };
+
+            ViewData["DoctorFullName"] = $"{schedule.Doctor?.User?.LastName} {schedule.Doctor?.User?.FirstName}";
+
+            return View(model);
         }
+
 
         // POST: Schedules/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -270,11 +335,12 @@ namespace med_service.Controllers
                 }
 
                 _context.Schedules.Remove(schedule);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
 
         private bool ScheduleExists(int id)
         {
