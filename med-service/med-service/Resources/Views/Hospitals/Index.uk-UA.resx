@@ -117,37 +117,31 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblBackToList" xml:space="preserve">
-    <value />
+  <data name="lblActions" xml:space="preserve">
+    <value>Дії</value>
   </data>
-  <data name="lblDay" xml:space="preserve">
-    <value />
+  <data name="lblCreateNew" xml:space="preserve">
+    <value>Створити нову лікарню</value>
   </data>
-  <data name="lblDayPlaceholder" xml:space="preserve">
-    <value />
+  <data name="lblAddress" xml:space="preserve">
+    <value>Адреса</value>
   </data>
-  <data name="lblDoctorId" xml:space="preserve">
-    <value />
+  <data name="lblDelete" xml:space="preserve">
+    <value>Видалити</value>
   </data>
-  <data name="lblHeading" xml:space="preserve">
-    <value />
+  <data name="lblDetails" xml:space="preserve">
+    <value>Деталі</value>
   </data>
-  <data name="lblSubHeading" xml:space="preserve">
-    <value />
+  <data name="lblName" xml:space="preserve">
+    <value>Назва лікарні</value>
   </data>
-  <data name="lblSubmitButton" xml:space="preserve">
-    <value />
+  <data name="lblEdit" xml:space="preserve">
+    <value>Редагувати</value>
   </data>
-  <data name="lblTimeValidationMessage" xml:space="preserve">
-    <value />
+  <data name="lblIndexTitle" xml:space="preserve">
+    <value>Лікарні</value>
   </data>
-  <data name="TitleTitle" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblWorkDayEnd" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblWorkDayStart" xml:space="preserve">
-    <value />
+  <data name="lblContact" xml:space="preserve">
+    <value>Контактний номер</value>
   </data>
 </root>

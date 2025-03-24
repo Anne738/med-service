@@ -24,7 +24,16 @@ namespace med_service.Controllers
         // GET: Hospitals
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Hospitals.ToListAsync());
+            var hospitals = await _context.Hospitals.ToListAsync();
+            var vmList = hospitals.Select(h => new HospitalViewModel
+            {
+                Id = h.Id,
+                Name = h.Name,
+                Address = h.Address,
+                Contact = h.Contact
+            }).ToList();
+
+            return View(vmList);
         }
 
         // GET: Hospitals/Details/5
@@ -35,7 +44,15 @@ namespace med_service.Controllers
             var hospital = await _context.Hospitals.FirstOrDefaultAsync(m => m.Id == id);
             if (hospital == null) return NotFound();
 
-            return View(hospital); // ❗Details ще можна лишити з Hospital (або адаптувати під ViewModel за бажанням)
+            var model = new HospitalViewModel
+            {
+                Id = hospital.Id,
+                Name = hospital.Name,
+                Address = hospital.Address,
+                Contact = hospital.Contact
+            };
+
+            return View(model);
         }
 
         // GET: Hospitals/Create
@@ -125,7 +142,15 @@ namespace med_service.Controllers
             var hospital = await _context.Hospitals.FirstOrDefaultAsync(m => m.Id == id);
             if (hospital == null) return NotFound();
 
-            return View(hospital);
+            var model = new HospitalViewModel
+            {
+                Id = hospital.Id,
+                Name = hospital.Name,
+                Address = hospital.Address,
+                Contact = hospital.Contact
+            };
+
+            return View(model);
         }
 
         // POST: Hospitals/Delete/5

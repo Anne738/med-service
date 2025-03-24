@@ -117,31 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblActions" xml:space="preserve">
-    <value>Дії</value>
-  </data>
-  <data name="lblCreateNew" xml:space="preserve">
-    <value>Створити новий розклад</value>
+  <data name="lblBackToList" xml:space="preserve">
+    <value>Повернутися до списку</value>
   </data>
   <data name="lblDay" xml:space="preserve">
     <value>День тижня</value>
   </data>
-  <data name="lblDelete" xml:space="preserve">
-    <value>Видалити</value>
-  </data>
-  <data name="lblDetails" xml:space="preserve">
-    <value>Деталі</value>
+  <data name="lblDetailsTitle" xml:space="preserve">
+    <value>Деталі розкладу</value>
   </data>
   <data name="lblDoctor" xml:space="preserve">
-    <value>Лікар</value>
+    <value>Доктор</value>
   </data>
   <data name="lblEdit" xml:space="preserve">
-    <value>Редагувати</value>
+    <value>Змінити</value>
   </data>
-  <data name="lblIndexTitle" xml:space="preserve">
-    <value>Розклади</value>
+  <data name="lblSchedule" xml:space="preserve">
+    <value>Розклад</value>
   </data>
-  <data name="lblWorkingHours" xml:space="preserve">
-    <value>Робочі години</value>
+  <data name="lblWorkHours" xml:space="preserve">
+    <value>Робочий час</value>
   </data>
 </root>
