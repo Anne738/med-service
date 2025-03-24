@@ -120,4 +120,46 @@
   <data name="homeTitle" xml:space="preserve">
     <value>Check</value>
   </data>
+  <data name="homeTitle" xml:space="preserve">
+  <value>Medical Service</value>
+</data>
+<data name="findDoctor" xml:space="preserve">
+  <value>Find a doctor and make an appointment</value>
+</data>
+<data name="searchDoctor" xml:space="preserve">
+  <value>Search for a doctor</value>
+</data>
+<data name="specialization" xml:space="preserve">
+  <value>Specialization</value>
+</data>
+<data name="allSpecializations" xml:space="preserve">
+  <value>-- All specializations --</value>
+</data>
+<data name="hospital" xml:space="preserve">
+  <value>Hospital</value>
+</data>
+<data name="allHospitals" xml:space="preserve">
+  <value>-- All hospitals --</value>
+</data>
+<data name="doctorName" xml:space="preserve">
+  <value>Doctor Name</value>
+</data>
+<data name="enterName" xml:space="preserve">
+  <value>Enter first or last name</value>
+</data>
+<data name="findDoctorBtn" xml:space="preserve">
+  <value>Find Doctor</value>
+</data>
+<data name="experience" xml:space="preserve">
+  <value>Experience</value>
+</data>
+<data name="years" xml:space="preserve">
+  <value>years</value>
+</data>
+<data name="viewSchedule" xml:space="preserve">
+  <value>View Schedule</value>
+</data>
+<data name="noDoctorsFound" xml:space="preserve">
+  <value>No doctors found matching the specified criteria.</value>
+</data>
 </root>
