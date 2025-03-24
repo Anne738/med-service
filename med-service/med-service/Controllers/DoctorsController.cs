@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Localization;
+using med_service.ViewModels;
 
 namespace med_service.Controllers
 {
@@ -15,10 +17,12 @@ namespace med_service.Controllers
     public class DoctorsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IStringLocalizer<DoctorsController> _localizer;
 
-        public DoctorsController(ApplicationDbContext context)
+        public DoctorsController(ApplicationDbContext context, IStringLocalizer<DoctorsController> localizer)
         {
             _context = context;
+            _localizer = localizer;
         }
 
         // GET: Doctors
@@ -57,32 +61,51 @@ namespace med_service.Controllers
         public IActionResult Create()
         {
             PrepareDropdownLists();
-            return View();
+            return View(new DoctorViewModel());
         }
 
         // POST: Doctors/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,UserId,HospitalId,SpecializationId,ExperienceYears")] Doctor doctor)
+        public async Task<IActionResult> Create(DoctorViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var doctor = new Doctor
+                    {
+                        UserId = viewModel.UserId,
+                        HospitalId = viewModel.HospitalId,
+                        SpecializationId = viewModel.SpecializationId,
+                        ExperienceYears = viewModel.ExperienceYears
+                    };
+
                     _context.Add(doctor);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateException ex)
                 {
-                    // Общая обработка ошибок БД (нарушение внешних ключей и т.д.)
-                    ModelState.AddModelError("", "Не удалось сохранить. Проверьте, что все выбранные значения существуют.");
+                    ModelState.AddModelError("", _localizer["SaveError"]);
+                }
+            }
+            else
+            {
+                // Для отладки валидации
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                   .Select(e => e.ErrorMessage)
+                   .ToList();
+
+                foreach (var error in errors)
+                {
+                    // Можно логировать ошибки или временно выводить для отладки
+                    Console.WriteLine($"Validation error: {error}");
                 }
             }
 
-            // Если что-то пошло не так, подготавливаем списки снова
-            PrepareDropdownLists(doctor);
-            return View(doctor);
+            PrepareDropdownLists();
+            return View(viewModel);
         }
 
         // GET: Doctors/Edit/5
@@ -95,40 +118,58 @@ namespace med_service.Controllers
             if (doctor == null)
                 return NotFound();
 
-            PrepareDropdownLists(doctor);
-            return View(doctor);
+            var viewModel = new DoctorViewModel
+            {
+                Id = doctor.Id,
+                UserId = doctor.UserId,
+                HospitalId = doctor.HospitalId,
+                SpecializationId = doctor.SpecializationId,
+                ExperienceYears = doctor.ExperienceYears
+            };
+
+            PrepareDropdownLists();
+            return View(viewModel);
         }
 
         // POST: Doctors/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,HospitalId,SpecializationId,ExperienceYears")] Doctor doctor)
+        public async Task<IActionResult> Edit(int id, DoctorViewModel viewModel)
         {
-            if (id != doctor.Id)
+            if (id != viewModel.Id)
                 return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var doctor = await _context.Doctors.FindAsync(id);
+                    if (doctor == null)
+                        return NotFound();
+
+                    doctor.UserId = viewModel.UserId;
+                    doctor.HospitalId = viewModel.HospitalId;
+                    doctor.SpecializationId = viewModel.SpecializationId;
+                    doctor.ExperienceYears = viewModel.ExperienceYears;
+
                     _context.Update(doctor);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DoctorExists(doctor.Id))
+                    if (!DoctorExists(viewModel.Id))
                         return NotFound();
                     throw;
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError("", "Не удалось сохранить изменения. Проверьте, что все выбранные значения существуют.");
+                    ModelState.AddModelError("", _localizer["UpdateError"]);
                 }
             }
 
-            PrepareDropdownLists(doctor);
-            return View(doctor);
+            PrepareDropdownLists();
+            return View(viewModel);
         }
 
         // GET: Doctors/Delete/5
@@ -168,20 +209,17 @@ namespace med_service.Controllers
             return _context.Doctors.Any(e => e.Id == id);
         }
 
-        // Вспомогательный метод для подготовки выпадающих списков
-        private void PrepareDropdownLists(Doctor doctor = null)
+        private void PrepareDropdownLists()
         {
-            // Используем Name/Description для отображения вместо Id
-            ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Name", doctor?.HospitalId);
-            ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Name", doctor?.SpecializationId);
+            ViewBag.HospitalId = new SelectList(_context.Hospitals, "Id", "Name");
+            ViewBag.SpecializationId = new SelectList(_context.Specializations, "Id", "Name");
 
-            // Используем ФИО пользователя для отображения
             var usersQuery = _context.Users.Select(u => new
             {
                 Id = u.Id,
                 FullName = $"{u.LastName} {u.FirstName}"
             });
-            ViewBag.UserId = new SelectList(usersQuery, "Id", "FullName", doctor?.UserId);
+            ViewBag.UserId = new SelectList(usersQuery, "Id", "FullName");
         }
     }
 }

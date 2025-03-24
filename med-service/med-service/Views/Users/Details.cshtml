@@ -1,33 +1,36 @@
-﻿@model med_service.ViewModels.UserViewModel
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model med_service.ViewModels.UserViewModel
 
 @{
-    ViewData["Title"] = "User Details";
+    ViewData["Title"] = Localizer["lblDetails"];
 }
 
-<h1>User Details</h1>
-
+<h1>@Localizer["lblDetails"]</h1>
+<h4>@Localizer["lblUser"]</h4>
 <table class="table">
     <tr>
-        <th>First Name</th>
+        <th>@Localizer["lblFirstName"]</th>
         <td>@Model.FirstName</td>
     </tr>
     <tr>
-        <th>Last Name</th>
+        <th>@Localizer["lblLastName"]</th>
         <td>@Model.LastName</td>
     </tr>
     <tr>
-        <th>Email</th>
+        <th>@Localizer["lblEmail"]</th>
         <td>@Model.Email</td>
     </tr>
     <tr>
-        <th>Username</th>
+        <th>@Localizer["lblUsername"]</th>
         <td>@Model.UserName</td>
     </tr>
     <tr>
-        <th>Role</th>
+        <th>@Localizer["lblRole"]</th>
         <td>@Model.Role</td>
     </tr>
 </table>
 
-<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
-<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">@Localizer["lblEditButton"]</a>
+<a asp-action="Index" class="btn btn-secondary">@Localizer["lblBackToListButton"]</a>

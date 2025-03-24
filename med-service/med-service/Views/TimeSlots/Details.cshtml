@@ -1,50 +1,45 @@
-﻿@model med_service.Models.TimeSlot
+﻿@model med_service.ViewModels.TimeSlotViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
 @{
-    ViewData["Title"] = "Деталі часового слоту";
+    ViewData["Title"] = Localizer["TimeSlotDetails"];
 }
 
-<h1>Деталі</h1>
+<h1>@Localizer["Details"]</h1>
 
 <div>
-    <h4>Часовий слот</h4>
+    <h4>@Localizer["TimeSlot"]</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            Розклад
+            @Localizer["Schedule"]
         </dt>
         <dd class="col-sm-10">
-            @if (Model.Schedule != null && Model.Schedule.Doctor != null && Model.Schedule.Doctor.User != null)
-            {
-                @($"{Model.Schedule.Doctor.User.LastName} - {Model.Schedule.Day}")
-            }
-            else
-            {
-                @Html.DisplayFor(model => model.Schedule.Id)
-            }
+            @Model.ScheduleString
         </dd>
         <dt class="col-sm-2">
-            Час
+            @Localizer["Time"]
         </dt>
         <dd class="col-sm-10">
             @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.isBooked)
+            @Localizer["IsBooked"]
         </dt>
         <dd class="col-sm-10">
-            @if (Model.isBooked)
+            @if (Model.IsBooked)
             {
-                <span class="badge bg-danger">Зайнято</span>
+                <span class="badge bg-danger">@Localizer["Booked"]</span>
             }
             else
             {
-                <span class="badge bg-success">Вільно</span>
+                <span class="badge bg-success">@Localizer["Available"]</span>
             }
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Змінити</a>
-    <a asp-action="Index" class="btn btn-secondary">Повернутися до списку</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">@Localizer["Edit"]</a>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["BackToList"]</a>
 </div>

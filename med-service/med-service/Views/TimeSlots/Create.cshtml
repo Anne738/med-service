@@ -1,12 +1,14 @@
-﻿@model med_service.Models.TimeSlot
+﻿@model med_service.ViewModels.TimeSlotViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
 @{
-    ViewData["Title"] = "Створення часового слоту";
+    ViewData["Title"] = Localizer["CreateTimeSlot"];
 }
 
-<h1>Створення часового слоту</h1>
+<h1>@Localizer["CreateTimeSlot"]</h1>
 
-<h4>Часовий слот</h4>
+<h4>@Localizer["TimeSlot"]</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -14,30 +16,30 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group">
-                <label asp-for="ScheduleId" class="control-label">Розклад</label>
+                <label asp-for="ScheduleId" class="control-label">@Localizer["Schedule"]</label>
                 <select asp-for="ScheduleId" class="form-control" asp-items="ViewBag.ScheduleId" id="scheduleSelect">
-                    <option value="">-- Виберіть розклад --</option>
+                    <option value="">@Localizer["SelectSchedule"]</option>
                 </select>
                 <span asp-validation-for="ScheduleId" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="StartTime" class="control-label">Час початку</label>
+                <label asp-for="StartTime" class="control-label">@Localizer["StartTime"]</label>
                 <select asp-for="StartTime" class="form-control" id="timeSelect" disabled>
-                    <option value="">-- Спочатку виберіть розклад --</option>
+                    <option value="">@Localizer["SelectTimeFirst"]</option>
                 </select>
                 <span asp-validation-for="StartTime" class="text-danger"></span>
             </div>
 
             <div class="form-group mt-3">
-                <input type="submit" value="Створити" class="btn btn-primary" />
+                <input type="submit" value="@Localizer["Create"]" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Повернутися до списку</a>
+    <a asp-action="Index">@Localizer["BackToList"]</a>
 </div>
 
 @section Scripts {
@@ -47,27 +49,23 @@
 
     <script>
         $(document).ready(function() {
-            // Отримуємо дані про робочі години розкладів
             var schedulesWorkHours = @Html.Raw(ViewBag.SchedulesWorkHours);
 
-            // Обробляємо зміну розкладу
             $('#scheduleSelect').change(function() {
                 var scheduleId = $(this).val();
                 var timeSelect = $('#timeSelect');
 
-                // Очищаємо список часу
                 timeSelect.empty();
 
                 if (!scheduleId) {
-                    timeSelect.append('<option value="">-- Спочатку виберіть розклад --</option>');
+                    timeSelect.append('<option value="">@Localizer["SelectTimeFirst"]</option>');
                     timeSelect.prop('disabled', true);
                     return;
                 }
 
-                // Отримуємо робочі години для вибраного розкладу
                 var workHours = schedulesWorkHours[scheduleId];
                 if (!workHours) {
-                    timeSelect.append('<option value="">-- Немає доступного часу --</option>');
+                    timeSelect.append('<option value="">@Localizer["NoAvailableTime"]</option>');
                     timeSelect.prop('disabled', true);
                     return;
                 }
@@ -75,16 +73,13 @@
                 var startHour = workHours.Start;
                 var endHour = workHours.End;
 
-                // Генеруємо часові слоти з кроком 30 хвилин
                 for (var hour = startHour; hour < endHour; hour++) {
-                    // Додаємо слот XX:00
                     timeSelect.append(
                         $('<option></option>')
                             .val(hour.toString().padStart(2, '0') + ':00:00')
                             .text(hour.toString().padStart(2, '0') + ':00 - ' + hour.toString().padStart(2, '0') + ':30')
                     );
 
-                    // Додаємо слот XX:30, якщо це не остання година робочого дня
                     if (hour < endHour - 1 || endHour == startHour + 1) {
                         timeSelect.append(
                             $('<option></option>')
@@ -97,7 +92,6 @@
                 timeSelect.prop('disabled', false);
             });
 
-            // При відправці форми додаємо секунди у формат часу
             $('form').submit(function() {
                 var timeValue = $('#timeSelect').val();
                 if (timeValue) {

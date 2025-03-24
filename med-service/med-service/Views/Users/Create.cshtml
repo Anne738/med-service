@@ -1,39 +1,44 @@
-﻿@model med_service.ViewModels.UserViewModel
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model med_service.ViewModels.UserViewModel
 
 @{
-    ViewData["Title"] = "Create User";
+    ViewData["Title"] = Localizer["lblCreate"];
 }
 
-<h1>Create User</h1>
+<h1>@Localizer["lblCreate"]</h1>
+
+<h4>@Localizer["lblUser"]</h4>
 
 <form asp-action="Create">
     <div class="form-group">
-        <label asp-for="FirstName"></label>
+        <label class="control-label">@Localizer["lblFirstName"]</label>
         <input asp-for="FirstName" class="form-control" placeholder="Enter first name" />
         <span asp-validation-for="FirstName" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="LastName"></label>
+        <label class="control-label">@Localizer["lblLastName"]</label>
         <input asp-for="LastName" class="form-control" placeholder="Enter last name" />
         <span asp-validation-for="LastName" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Email"></label>
+        <label class="control-label">@Localizer["lblEmail"]</label>
         <input asp-for="Email" class="form-control" placeholder="Enter email address" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="UserName"></label>
+        <label class="control-label">@Localizer["lblUsername"]</label>
         <input asp-for="UserName" class="form-control" placeholder="Enter username" />
         <span asp-validation-for="UserName" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Role"></label>
+        <label class="control-label">@Localizer["lblRole"]</label>
         <select asp-for="Role" asp-items="Html.GetEnumSelectList<med_service.Models.User.UserRole>()" class="form-control">
             <option value="">Select role</option> <!-- Default empty option -->
         </select>
         <span asp-validation-for="Role" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Create</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary">@Localizer["lblCreateButton"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["lblCancelButton"]</a>
 </form>

@@ -192,7 +192,7 @@ namespace med_service.Data.Migrations
                     b.HasIndex("TimeSlotId")
                         .IsUnique();
 
-                    b.ToTable("Appointments");
+                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("med_service.Models.Doctor", b =>
@@ -224,7 +224,7 @@ namespace med_service.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Doctors");
+                    b.ToTable("Doctors", (string)null);
                 });
 
             modelBuilder.Entity("med_service.Models.Hospital", b =>
@@ -249,7 +249,7 @@ namespace med_service.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Hospitals");
+                    b.ToTable("Hospitals", (string)null);
                 });
 
             modelBuilder.Entity("med_service.Models.Patient", b =>
@@ -272,7 +272,7 @@ namespace med_service.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("med_service.Models.Schedule", b =>
@@ -299,7 +299,7 @@ namespace med_service.Data.Migrations
 
                     b.HasIndex("DoctorId");
 
-                    b.ToTable("Schedules");
+                    b.ToTable("Schedules", (string)null);
                 });
 
             modelBuilder.Entity("med_service.Models.Specialization", b =>
@@ -320,7 +320,7 @@ namespace med_service.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Specializations");
+                    b.ToTable("Specializations", (string)null);
                 });
 
             modelBuilder.Entity("med_service.Models.TimeSlot", b =>
@@ -347,7 +347,7 @@ namespace med_service.Data.Migrations
 
                     b.HasIndex("ScheduleId");
 
-                    b.ToTable("TimeSlots");
+                    b.ToTable("TimeSlots", (string)null);
                 });
 
             modelBuilder.Entity("med_service.Models.User", b =>

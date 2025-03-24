@@ -1,48 +1,37 @@
-﻿@model med_service.Models.Appointment
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model med_service.ViewModels.AppointmentViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Localizer["lblDetails"];
 }
 
-<h1>Details</h1>
+<h1>@Localizer["lblDetails"]</h1>
 
 <div>
-    <h4>Appointment</h4>
+    <h4>@Localizer["lblAppointment"]</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Patient)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Patient.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Doctor)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Doctor.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Notes)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Notes)
-        </dd>
-        <dt class="col-sm-2">
-            Time Slot
-        </dt>
+        <dt class="col-sm-2">@Localizer["lblStatus"]</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Status)</dd>
+
+        <dt class="col-sm-2">@Localizer["lblPatient"]</dt>
+        <dd class="col-sm-10">@Model.PatientName</dd>
+
+        <dt class="col-sm-2">@Localizer["lblDoctor"]</dt>
+        <dd class="col-sm-10">@Model.DoctorName</dd>
+
+        <dt class="col-sm-2">@Localizer["lblNotes"]</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Notes)</dd>
+
+        <dt class="col-sm-2">@Localizer["lblTimeSlot"]</dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.TimeSlot.StartTime) - @Html.DisplayFor(model => model.TimeSlot.EndTime)
+            @Model.TimeSlot?.StartTime.ToString(@"hh\:mm") - @Model.TimeSlot?.EndTime.ToString(@"hh\:mm")
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">@Localizer["lblEditButton"]</a>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["lblBackToListButton"]</a>
 </div>

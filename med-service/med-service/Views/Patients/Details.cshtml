@@ -1,29 +1,31 @@
-﻿@model med_service.Models.Patient
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model med_service.Models.Patient
 
 @{
-    ViewData["Title"] = "Інформація про пацієнта";
+    ViewData["Title"] = Localizer["PatientDetails"];
 }
 
-<h1>Інформація про пацієнта</h1>
+<h1>@Localizer["PatientDetails"]</h1>
 
 <div>
-    <h4>Пацієнт</h4>
+    <h4>@Localizer["Patient"]</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            Ім'я
+            @Localizer["FirstName"]
         </dt>
         <dd class="col-sm-10">
             @Model.User?.FirstName
         </dd>
         <dt class="col-sm-2">
-            Прізвище
+            @Localizer["LastName"]
         </dt>
         <dd class="col-sm-10">
             @Model.User?.LastName
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.DateOfBirth)
+            @Localizer["DateOfBirth"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DateOfBirth)
@@ -32,10 +34,10 @@
 </div>
 <div class="mt-3 mb-3 d-flex gap-2">
     <a href="@Url.Action("GetPatientHistory", "Appointments", new { patientId = Model.Id })" class="btn btn-outline-success">
-        📅 Ваша історія записів
+        📅 @Localizer["YourAppointmentHistory"]
     </a>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Змінити</a> |
-    <a asp-action="Index">Повернутися до списку</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">@Localizer["Edit"]</a> |
+    <a asp-action="Index">@Localizer["BackToList"]</a>
 </div>

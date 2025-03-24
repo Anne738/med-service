@@ -1,13 +1,15 @@
-﻿@model IEnumerable<med_service.Models.Appointment>
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model IEnumerable<med_service.Models.Appointment>
 @{
-    ViewData["Title"] = ViewBag.UserRole == "Doctor" ? "Мої пацієнти" : "Мої записи на прийом";
+    ViewData["Title"] = ViewBag.UserRole == "Doctor" ? Localizer["myPatients"] : Localizer["myAppointments"];
 }
 
-<h1>@(ViewBag.UserRole == "Doctor" ? "Мої пацієнти" : "Мої записи на прийом")</h1>
+<h1>@(ViewBag.UserRole == "Doctor" ? Localizer["myPatients"] : Localizer["myAppointments"])</h1>
 
 <div class="row mb-3">
     <div class="col">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">На головну</a>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">@Localizer["toHome"]</a>
     </div>
 </div>
 
@@ -16,11 +18,11 @@
     <div class="alert alert-info">
         @if (ViewBag.UserRole == "Doctor")
         {
-            <p>У вас поки немає жодного запису від пацієнтів.</p>
+            <p>@Localizer["noPatients"]</p>
         }
         else
         {
-            <p>У вас поки немає жодного запису на прийом.</p>
+            <p>@Localizer["noAppointments"]</p>
         }
     </div>
 }
@@ -32,16 +34,16 @@ else
                 <tr>
                     @if (ViewBag.UserRole == "Doctor")
                     {
-                        <th>Пацієнт</th>
+                        <th>@Localizer["patient"]</th>
                     }
                     else
                     {
-                        <th>Лікар</th>
+                        <th>@Localizer["doctor"]</th>
                     }
-                    <th>День</th>
-                    <th>Час</th>
-                    <th>Статус</th>
-                    <th>Примітки</th>
+                    <th>@Localizer["day"]</th>
+                    <th>@Localizer["time"]</th>
+                    <th>@Localizer["status"]</th>
+                    <th>@Localizer["notes"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,16 +64,16 @@ else
                             @switch (item.Status)
                             {
                                 case Appointment.AppointmentStatus.PENDING:
-                                    <span class="badge bg-warning">Очікує підтвердження</span>
+                                    <span class="badge bg-warning">@Localizer["statusPending"]</span>
                                     break;
                                 case Appointment.AppointmentStatus.CONFIRMED:
-                                    <span class="badge bg-success">Підтверджено</span>
+                                    <span class="badge bg-success">@Localizer["statusConfirmed"]</span>
                                     break;
                                 case Appointment.AppointmentStatus.COMPLETED:
-                                    <span class="badge bg-primary">Завершено</span>
+                                    <span class="badge bg-primary">@Localizer["statusCompleted"]</span>
                                     break;
                                 case Appointment.AppointmentStatus.CANCELED:
-                                    <span class="badge bg-danger">Скасовано</span>
+                                    <span class="badge bg-danger">@Localizer["statusCanceled"]</span>
                                     break;
                             }
                         </td>

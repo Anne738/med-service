@@ -1,53 +1,57 @@
-﻿@model med_service.Models.TimeSlot
+﻿@model med_service.ViewModels.TimeSlotViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
 @{
-    ViewData["Title"] = "Видалення";
+    ViewData["Title"] = Localizer["DeleteTimeSlot"];
 }
 
-<h1>Видалення</h1>
+<h1>@Localizer["Delete"]</h1>
 
-<h3>Ви впевнені, що хочете видалити цей часовий слот?</h3>
+<h3>@Localizer["AreYouSureDelete"]</h3>
 <div>
-    <h4>Часовий слот</h4>
+    <h4>@Localizer["TimeSlot"]</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            Розклад
+            @Localizer["Schedule"]
         </dt>
         <dd class="col-sm-10">
-            @if (Model.Schedule != null && Model.Schedule.Doctor != null && Model.Schedule.Doctor.User != null)
-            {
-                @($"{Model.Schedule.Doctor.User.LastName} - {Model.Schedule.Day}")
-            }
-            else
-            {
-                @Html.DisplayFor(model => model.Schedule.Id)
-            }
+            @Model.ScheduleString
         </dd>
         <dt class="col-sm-2">
-            Час
+            @Localizer["Time"]
         </dt>
         <dd class="col-sm-10">
             @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.isBooked)
+            @Localizer["IsBooked"]
         </dt>
         <dd class="col-sm-10">
-            @if (Model.isBooked)
+            @if (Model.IsBooked)
             {
-                <span class="badge bg-danger">Зайнято</span>
+                <span class="badge bg-danger">@Localizer["Booked"]</span>
             }
             else
             {
-                <span class="badge bg-success">Вільно</span>
+                <span class="badge bg-success">@Localizer["Available"]</span>
             }
         </dd>
     </dl>
 
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Видалити" class="btn btn-danger" />
-        <a asp-action="Index" class="btn btn-secondary">Повернутися до списку</a>
-    </form>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+    else
+    {
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <input type="submit" value="@Localizer["Delete"]" class="btn btn-danger" />
+            <a asp-action="Index" class="btn btn-secondary">@Localizer["BackToList"]</a>
+        </form>
+    }
 </div>

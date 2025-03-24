@@ -1,43 +1,50 @@
-﻿@model med_service.Models.Appointment
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model med_service.ViewModels.AppointmentViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = Localizer["lblCreate"];
 }
 
-<h1>Create</h1>
+<h1>@Localizer["lblCreate"]</h1>
 
-<h4>Appointment</h4>
+<h4>@Localizer["lblAppointment"]</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Status"></label>
+                <label class="control-label">@Localizer["lblStatus"]</label>
                 <select asp-for="Status" asp-items="Html.GetEnumSelectList<med_service.Models.Appointment.AppointmentStatus>()" class="form-control">
-                    <option value="" selected disabled>Status</option>
+                    <option value="" selected disabled>@Localizer["lblStatus"]</option>
                 </select>
+                <span asp-validation-for="Status" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="TimeSlotId"></label>
+                <label class="control-label">@Localizer["lblTimeSlot"]</label>
                 <select asp-for="TimeSlotId" class="form-control" asp-items="ViewBag.TimeSlotId"></select>
+                <span asp-validation-for="TimeSlotId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PatientId" class="control-label"></label>
-                <select asp-for="PatientId" class ="form-control" asp-items="ViewBag.PatientId"></select>
+                <label class="control-label">@Localizer["lblPatient"]</label>
+                <select asp-for="PatientId" class="form-control" asp-items="ViewBag.PatientId"></select>
+                <span asp-validation-for="PatientId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="DoctorId" class="control-label"></label>
-                <select asp-for="DoctorId" class ="form-control" asp-items="ViewBag.DoctorId"></select>
+                <label class="control-label">@Localizer["lblDoctor"]</label>
+                <select asp-for="DoctorId" class="form-control" asp-items="ViewBag.DoctorId"></select>
+                <span asp-validation-for="DoctorId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Notes" class="control-label"></label>
-                <input asp-for="Notes" class="form-control" />
+                <label class="control-label">@Localizer["lblNotes"]</label>
+                <input asp-for="Notes" class="form-control" placeholder="@Localizer["lblNotesField"]" />
                 <span asp-validation-for="Notes" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <button type="submit" class="btn btn-primary">Create</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">@Localizer["lblCreateButton"]</button>
+                <a asp-action="Index" class="btn btn-secondary">@Localizer["lblCancelButton"]</a>
             </div>
         </form>
     </div>
