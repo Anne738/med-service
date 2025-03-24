@@ -1,7 +1,9 @@
-﻿@model List<med_service.Models.Schedule>
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model List<med_service.Models.Schedule>
 @using med_service.Models
 @{
-    ViewData["Title"] = "Розклад лікаря";
+    ViewData["Title"] = Localizer["doctorScheduleTitle"];
 
     // Дні тижня, на які складається розклад
     var days = Enum.GetValues(typeof(Schedule.DayOfWeek)).Cast<Schedule.DayOfWeek>();
@@ -21,13 +23,13 @@
     int endHour = schedule?.WorkDayEnd ?? 18;
 }
 
-<h1>Розклад лікаря: @ViewBag.DoctorName</h1>
+<h1>@Localizer["doctorSchedule"]: @ViewBag.DoctorName</h1>
 
 <div class="row mb-4">
     <div class="col-md-4">
         <form id="daySelectForm" asp-action="Doctor" asp-route-id="@ViewBag.DoctorId" method="get">
             <div class="input-group">
-                <label class="input-group-text" for="selectedDay">День тижня:</label>
+                <label class="input-group-text" for="selectedDay">@Localizer["weekday"]:</label>
                 <select id="selectedDay" name="selectedDay" class="form-select" onchange="this.form.submit()">
                     @foreach (var day in days)
                     {
@@ -46,7 +48,7 @@
 
         @if (schedule != null)
         {
-            <div class="calendar-hours fs-6">Робочі години: @schedule.WorkingHours</div>
+            <div class="calendar-hours fs-6">@Localizer["workingHours"]: @schedule.WorkingHours</div>
         }
     </div>
 
@@ -67,17 +69,17 @@
                     <div class="slot-status">
                         @if (schedule == null)
                         {
-                            <span>Немає розкладу</span>
+                            <span>@Localizer["noSchedule"]</span>
                         }
                         else if (isBooked)
                         {
-                            <span class="badge bg-secondary">Зайнято</span>
+                            <span class="badge bg-secondary">@Localizer["booked"]</span>
                         }
                         else
                         {
                             <a asp-action="Book" asp-route-day="@selectedDay" asp-route-hour="@hour"
                                asp-route-minute="0" asp-route-doctorId="@ViewBag.DoctorId"
-                               class="btn btn-sm btn-primary w-100">Записатися</a>
+                               class="btn btn-sm btn-primary w-100">@Localizer["book"]</a>
                         }
                     </div>
                 </div>
@@ -98,17 +100,17 @@
                     <div class="slot-status">
                         @if (schedule == null)
                         {
-                            <span>Немає розкладу</span>
+                            <span>@Localizer["noSchedule"]</span>
                         }
                         else if (isBooked)
                         {
-                            <span class="badge bg-secondary">Зайнято</span>
+                            <span class="badge bg-secondary">@Localizer["booked"]</span>
                         }
                         else
                         {
                             <a asp-action="Book" asp-route-day="@selectedDay" asp-route-hour="@hour"
                                asp-route-minute="30" asp-route-doctorId="@ViewBag.DoctorId"
-                               class="btn btn-sm btn-primary w-100">Записатися</a>
+                               class="btn btn-sm btn-primary w-100">@Localizer["book"]</a>
                         }
                     </div>
                 </div>
@@ -118,7 +120,7 @@
 </div>
 
 <div>
-    <a asp-controller="Doctors" asp-action="Index" class="btn btn-secondary">До списку лікарів</a>
+    <a asp-controller="Doctors" asp-action="Index" class="btn btn-secondary">@Localizer["backToDoctorsList"]</a>
 </div>
 
 <style>

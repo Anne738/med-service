@@ -9,35 +9,35 @@
 <div class="container">
     <div class="text-center mb-4">
         <h1 class="display-4">@Localizer["homeTitle"]</h1>
-        <p>Знайдіть лікаря та запишіться на прийом</p>
+        <p>@Localizer["findDoctor"]</p>
     </div>
 
     <div class="card shadow mb-4">
         <div class="card-header bg-primary text-white">
-            <h5 class="m-0">Пошук лікаря</h5>
+            <h5 class="m-0">@Localizer["searchDoctor"]</h5>
         </div>
         <div class="card-body">
             <form asp-controller="Timetables" asp-action="FindDoctor" method="get" class="needs-validation" novalidate>
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label asp-for="SpecializationId" class="form-label">Спеціалізація</label>
+                        <label asp-for="SpecializationId" class="form-label">@Localizer["specialization"]</label>
                         <select asp-for="SpecializationId" asp-items="Model.Specializations" class="form-select">
-                            <option value="">-- Всі спеціалізації --</option>
+                            <option value="">@Localizer["allSpecializations"]</option>
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label asp-for="HospitalId" class="form-label">Лікарня</label>
+                        <label asp-for="HospitalId" class="form-label">@Localizer["hospital"]</label>
                         <select asp-for="HospitalId" asp-items="Model.Hospitals" class="form-select">
-                            <option value="">-- Всі лікарні --</option>
+                            <option value="">@Localizer["allHospitals"]</option>
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label asp-for="DoctorName" class="form-label">Ім'я лікаря</label>
-                        <input asp-for="DoctorName" class="form-control" placeholder="Введіть ім'я або прізвище">
+                        <label asp-for="DoctorName" class="form-label">@Localizer["doctorName"]</label>
+                        <input asp-for="DoctorName" class="form-control" placeholder="@Localizer["enterName"]">
                     </div>
                 </div>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                    <button type="submit" class="btn btn-primary">Знайти лікаря</button>
+                    <button type="submit" class="btn btn-primary">@Localizer["findDoctorBtn"]</button>
                 </div>
             </form>
         </div>
@@ -54,13 +54,13 @@
                             <h5 class="card-title">@doctor.User.LastName @doctor.User.FirstName</h5>
                             <h6 class="card-subtitle mb-2 text-muted">@doctor.Specialization.Name</h6>
                             <p class="card-text">
-                                <small class="text-muted">Досвід: @doctor.ExperienceYears років</small><br>
-                                <small class="text-muted">Лікарня: @doctor.Hospital.Name</small>
+                                <small class="text-muted">@Localizer["experience"]: @doctor.ExperienceYears @Localizer["years"]</small><br>
+                                <small class="text-muted">@Localizer["hospital"]: @doctor.Hospital.Name</small>
                             </p>
                         </div>
                         <div class="card-footer bg-transparent border-top-0">
                             <a asp-controller="Timetables" asp-action="Doctor" asp-route-id="@doctor.Id"
-                               class="btn btn-outline-primary w-100">Переглянути розклад</a>
+                               class="btn btn-outline-primary w-100">@Localizer["viewSchedule"]</a>
                         </div>
                     </div>
                 </div>
@@ -70,7 +70,7 @@
     else if (Model.IsSearched)
     {
         <div class="alert alert-info">
-            Не знайдено жодного лікаря за вказаними критеріями.
+            @Localizer["noDoctorsFound"]
         </div>
     }
 </div>
