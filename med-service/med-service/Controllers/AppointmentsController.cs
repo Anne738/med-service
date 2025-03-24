@@ -60,8 +60,6 @@ namespace med_service.Controllers
             return View(appointmentViewModels);
         }
 
-
-
         // GET: Appointments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -100,23 +98,21 @@ namespace med_service.Controllers
             return View();
         }
 
-
         // POST: Appointments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Status,PatientId,DoctorId,TimeSlotId,Notes")] AppointmentViewModel appointmentViewModel)
         {
-            if (!ModelState.IsValid) // If validation fails, reload the form with dropdowns
+            if (!ModelState.IsValid)
             {
                 PopulateDropdowns(
                     selectedTimeSlotId: appointmentViewModel.TimeSlotId,
                     selectedDoctorId: appointmentViewModel.DoctorId,
                     selectedPatientId: appointmentViewModel.PatientId
                 );
-                return View(appointmentViewModel); // Return the form with validation errors
+                return View(appointmentViewModel);
             }
 
-            // Create a new Appointment entity based on the ViewModel
             var appointment = new Appointment
             {
                 Status = appointmentViewModel.Status,
@@ -126,30 +122,26 @@ namespace med_service.Controllers
                 Notes = appointmentViewModel.Notes
             };
 
-            // Mark the selected TimeSlot as booked
             var timeSlot = await _context.TimeSlots.FirstOrDefaultAsync(ts => ts.Id == appointmentViewModel.TimeSlotId);
             if (timeSlot != null)
             {
-                timeSlot.isBooked = true; // Mark as booked
-                _context.Update(timeSlot); // Update the TimeSlot in the database
+                timeSlot.isBooked = true;
+                _context.Update(timeSlot);
             }
             else
             {
-                // Validation fallback for bad TimeSlot selection
                 ModelState.AddModelError("TimeSlotId", "The selected time slot is invalid.");
                 PopulateDropdowns(
                     selectedTimeSlotId: appointmentViewModel.TimeSlotId,
                     selectedDoctorId: appointmentViewModel.DoctorId,
                     selectedPatientId: appointmentViewModel.PatientId
                 );
-                return View(appointmentViewModel); // Reload form with error
+                return View(appointmentViewModel);
             }
 
-            // Add the new Appointment to the database
             _context.Add(appointment);
-            await _context.SaveChangesAsync(); // Save changes to the database
+            await _context.SaveChangesAsync();
 
-            // Redirect to the Index page on success
             return RedirectToAction(nameof(Index));
         }
 
@@ -238,10 +230,6 @@ namespace med_service.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-
-
-        // GET: Appointments/Delete/5
         // GET: Appointments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -301,7 +289,7 @@ namespace med_service.Controllers
         {
             //Include available slots or keep the current (selected) one
             var availableSlots = _context.TimeSlots
-                .Where(ts => !ts.isBooked || ts.Id == selectedTimeSlotId) // Show unbooked and selected slot
+                .Where(ts => !ts.isBooked || ts.Id == selectedTimeSlotId) //Show unbooked and selected slot
                 .Include(ts => ts.Schedule)
                     .ThenInclude(s => s.Doctor)
                         .ThenInclude(d => d.User)
