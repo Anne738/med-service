@@ -1,12 +1,14 @@
-﻿@model med_service.Models.Doctor
+﻿@model med_service.ViewModels.DoctorViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
 @{
-    ViewData["Title"] = "Редагування";
+    ViewData["Title"] = Localizer["EditTitle"];
 }
 
-<h1>Редагування</h1>
+<h1>@Localizer["EditTitle"]</h1>
 
-<h4>Лікар</h4>
+<h4>@Localizer["Doctor"]</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -14,34 +16,40 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group mb-3">
-                <label asp-for="UserId" class="control-label">Користувач</label>
-                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
+                <label asp-for="UserId" class="control-label">@Localizer["User"]</label>
+                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId">
+                    <option value="">@Localizer["SelectUser"]</option>
+                </select>
                 <span asp-validation-for="UserId" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="HospitalId" class="control-label">Лікарня</label>
-                <select asp-for="HospitalId" class="form-control" asp-items="ViewBag.HospitalId"></select>
+                <label asp-for="HospitalId" class="control-label">@Localizer["Hospital"]</label>
+                <select asp-for="HospitalId" class="form-control" asp-items="ViewBag.HospitalId">
+                    <option value="">@Localizer["SelectHospital"]</option>
+                </select>
                 <span asp-validation-for="HospitalId" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="SpecializationId" class="control-label">Спеціалізація</label>
-                <select asp-for="SpecializationId" class="form-control" asp-items="ViewBag.SpecializationId"></select>
+                <label asp-for="SpecializationId" class="control-label">@Localizer["Specialization"]</label>
+                <select asp-for="SpecializationId" class="form-control" asp-items="ViewBag.SpecializationId">
+                    <option value="">@Localizer["SelectSpecialization"]</option>
+                </select>
                 <span asp-validation-for="SpecializationId" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="ExperienceYears" class="control-label">Досвід роботи (роки)</label>
+                <label asp-for="ExperienceYears" class="control-label">@Localizer["ExperienceYears"]</label>
                 <input asp-for="ExperienceYears" class="form-control" />
                 <span asp-validation-for="ExperienceYears" class="text-danger"></span>
             </div>
             <div class="form-group mt-3">
-                <input type="submit" value="Зберегти" class="btn btn-primary" />
+                <input type="submit" value="@Localizer["Save"]" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Повернутися до списку</a>
+    <a asp-action="Index">@Localizer["BackToList"]</a>
 </div>
 
 @section Scripts {
