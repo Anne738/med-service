@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
+using med_service.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 
 namespace med_service.Controllers
@@ -24,116 +24,133 @@ namespace med_service.Controllers
         // GET: Hospitals
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Hospitals.ToListAsync());
+            var hospitals = await _context.Hospitals.ToListAsync();
+            var vmList = hospitals.Select(h => new HospitalViewModel
+            {
+                Id = h.Id,
+                Name = h.Name,
+                Address = h.Address,
+                Contact = h.Contact
+            }).ToList();
+
+            return View(vmList);
         }
 
         // GET: Hospitals/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var hospital = await _context.Hospitals
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (hospital == null)
-            {
-                return NotFound();
-            }
+            var hospital = await _context.Hospitals.FirstOrDefaultAsync(m => m.Id == id);
+            if (hospital == null) return NotFound();
 
-            return View(hospital);
+            var model = new HospitalViewModel
+            {
+                Id = hospital.Id,
+                Name = hospital.Name,
+                Address = hospital.Address,
+                Contact = hospital.Contact
+            };
+
+            return View(model);
         }
 
         // GET: Hospitals/Create
         public IActionResult Create()
         {
-            return View();
+            return View(new HospitalViewModel());
         }
 
         // POST: Hospitals/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Address,Contact")] Hospital hospital)
+        public async Task<IActionResult> Create(HospitalViewModel model)
         {
             if (ModelState.IsValid)
             {
+                var hospital = new Hospital
+                {
+                    Name = model.Name,
+                    Address = model.Address,
+                    Contact = model.Contact
+                };
+
                 _context.Add(hospital);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(hospital);
+
+            return View(model);
         }
 
         // GET: Hospitals/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var hospital = await _context.Hospitals.FindAsync(id);
-            if (hospital == null)
+            if (hospital == null) return NotFound();
+
+            var model = new HospitalViewModel
             {
-                return NotFound();
-            }
-            return View(hospital);
+                Id = hospital.Id,
+                Name = hospital.Name,
+                Address = hospital.Address,
+                Contact = hospital.Contact
+            };
+
+            return View(model);
         }
 
         // POST: Hospitals/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Address,Contact")] Hospital hospital)
+        public async Task<IActionResult> Edit(int id, HospitalViewModel model)
         {
-            if (id != hospital.Id)
-            {
-                return NotFound();
-            }
+            if (id != model.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var hospital = await _context.Hospitals.FindAsync(id);
+                    if (hospital == null) return NotFound();
+
+                    hospital.Name = model.Name;
+                    hospital.Address = model.Address;
+                    hospital.Contact = model.Contact;
+
                     _context.Update(hospital);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!HospitalExists(hospital.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!HospitalExists(model.Id)) return NotFound();
+                    else throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(hospital);
+
+            return View(model);
         }
 
         // GET: Hospitals/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var hospital = await _context.Hospitals
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (hospital == null)
-            {
-                return NotFound();
-            }
+            var hospital = await _context.Hospitals.FirstOrDefaultAsync(m => m.Id == id);
+            if (hospital == null) return NotFound();
 
-            return View(hospital);
+            var model = new HospitalViewModel
+            {
+                Id = hospital.Id,
+                Name = hospital.Name,
+                Address = hospital.Address,
+                Contact = hospital.Contact
+            };
+
+            return View(model);
         }
 
         // POST: Hospitals/Delete/5
@@ -145,9 +162,9 @@ namespace med_service.Controllers
             if (hospital != null)
             {
                 _context.Hospitals.Remove(hospital);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

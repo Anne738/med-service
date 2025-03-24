@@ -1,46 +1,31 @@
-﻿@model med_service.Models.Schedule
+﻿@model med_service.ViewModels.ScheduleViewModel
+@inject IViewLocalizer Localizer
 
 @{
-    ViewData["Title"] = "Видалення";
+    ViewData["Title"] = Localizer["lblDeleteTitle"];
 }
 
-<h1>Видалення</h1>
+<h1>@Localizer["lblDeleteTitle"]</h1>
 
-<h3>Ви впевнені, що хочете видалити цей розклад?</h3>
+<h3>@Localizer["lblDeleteConfirmation"]</h3>
+
 <div>
-    <h4>Розклад</h4>
+    <h4>@Localizer["lblSubHeading"]</h4>
     <hr />
     <dl class="row">
-        <dt class="col-sm-2">
-            День тижня
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Day)
-        </dd>
-        <dt class="col-sm-2">
-            Лікар
-        </dt>
-        <dd class="col-sm-10">
-            @if (Model.Doctor?.User != null)
-            {
-                @($"{Model.Doctor.User.LastName} {Model.Doctor.User.FirstName}")
-            }
-            else
-            {
-                @Html.DisplayFor(model => model.Doctor.Id)
-            }
-        </dd>
-        <dt class="col-sm-2">
-            Робочі години
-        </dt>
-        <dd class="col-sm-10">
-            @Model.WorkingHours
-        </dd>
+        <dt class="col-sm-2">@Localizer["lblDay"]</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Day)</dd>
+
+        <dt class="col-sm-2">@Localizer["lblDoctor"]</dt>
+        <dd class="col-sm-10">@Model.DoctorFullName</dd>
+
+        <dt class="col-sm-2">@Localizer["lblWorkingHours"]</dt>
+        <dd class="col-sm-10">@Model.WorkingHours</dd>
     </dl>
 
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Видалити" class="btn btn-danger" />
-        <a asp-action="Index" class="btn btn-secondary">Повернутися до списку</a>
+        <input type="submit" value="@Localizer["lblDelete"]" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">@Localizer["lblBackToList"]</a>
     </form>
 </div>

@@ -1,8 +1,10 @@
 ﻿@page
 @model LoginModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
 @{
-    ViewData["Title"] = "Вхід";
+    ViewData["Title"] = Localizer["Login"];
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -10,7 +12,7 @@
     <div class="col-md-4">
         <section>
             <form id="account" method="post">
-                <h2>Використовуйте локальний обліковий запис для входу.</h2>
+                <h2>@Localizer["UseLocalAccount"]</h2>
                 <hr />
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
                 <div class="form-floating mb-3">
@@ -20,27 +22,27 @@
                 </div>
                 <div class="form-floating mb-3">
                     <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Input.Password" class="form-label">Пароль</label>
+                    <label asp-for="Input.Password" class="form-label">@Localizer["Password"]</label>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
                 <div class="checkbox mb-3">
                     <label asp-for="Input.RememberMe" class="form-label">
                         <input class="form-check-input" asp-for="Input.RememberMe" />
-                        Запам'ятати мене
+                        @Localizer["RememberMe"]
                     </label>
                 </div>
                 <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Увійти</button>
+                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">@Localizer["Login"]</button>
                 </div>
                 <div>
                     <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Забули пароль?</a>
+                        <a id="forgot-password" asp-page="./ForgotPassword">@Localizer["ForgotPassword"]</a>
                     </p>
                     <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Зареєструватися як новий користувач</a>
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["RegisterAsNewUser"]</a>
                     </p>
                     <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Повторно надіслати підтвердження email</a>
+                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">@Localizer["ResendConfirmationEmail"]</a>
                     </p>
                 </div>
             </form>
@@ -48,15 +50,14 @@
     </div>
     <div class="col-md-6 col-md-offset-2">
         <section>
-            <h3>Використовувати інший сервіс для входу.</h3>
+            <h3>@Localizer["UseExternalService"]</h3>
             <hr />
             @{
                 if ((Model.ExternalLogins?.Count ?? 0) == 0)
                 {
                     <div>
                         <p>
-                            Немає налаштованих зовнішніх сервісів аутентифікації. Дивіться цю <a href="https://go.microsoft.com/fwlink/?LinkID=532715">статтю
-                            про налаштування ASP.NET програми для підтримки входу через зовнішні сервіси</a>.
+                            @Localizer["NoExternalServices"] <a href="https://go.microsoft.com/fwlink/?LinkID=532715">@Localizer["ConfigureAuthArticle"]</a>.
                         </p>
                     </div>
                 }
@@ -67,7 +68,7 @@
                             <p>
                                 @foreach (var provider in Model.ExternalLogins!)
                                 {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Увійти за допомогою @provider.DisplayName облікового запису">@provider.DisplayName</button>
+                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="@Localizer["LoginUsing"] @provider.DisplayName">@provider.DisplayName</button>
                                 }
                             </p>
                         </div>
