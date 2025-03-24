@@ -39,40 +39,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Name" xml:space="preserve">
-    <value>Назва</value>
-  </data>
-  <data name="Description" xml:space="preserve">
-    <value>Опис</value>
-  </data>
-  <data name="Edit" xml:space="preserve">
-    <value>Редагувати</value>
-  </data>
-  <data name="Details" xml:space="preserve">
-    <value>Деталі</value>
-  </data>
-  <data name="Delete" xml:space="preserve">
-    <value>Видалити</value>
-  </data>
-  <data name="Create" xml:space="preserve">
-    <value>Створити</value>
-  </data>
-  <data name="Save" xml:space="preserve">
-    <value>Зберегти</value>
-  </data>
-  <data name="BackToList" xml:space="preserve">
-    <value>Повернутися до списку</value>
-  </data>
-  <data name="Specialization" xml:space="preserve">
-    <value>Спеціалізація</value>
-  </data>
-  <data name="NameRequired" xml:space="preserve">
-    <value>Назва є обов'язковою</value>
-  </data>
-  <data name="NameLength" xml:space="preserve">
-    <value>Назва не може перевищувати 100 символів</value>
-  </data>
-  <data name="DescriptionLength" xml:space="preserve">
-    <value>Опис не може перевищувати 500 символів</value>
-  </data>
+  <data name="User" xml:space="preserve">
+  <value>User</value>
+</data>
+<data name="Hospital" xml:space="preserve">
+  <value>Hospital</value>
+</data>
+<data name="Specialization" xml:space="preserve">
+  <value>Specialization</value>
+</data>
+<data name="ExperienceYears" xml:space="preserve">
+  <value>Experience (years)</value>
+</data>
+<data name="UserRequired" xml:space="preserve">
+  <value>The User field is required</value>
+</data>
+<data name="HospitalRequired" xml:space="preserve">
+  <value>The Hospital field is required</value>
+</data>
+<data name="SpecializationRequired" xml:space="preserve">
+  <value>The Specialization field is required</value>
+</data>
+<data name="ExperienceRequired" xml:space="preserve">
+  <value>The Experience field is required</value>
+</data>
+<data name="ExperienceRange" xml:space="preserve">
+  <value>Experience must be between 0 and 70 years</value>
+</data>
+<data name="SelectUser" xml:space="preserve">
+  <value>-- Select User --</value>
+</data>
+<data name="SelectHospital" xml:space="preserve">
+  <value>-- Select Hospital --</value>
+</data>
+<data name="SelectSpecialization" xml:space="preserve">
+  <value>-- Select Specialization --</value>
+</data>
 </root>

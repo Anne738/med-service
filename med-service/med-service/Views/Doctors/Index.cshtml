@@ -1,30 +1,32 @@
 ﻿@model IEnumerable<med_service.Models.Doctor>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
 @{
-    ViewData["Title"] = "Список лікарів";
+    ViewData["Title"] = Localizer["DoctorsList"];
 }
 
-<h1>Список лікарів</h1>
+<h1>@Localizer["DoctorsList"]</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Створити нового</a>
+    <a asp-action="Create" class="btn btn-primary">@Localizer["CreateNew"]</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                ПІБ
+                @Localizer["FullName"]
             </th>
             <th>
-                Лікарня
+                @Localizer["Hospital"]
             </th>
             <th>
-                Спеціалізація
+                @Localizer["Specialization"]
             </th>
             <th>
-                Досвід роботи
+                @Localizer["Experience"]
             </th>
-            <th>Дії</th>
+            <th>@Localizer["Actions"]</th>
         </tr>
     </thead>
     <tbody>
@@ -48,12 +50,12 @@
                     @Html.DisplayFor(modelItem => item.Specialization.Name)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.ExperienceYears) років
+                    @Html.DisplayFor(modelItem => item.ExperienceYears) @Localizer["Years"]
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редагувати</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Деталі</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Видалити</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">@Localizer["Edit"]</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">@Localizer["Details"]</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">@Localizer["Delete"]</a>
                 </td>
             </tr>
         }
