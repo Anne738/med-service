@@ -14,10 +14,12 @@ namespace med_service.Controllers
     public class UsersController : Controller
     {
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UsersController(UserManager<User> userManager)
+        public UsersController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         // GET: Users/Index
@@ -25,7 +27,7 @@ namespace med_service.Controllers
         {
             var users = await _userManager.Users.ToListAsync();
 
-            // Convert to ViewModel
+            //Convert to ViewModel
             var userViewModels = users.Select(user => new UserViewModel
             {
                 Id = user.Id,
@@ -75,21 +77,60 @@ namespace med_service.Controllers
         // POST: Users/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FirstName,LastName,Role,Email,UserName")] User user)
+        public async Task<IActionResult> Create(UserViewModel userViewModel)
         {
-            if (ModelState.IsValid)
-            {
-                var result = await _userManager.CreateAsync(user);
-                if (result.Succeeded)
-                    return RedirectToAction(nameof(Index));
+            // Remove the Id field from validation
+            ModelState.Remove("Id");
 
-                foreach (var error in result.Errors)
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine("ModelState validation failed!");
+                foreach (var state in ModelState)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    Console.WriteLine($"Key: {state.Key}");
+                    foreach (var error in state.Value.Errors)
+                    {
+                        Console.WriteLine($"Error: {error.ErrorMessage}");
+                    }
                 }
+                return View(userViewModel); // Re-display the form with validation messages
             }
-            return View(user);
+
+            // Map ViewModel to User model
+            var user = new User
+            {
+                FirstName = userViewModel.FirstName,
+                LastName = userViewModel.LastName,
+                Email = userViewModel.Email,
+                UserName = userViewModel.UserName,
+                Role = userViewModel.Role
+            };
+
+            // Create the user in the database
+            var result = await _userManager.CreateAsync(user, userViewModel.Password);
+
+            if (result.Succeeded)
+            {
+                if (!await _roleManager.RoleExistsAsync(user.Role.ToString()))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(user.Role.ToString()));
+                }
+                await _userManager.AddToRoleAsync(user, user.Role.ToString());
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Handle creation errors
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View(userViewModel);
         }
+
+
+
 
         // GET: Users/Edit/5
         public async Task<IActionResult> Edit(string id)
@@ -113,7 +154,9 @@ namespace med_service.Controllers
                 LastName = user.LastName,
                 Email = user.Email,
                 UserName = user.UserName,
-                Role = user.Role
+                Role = user.Role,
+                Password = string.Empty, // Initialize empty password field
+                ConfirmPassword = string.Empty // Initialize empty confirm password field
             };
 
             return View(userViewModel);
@@ -122,50 +165,89 @@ namespace med_service.Controllers
         // POST: Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,FirstName,LastName,Role,Email,UserName")] UserViewModel userViewModel)
+        public async Task<IActionResult> Edit(string id, UserViewModel userViewModel)
         {
             if (id != userViewModel.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
+                return View(userViewModel);
+            }
+
+            try
+            {
+                var existingUser = await _userManager.FindByIdAsync(userViewModel.Id);
+                if (existingUser == null)
                 {
-                    var existingUser = await _userManager.FindByIdAsync(userViewModel.Id);
-                    if (existingUser == null)
-                    {
-                        return NotFound();
-                    }
-
-                    // Update user data
-                    existingUser.FirstName = userViewModel.FirstName;
-                    existingUser.LastName = userViewModel.LastName;
-                    existingUser.Role = userViewModel.Role;
-                    existingUser.Email = userViewModel.Email;
-                    existingUser.UserName = userViewModel.UserName;
-
-                    var identityResult = await _userManager.UpdateAsync(existingUser);
-
-                    if (identityResult.Succeeded)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+
+                // Update non-password fields
+                existingUser.FirstName = userViewModel.FirstName;
+                existingUser.LastName = userViewModel.LastName;
+                existingUser.Email = userViewModel.Email;
+                existingUser.UserName = userViewModel.UserName;
+                existingUser.Role = userViewModel.Role;
+
+                // If new password is provided, update the password
+                if (!string.IsNullOrEmpty(userViewModel.Password))
                 {
-                    if (!UserExists(userViewModel.Id))
+                    if (userViewModel.Password != userViewModel.ConfirmPassword)
                     {
-                        return NotFound();
+                        ModelState.AddModelError("ConfirmPassword", "The password and confirmation password do not match.");
+                        return View(userViewModel);
                     }
-                    else
+
+                    // Remove existing password (if configured) and set the new one
+                    var removePasswordResult = await _userManager.RemovePasswordAsync(existingUser);
+                    if (!removePasswordResult.Succeeded)
                     {
-                        ModelState.AddModelError(string.Empty, "Concurrency error: the user was modified by another user.");
+                        foreach (var error in removePasswordResult.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                        return View(userViewModel);
+                    }
+
+                    var addPasswordResult = await _userManager.AddPasswordAsync(existingUser, userViewModel.Password);
+                    if (!addPasswordResult.Succeeded)
+                    {
+                        foreach (var error in addPasswordResult.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
                         return View(userViewModel);
                     }
                 }
+
+                // Update user in database
+                var identityResult = await _userManager.UpdateAsync(existingUser);
+                if (identityResult.Succeeded)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+
+                foreach (var error in identityResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(userViewModel.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Concurrency error: the user was modified by another user.");
+                    return View(userViewModel);
+                }
+            }
+
             return View(userViewModel);
         }
 

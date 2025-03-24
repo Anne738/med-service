@@ -120,6 +120,9 @@
   <data name="lblCancelButton" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="lblConfirmPassword" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
   <data name="lblCreate" xml:space="preserve">
     <value>Create</value>
   </data>
@@ -129,11 +132,23 @@
   <data name="lblEmail" xml:space="preserve">
     <value>Email Address</value>
   </data>
+  <data name="lblEmailField" xml:space="preserve">
+    <value>Enter email address</value>
+  </data>
   <data name="lblFirstName" xml:space="preserve">
     <value>First Name</value>
   </data>
+  <data name="lblFirstNameField" xml:space="preserve">
+    <value>Enter first name</value>
+  </data>
   <data name="lblLastName" xml:space="preserve">
     <value>Last Name</value>
+  </data>
+  <data name="lblLastNameField" xml:space="preserve">
+    <value>Enter last name</value>
+  </data>
+  <data name="lblPassword" xml:space="preserve">
+    <value>Password</value>
   </data>
   <data name="lblRole" xml:space="preserve">
     <value>Role</value>
@@ -143,5 +158,8 @@
   </data>
   <data name="lblUsername" xml:space="preserve">
     <value>Username</value>
+  </data>
+  <data name="lblUsernameField" xml:space="preserve">
+    <value>Enter username</value>
   </data>
 </root>

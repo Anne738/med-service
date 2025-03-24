@@ -144,4 +144,10 @@
   <data name="lblCancelButton" xml:space="preserve">
     <value>Скасувати</value>
   </data>
+  <data name="lblPassword" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="lblConfirmPassword" xml:space="preserve">
+    <value>Підтвердьте пароль</value>
+  </data>
 </root>
