@@ -120,4 +120,46 @@
   <data name="homeTitle" xml:space="preserve">
     <value>Прикіл</value>
   </data>
+  <data name="homeTitle" xml:space="preserve">
+  <value>Медичний сервіс</value>
+</data>
+<data name="findDoctor" xml:space="preserve">
+  <value>Знайдіть лікаря та запишіться на прийом</value>
+</data>
+<data name="searchDoctor" xml:space="preserve">
+  <value>Пошук лікаря</value>
+</data>
+<data name="specialization" xml:space="preserve">
+  <value>Спеціалізація</value>
+</data>
+<data name="allSpecializations" xml:space="preserve">
+  <value>-- Всі спеціалізації --</value>
+</data>
+<data name="hospital" xml:space="preserve">
+  <value>Лікарня</value>
+</data>
+<data name="allHospitals" xml:space="preserve">
+  <value>-- Всі лікарні --</value>
+</data>
+<data name="doctorName" xml:space="preserve">
+  <value>Ім'я лікаря</value>
+</data>
+<data name="enterName" xml:space="preserve">
+  <value>Введіть ім'я або прізвище</value>
+</data>
+<data name="findDoctorBtn" xml:space="preserve">
+  <value>Знайти лікаря</value>
+</data>
+<data name="experience" xml:space="preserve">
+  <value>Досвід</value>
+</data>
+<data name="years" xml:space="preserve">
+  <value>років</value>
+</data>
+<data name="viewSchedule" xml:space="preserve">
+  <value>Переглянути розклад</value>
+</data>
+<data name="noDoctorsFound" xml:space="preserve">
+  <value>Не знайдено жодного лікаря за вказаними критеріями.</value>
+</data>
 </root>
