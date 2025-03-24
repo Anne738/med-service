@@ -1,7 +1,10 @@
 ﻿@page
 @model RegisterModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
 @{
-    ViewData["Title"] = "Реєстрація";
+    ViewData["Title"] = Localizer["Register"];
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -9,7 +12,7 @@
 <div class="row">
     <div class="col-md-4">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Створення нового облікового запису</h2>
+            <h2>@Localizer["CreateNewAccount"]</h2>
             <hr />
             <div asp-validation-summary="All" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
@@ -18,29 +21,29 @@
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.FirstName" class="form-control" aria-required="true" placeholder="Ім'я" />
-                <label asp-for="Input.FirstName">Ім'я</label>
+                <input asp-for="Input.FirstName" class="form-control" aria-required="true" placeholder="@Localizer["FirstName"]" />
+                <label asp-for="Input.FirstName">@Localizer["FirstName"]</label>
                 <span asp-validation-for="Input.FirstName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.LastName" class="form-control" aria-required="true" placeholder="Прізвище" />
-                <label asp-for="Input.LastName">Прізвище</label>
+                <input asp-for="Input.LastName" class="form-control" aria-required="true" placeholder="@Localizer["LastName"]" />
+                <label asp-for="Input.LastName">@Localizer["LastName"]</label>
                 <span asp-validation-for="Input.LastName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <select asp-for="Input.Role" class="form-control" aria-required="true" id="roleSelect">
-                    <option value="@med_service.Models.User.UserRole.Patient">Пацієнт</option>
-                    <option value="@med_service.Models.User.UserRole.Doctor">Лікар</option>
-                    <option value="@med_service.Models.User.UserRole.Admin">Адміністратор</option>
+                    <option value="@med_service.Models.User.UserRole.Patient">@Localizer["Patient"]</option>
+                    <option value="@med_service.Models.User.UserRole.Doctor">@Localizer["Doctor"]</option>
+                    <option value="@med_service.Models.User.UserRole.Admin">@Localizer["Admin"]</option>
                 </select>
-                <label asp-for="Input.Role">Роль</label>
+                <label asp-for="Input.Role">@Localizer["Role"]</label>
                 <span asp-validation-for="Input.Role" class="text-danger"></span>
             </div>
 
             <div id="patientFields" class="mb-3">
                 <div class="form-floating mb-3">
                     <input asp-for="Input.DateOfBirth" type="date" class="form-control" />
-                    <label asp-for="Input.DateOfBirth">Дата народження</label>
+                    <label asp-for="Input.DateOfBirth">@Localizer["DateOfBirth"]</label>
                     <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
                 </div>
             </div>
@@ -48,50 +51,50 @@
             <div id="doctorFields" class="mb-3" style="display: none;">
                 <div class="form-floating mb-3">
                     <select asp-for="Input.HospitalId" class="form-control" asp-items="Model.Hospitals">
-                        <option value="">Виберіть лікарню</option> <!-- Added an empty option -->
+                        <option value="">@Localizer["SelectHospital"]</option>
                     </select>
-                    <label asp-for="Input.HospitalId">Лікарня</label>
+                    <label asp-for="Input.HospitalId">@Localizer["Hospital"]</label>
                     <span asp-validation-for="Input.HospitalId" class="text-danger"></span>
                 </div>
 
                 <div class="form-floating mb-3">
                     <select asp-for="Input.SpecializationId" class="form-control" asp-items="Model.Specializations">
-                        <option value="">Виберіть спеціалізацію</option> <!-- Added an empty option -->
+                        <option value="">@Localizer["SelectSpecialization"]</option>
                     </select>
-                    <label asp-for="Input.SpecializationId">Спеціалізація</label>
+                    <label asp-for="Input.SpecializationId">@Localizer["Specialization"]</label>
                     <span asp-validation-for="Input.SpecializationId" class="text-danger"></span>
                 </div>
 
                 <div class="form-floating mb-3">
                     <input asp-for="Input.ExperienceYears" type="number" class="form-control" min="0" />
-                    <label asp-for="Input.ExperienceYears">Стаж роботи (років)</label>
+                    <label asp-for="Input.ExperienceYears">@Localizer["ExperienceYears"]</label>
                     <span asp-validation-for="Input.ExperienceYears" class="text-danger"></span>
                 </div>
             </div>
 
             <div class="form-floating mb-3">
                 <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Пароль</label>
+                <label asp-for="Input.Password">@Localizer["Password"]</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Підтвердження пароля</label>
+                <label asp-for="Input.ConfirmPassword">@Localizer["ConfirmPassword"]</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Зареєструватися</button>
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">@Localizer["Register"]</button>
         </form>
     </div>
     <div class="col-md-6 col-md-offset-2">
         <section>
-            <h3>Використовувати інші сервіси для реєстрації</h3>
+            <h3>@Localizer["UseExternalService"]</h3>
             <hr />
             @{
                 if ((Model.ExternalLogins?.Count ?? 0) == 0)
                 {
                     <div>
                         <p>
-                            На даний момент немає налаштованих зовнішніх сервісів аутентифікації.
+                            @Localizer["NoExternalServices"]
                         </p>
                     </div>
                 }
@@ -102,7 +105,7 @@
                             <p>
                                 @foreach (var provider in Model.ExternalLogins!)
                                 {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="@Localizer["LoginUsing"] @provider.DisplayName">@provider.DisplayName</button>
                                 }
                             </p>
                         </div>
