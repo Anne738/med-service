@@ -9,6 +9,7 @@ using med_service.Data;
 using med_service.Models;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
+using med_service.ViewModels;
 
 namespace med_service.Controllers
 {
@@ -25,8 +26,22 @@ namespace med_service.Controllers
         // GET: TimeSlots
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.TimeSlots.Include(t => t.Schedule);
-            return View(await applicationDbContext.ToListAsync());
+            var timeSlots = await _context.TimeSlots
+                .Include(t => t.Schedule)
+                .ThenInclude(s => s.Doctor)
+                .ThenInclude(d => d.User)
+                .Select(ts => new TimeSlotViewModel
+                {
+                    Id = ts.Id,
+                    ScheduleId = ts.ScheduleId,
+                    StartTime = ts.StartTime,
+                    EndTime = ts.EndTime,
+                    IsBooked = ts.isBooked,
+                    ScheduleString = ts.Schedule.Doctor.User.LastName + " - " + ts.Schedule.Day.ToString()
+                })
+                .ToListAsync();
+
+            return View(timeSlots);
         }
 
         // GET: TimeSlots/Details/5
@@ -39,6 +54,17 @@ namespace med_service.Controllers
 
             var timeSlot = await _context.TimeSlots
                 .Include(t => t.Schedule)
+                .ThenInclude(s => s.Doctor)
+                .ThenInclude(d => d.User)
+                .Select(ts => new TimeSlotViewModel
+                {
+                    Id = ts.Id,
+                    ScheduleId = ts.ScheduleId,
+                    StartTime = ts.StartTime,
+                    EndTime = ts.EndTime,
+                    IsBooked = ts.isBooked,
+                    ScheduleString = ts.Schedule.Doctor.User.LastName + " - " + ts.Schedule.Day.ToString()
+                })
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (timeSlot == null)
@@ -69,7 +95,8 @@ namespace med_service.Controllers
             // Передаем словарь с диапазонами рабочего времени для каждого расписания
             var schedulesWorkHours = schedules.ToDictionary(
                 s => s.Id,
-                s => new {
+                s => new
+                {
                     Start = s.WorkDayStart,
                     End = s.WorkDayEnd
                 }
@@ -80,34 +107,34 @@ namespace med_service.Controllers
             // Временные опции будут загружаться динамически в зависимости от выбранного расписания
             ViewBag.TimeOptions = new SelectList(Enumerable.Empty<SelectListItem>());
 
-            return View();
+            return View(new TimeSlotViewModel());
         }
 
         // POST: TimeSlots/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ScheduleId,StartTime")] TimeSlot timeSlot)
+        public async Task<IActionResult> Create([Bind("ScheduleId,StartTime")] TimeSlotViewModel viewModel)
         {
             // Проверка на дубликат с учетом точного формата времени
             var existingSlot = await _context.TimeSlots
                 .FirstOrDefaultAsync(ts =>
-                    ts.ScheduleId == timeSlot.ScheduleId &&
-                    ts.StartTime.Hours == timeSlot.StartTime.Hours &&
-                    ts.StartTime.Minutes == timeSlot.StartTime.Minutes);
+                    ts.ScheduleId == viewModel.ScheduleId &&
+                    ts.StartTime.Hours == viewModel.StartTime.Hours &&
+                    ts.StartTime.Minutes == viewModel.StartTime.Minutes);
 
             if (existingSlot != null)
             {
                 ModelState.AddModelError("StartTime",
-                    $"Временной слот для этого расписания уже существует ({timeSlot.StartTime.Hours:D2}:{timeSlot.StartTime.Minutes:D2})");
+                    $"Временной слот для этого расписания уже существует ({viewModel.StartTime.Hours:D2}:{viewModel.StartTime.Minutes:D2})");
             }
 
             // Проверка, что слот находится в рамках рабочего времени
-            var schedule = await _context.Schedules.FindAsync(timeSlot.ScheduleId);
+            var schedule = await _context.Schedules.FindAsync(viewModel.ScheduleId);
             if (schedule != null)
             {
-                if (timeSlot.StartTime.Hours < schedule.WorkDayStart ||
-                    timeSlot.StartTime.Hours >= schedule.WorkDayEnd ||
-                    (timeSlot.StartTime.Hours == schedule.WorkDayEnd - 1 && timeSlot.StartTime.Minutes > 0))
+                if (viewModel.StartTime.Hours < schedule.WorkDayStart ||
+                    viewModel.StartTime.Hours >= schedule.WorkDayEnd ||
+                    (viewModel.StartTime.Hours == schedule.WorkDayEnd - 1 && viewModel.StartTime.Minutes > 0))
                 {
                     ModelState.AddModelError("StartTime",
                         $"Время слота должно быть в рамках рабочего времени ({schedule.WorkDayStart}:00 - {schedule.WorkDayEnd}:00)");
@@ -118,8 +145,13 @@ namespace med_service.Controllers
             {
                 try
                 {
-                    // Устанавливаем EndTime (+30 минут)
-                    timeSlot.EndTime = timeSlot.StartTime.Add(TimeSpan.FromMinutes(30));
+                    var timeSlot = new TimeSlot
+                    {
+                        ScheduleId = viewModel.ScheduleId,
+                        StartTime = viewModel.StartTime,
+                        EndTime = viewModel.StartTime.Add(TimeSpan.FromMinutes(30)),
+                        isBooked = false
+                    };
 
                     _context.Add(timeSlot);
                     await _context.SaveChangesAsync();
@@ -141,7 +173,7 @@ namespace med_service.Controllers
             {
                 Value = s.Id.ToString(),
                 Text = $"{s.Doctor?.User?.LastName} - {s.Day}",
-                Selected = s.Id == timeSlot.ScheduleId
+                Selected = s.Id == viewModel.ScheduleId
             }).ToList();
 
             ViewBag.ScheduleId = new SelectList(scheduleItems, "Value", "Text");
@@ -156,7 +188,8 @@ namespace med_service.Controllers
                 // Передаем словарь с диапазонами рабочего времени для каждого расписания
                 var schedulesWorkHours = schedules.ToDictionary(
                     s => s.Id,
-                    s => new {
+                    s => new
+                    {
                         Start = s.WorkDayStart,
                         End = s.WorkDayEnd
                     }
@@ -165,7 +198,7 @@ namespace med_service.Controllers
                 ViewBag.SchedulesWorkHours = JsonSerializer.Serialize(schedulesWorkHours);
             }
 
-            return View(timeSlot);
+            return View(viewModel);
         }
 
         // GET: TimeSlots/Edit/5
@@ -178,12 +211,24 @@ namespace med_service.Controllers
 
             var timeSlot = await _context.TimeSlots
                 .Include(t => t.Schedule)
+                .ThenInclude(s => s.Doctor)
+                .ThenInclude(d => d.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (timeSlot == null)
             {
                 return NotFound();
             }
+
+            var viewModel = new TimeSlotViewModel
+            {
+                Id = timeSlot.Id,
+                ScheduleId = timeSlot.ScheduleId,
+                StartTime = timeSlot.StartTime,
+                EndTime = timeSlot.EndTime,
+                IsBooked = timeSlot.isBooked,
+                ScheduleString = timeSlot.Schedule.Doctor.User.LastName + " - " + timeSlot.Schedule.Day.ToString()
+            };
 
             // Получаем расписания с данными врачей для выпадающего списка
             var schedules = _context.Schedules
@@ -202,7 +247,8 @@ namespace med_service.Controllers
             // Словарь с диапазонами рабочего времени для каждого расписания
             var schedulesWorkHours = schedules.ToDictionary(
                 s => s.Id,
-                s => new {
+                s => new
+                {
                     Start = s.WorkDayStart,
                     End = s.WorkDayEnd
                 }
@@ -222,24 +268,24 @@ namespace med_service.Controllers
                 ViewBag.TimeOptions = new SelectList(Enumerable.Empty<SelectListItem>());
             }
 
-            return View(timeSlot);
+            return View(viewModel);
         }
 
         // POST: TimeSlots/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ScheduleId,StartTime,EndTime,isBooked")] TimeSlot timeSlot)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ScheduleId,StartTime,IsBooked")] TimeSlotViewModel viewModel)
         {
-            if (id != timeSlot.Id)
+            if (id != viewModel.Id)
                 return NotFound();
 
             // Проверка, что слот находится в рамках рабочего времени
-            var schedule = await _context.Schedules.FindAsync(timeSlot.ScheduleId);
+            var schedule = await _context.Schedules.FindAsync(viewModel.ScheduleId);
             if (schedule != null)
             {
-                if (timeSlot.StartTime.Hours < schedule.WorkDayStart ||
-                    timeSlot.StartTime.Hours >= schedule.WorkDayEnd ||
-                    (timeSlot.StartTime.Hours == schedule.WorkDayEnd - 1 && timeSlot.StartTime.Minutes > 0))
+                if (viewModel.StartTime.Hours < schedule.WorkDayStart ||
+                    viewModel.StartTime.Hours >= schedule.WorkDayEnd ||
+                    (viewModel.StartTime.Hours == schedule.WorkDayEnd - 1 && viewModel.StartTime.Minutes > 0))
                 {
                     ModelState.AddModelError("StartTime",
                         $"Время слота должно быть в рамках рабочего времени ({schedule.WorkDayStart}:00 - {schedule.WorkDayEnd}:00)");
@@ -250,7 +296,14 @@ namespace med_service.Controllers
             {
                 try
                 {
-                    timeSlot.EndTime = timeSlot.StartTime.Add(TimeSpan.FromMinutes(30));
+                    var timeSlot = await _context.TimeSlots.FindAsync(id);
+                    if (timeSlot == null)
+                        return NotFound();
+
+                    timeSlot.ScheduleId = viewModel.ScheduleId;
+                    timeSlot.StartTime = viewModel.StartTime;
+                    timeSlot.EndTime = viewModel.StartTime.Add(TimeSpan.FromMinutes(30));
+                    timeSlot.isBooked = viewModel.IsBooked;
 
                     _context.Update(timeSlot);
                     await _context.SaveChangesAsync();
@@ -258,7 +311,7 @@ namespace med_service.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_context.TimeSlots.Any(e => e.Id == timeSlot.Id))
+                    if (!_context.TimeSlots.Any(e => e.Id == viewModel.Id))
                         return NotFound();
                     throw;
                 }
@@ -276,12 +329,13 @@ namespace med_service.Controllers
                 Text = $"{s.Doctor?.User?.LastName} - {s.Day}"
             }).ToList();
 
-            ViewBag.ScheduleId = new SelectList(scheduleItems, "Value", "Text", timeSlot.ScheduleId);
+            ViewBag.ScheduleId = new SelectList(scheduleItems, "Value", "Text", viewModel.ScheduleId);
 
             // Словарь с диапазонами рабочего времени
             var schedulesWorkHours = schedules.ToDictionary(
                 s => s.Id,
-                s => new {
+                s => new
+                {
                     Start = s.WorkDayStart,
                     End = s.WorkDayEnd
                 }
@@ -294,10 +348,10 @@ namespace med_service.Controllers
                 ViewBag.TimeOptions = new SelectList(
                     GenerateTimeOptions(schedule.WorkDayStart, schedule.WorkDayEnd),
                     "Value", "Text",
-                    $"{timeSlot.StartTime.Hours:D2}:{timeSlot.StartTime.Minutes:D2}:00");
+                    $"{viewModel.StartTime.Hours:D2}:{viewModel.StartTime.Minutes:D2}:00");
             }
 
-            return View(timeSlot);
+            return View(viewModel);
         }
 
         // GET: TimeSlots/Delete/5
@@ -312,6 +366,15 @@ namespace med_service.Controllers
                 .Include(t => t.Schedule)
                 .ThenInclude(s => s.Doctor)
                 .ThenInclude(d => d.User)
+                .Select(ts => new TimeSlotViewModel
+                {
+                    Id = ts.Id,
+                    ScheduleId = ts.ScheduleId,
+                    StartTime = ts.StartTime,
+                    EndTime = ts.EndTime,
+                    IsBooked = ts.isBooked,
+                    ScheduleString = ts.Schedule.Doctor.User.LastName + " - " + ts.Schedule.Day.ToString()
+                })
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (timeSlot == null)

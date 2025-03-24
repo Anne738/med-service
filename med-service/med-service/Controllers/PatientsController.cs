@@ -9,6 +9,7 @@ using med_service.Data;
 using med_service.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using med_service.ViewModels;
 
 namespace med_service.Controllers
 {
@@ -55,49 +56,79 @@ namespace med_service.Controllers
         // GET: Patients/Create
         public IActionResult Create()
         {
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "UserName");
-            return View();
+            var users = _context.Users.Select(u => new
+            {
+                u.Id,
+                FullName = $"{u.FirstName} {u.LastName}"
+            }).ToList();
+
+            var viewModel = new PatientViewModel
+            {
+                DateOfBirth = DateTime.Today,
+                UserList = new SelectList(users, "Id", "FullName")
+            };
+            return View(viewModel);
         }
 
         // POST: Patients/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,UserId,DateOfBirth")] Patient patient)
+        public async Task<IActionResult> Create(PatientViewModel viewModel)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.SelectMany(x => x.Value.Errors).Select(x => x.ErrorMessage);
-                return Content("Ошибки: " + string.Join("; ", errors));
-            }
-
             if (ModelState.IsValid)
             {
-                if (!string.IsNullOrEmpty(patient.UserId))
+                var user = await _userManager.FindByIdAsync(viewModel.UserId);
+                if (user == null)
                 {
-                    var user = await _userManager.FindByIdAsync(patient.UserId);
-                    if (user == null)
+                    ModelState.AddModelError("UserId", "Користувач не знайдений");
+
+                    var users = _context.Users.Select(u => new
                     {
-                        ModelState.AddModelError("UserId", "Пользователь с таким UserId не найден.");
-                        return View(patient);
-                    }
-                    patient.User = user;
+                        u.Id,
+                        FullName = $"{u.FirstName} {u.LastName}"
+                    }).ToList();
+
+                    viewModel.UserList = new SelectList(users, "Id", "FullName", viewModel.UserId);
+                    return View(viewModel);
                 }
-                else
+
+                var existingPatient = await _context.Patients
+                    .FirstOrDefaultAsync(p => p.UserId == viewModel.UserId);
+
+                if (existingPatient != null)
                 {
-                    ModelState.AddModelError("UserId", "UserId является обязательным полем.");
-                    return View(patient);
+                    ModelState.AddModelError("UserId", "Пацієнт з цим користувачем вже існує");
+
+                    var users = _context.Users.Select(u => new
+                    {
+                        u.Id,
+                        FullName = $"{u.FirstName} {u.LastName}"
+                    }).ToList();
+
+                    viewModel.UserList = new SelectList(users, "Id", "FullName", viewModel.UserId);
+                    return View(viewModel);
                 }
+
+                var patient = new Patient
+                {
+                    UserId = viewModel.UserId,
+                    DateOfBirth = viewModel.DateOfBirth
+                };
 
                 _context.Add(patient);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(patient);
-        }
 
- 
+            var userList = _context.Users.Select(u => new
+            {
+                u.Id,
+                FullName = $"{u.FirstName} {u.LastName}"
+            }).ToList();
+
+            viewModel.UserList = new SelectList(userList, "Id", "FullName", viewModel.UserId);
+            return View(viewModel);
+        }
 
         // GET: Patients/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -107,23 +138,39 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            var patient = await _context.Patients.FindAsync(id);
+            var patient = await _context.Patients
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (patient == null)
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", patient.UserId);
-            return View(patient);
+
+            var users = _context.Users.Select(u => new
+            {
+                u.Id,
+                FullName = $"{u.FirstName} {u.LastName}"
+            }).ToList();
+
+            var viewModel = new PatientViewModel
+            {
+                Id = patient.Id,
+                UserId = patient.UserId,
+                DateOfBirth = patient.DateOfBirth,
+                FullName = $"{patient.User?.FirstName} {patient.User?.LastName}",
+                UserList = new SelectList(users, "Id", "FullName", patient.UserId)
+            };
+
+            return View(viewModel);
         }
 
         // POST: Patients/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,DateOfBirth")] Patient patient)
+        public async Task<IActionResult> Edit(int id, PatientViewModel viewModel)
         {
-            if (id != patient.Id)
+            if (id != viewModel.Id)
             {
                 return NotFound();
             }
@@ -132,12 +179,41 @@ namespace med_service.Controllers
             {
                 try
                 {
+                    var patient = await _context.Patients.FindAsync(id);
+                    if (patient == null)
+                    {
+                        return NotFound();
+                    }
+
+                    if (patient.UserId != viewModel.UserId)
+                    {
+                        var existingPatient = await _context.Patients
+                            .FirstOrDefaultAsync(p => p.UserId == viewModel.UserId && p.Id != id);
+
+                        if (existingPatient != null)
+                        {
+                            ModelState.AddModelError("UserId", "Пацієнт з цим користувачем вже існує");
+
+                            var users = _context.Users.Select(u => new
+                            {
+                                u.Id,
+                                FullName = $"{u.FirstName} {u.LastName}"
+                            }).ToList();
+
+                            viewModel.UserList = new SelectList(users, "Id", "FullName", viewModel.UserId);
+                            return View(viewModel);
+                        }
+                    }
+
+                    patient.UserId = viewModel.UserId;
+                    patient.DateOfBirth = viewModel.DateOfBirth;
+
                     _context.Update(patient);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PatientExists(patient.Id))
+                    if (!PatientExists(viewModel.Id))
                     {
                         return NotFound();
                     }
@@ -148,8 +224,15 @@ namespace med_service.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", patient.UserId);
-            return View(patient);
+
+            var userList = _context.Users.Select(u => new
+            {
+                u.Id,
+                FullName = $"{u.FirstName} {u.LastName}"
+            }).ToList();
+
+            viewModel.UserList = new SelectList(userList, "Id", "FullName", viewModel.UserId);
+            return View(viewModel);
         }
 
         // GET: Patients/Delete/5
@@ -179,6 +262,15 @@ namespace med_service.Controllers
             var patient = await _context.Patients.FindAsync(id);
             if (patient != null)
             {
+                var hasAppointments = await _context.Appointments
+                    .AnyAsync(a => a.PatientId == id);
+
+                if (hasAppointments)
+                {
+                    TempData["Error"] = "Неможливо видалити пацієнта, оскільки у нього є записи на прийом";
+                    return RedirectToAction(nameof(Delete), new { id });
+                }
+
                 _context.Patients.Remove(patient);
             }
 
@@ -189,6 +281,31 @@ namespace med_service.Controllers
         private bool PatientExists(int id)
         {
             return _context.Patients.Any(e => e.Id == id);
+        }
+
+        // GET: Patients/GetPatientHistory/5
+        public async Task<IActionResult> GetPatientHistory(int patientId)
+        {
+            var patient = await _context.Patients
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Id == patientId);
+
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
+            var appointments = await _context.Appointments
+                .Include(a => a.Doctor).ThenInclude(d => d.User)
+                .Include(a => a.TimeSlot).ThenInclude(ts => ts.Schedule)
+                .Where(a => a.PatientId == patientId)
+                .OrderByDescending(a => a.TimeSlot.StartTime)
+                .ToListAsync();
+
+            ViewBag.PatientName = $"{patient.User.FirstName} {patient.User.LastName}";
+            ViewBag.PatientId = patientId;
+
+            return View(appointments);
         }
     }
 }
