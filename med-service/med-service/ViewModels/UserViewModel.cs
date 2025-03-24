@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using static med_service.Models.User; // Importing UserRole enum
+using static med_service.Models.User; //Importing UserRole enum
 
 namespace med_service.ViewModels
 {

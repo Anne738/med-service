@@ -3,7 +3,7 @@
 
 @inject IViewLocalizer Localizer
 
-@model IEnumerable<med_service.Models.Appointment>
+@model IEnumerable<med_service.ViewModels.AppointmentViewModel>
 
 @{
     ViewData["Title"] = "Appointments";
@@ -32,10 +32,10 @@
 <table class="table">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(model => model.Status)</th>
-            <th>@Html.DisplayNameFor(model => model.Patient.Id)</th>
-            <th>@Html.DisplayNameFor(model => model.Doctor.Id)</th>
-            <th>@Html.DisplayNameFor(model => model.Notes)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Status)</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>@Html.DisplayNameFor(model => model.First().Notes)</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -43,10 +43,10 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.Status)</td>
-                <td>@Html.DisplayFor(modelItem => item.Patient.Id)</td>
-                <td>@Html.DisplayFor(modelItem => item.Doctor.Id)</td>
-                <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                <td>@item.Status</td>
+                <td>@item.PatientName</td> <!-- Display Patient's Full Name -->
+                <td>@item.DoctorName</td>  <!-- Display Doctor's Full Name -->
+                <td>@item.Notes</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">Edit</a>
                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Details</a>
