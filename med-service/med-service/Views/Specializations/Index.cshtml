@@ -1,22 +1,24 @@
-﻿@model IEnumerable<med_service.Models.Specialization>
+﻿@model IEnumerable<med_service.ViewModels.SpecializationViewModel>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = Localizer["SpecializationsList"];
 }
 
-<h1>Index</h1>
+<h1>@Localizer["SpecializationsList"]</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">@Localizer["CreateNew"]</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Localizer["Name"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Localizer["Description"]
             </th>
             <th></th>
         </tr>
@@ -31,9 +33,9 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-info">@Localizer["Edit"]</a> |
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">@Localizer["Details"]</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">@Localizer["Delete"]</a>
             </td>
         </tr>
 }

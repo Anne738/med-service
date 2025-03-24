@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
 using Microsoft.AspNetCore.Authorization;
+using med_service.ViewModels;
 
 namespace med_service.Controllers
 {
@@ -24,7 +25,15 @@ namespace med_service.Controllers
         // GET: Specializations
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Specializations.ToListAsync());
+            var specializations = await _context.Specializations.ToListAsync();
+            var viewModels = specializations.Select(s => new SpecializationViewModel
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Description = s.Description
+            }).ToList();
+
+            return View(viewModels);
         }
 
         // GET: Specializations/Details/5
@@ -42,29 +51,40 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            return View(specialization);
+            var viewModel = new SpecializationViewModel
+            {
+                Id = specialization.Id,
+                Name = specialization.Name,
+                Description = specialization.Description
+            };
+
+            return View(viewModel);
         }
 
         // GET: Specializations/Create
         public IActionResult Create()
         {
-            return View();
+            return View(new SpecializationViewModel());
         }
 
         // POST: Specializations/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description")] Specialization specialization)
+        public async Task<IActionResult> Create(SpecializationViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
+                var specialization = new Specialization
+                {
+                    Name = viewModel.Name,
+                    Description = viewModel.Description
+                };
+
                 _context.Add(specialization);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(specialization);
+            return View(viewModel);
         }
 
         // GET: Specializations/Edit/5
@@ -80,17 +100,23 @@ namespace med_service.Controllers
             {
                 return NotFound();
             }
-            return View(specialization);
+
+            var viewModel = new SpecializationViewModel
+            {
+                Id = specialization.Id,
+                Name = specialization.Name,
+                Description = specialization.Description
+            };
+
+            return View(viewModel);
         }
 
         // POST: Specializations/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description")] Specialization specialization)
+        public async Task<IActionResult> Edit(int id, SpecializationViewModel viewModel)
         {
-            if (id != specialization.Id)
+            if (id != viewModel.Id)
             {
                 return NotFound();
             }
@@ -99,12 +125,21 @@ namespace med_service.Controllers
             {
                 try
                 {
+                    var specialization = await _context.Specializations.FindAsync(id);
+                    if (specialization == null)
+                    {
+                        return NotFound();
+                    }
+
+                    specialization.Name = viewModel.Name;
+                    specialization.Description = viewModel.Description;
+
                     _context.Update(specialization);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SpecializationExists(specialization.Id))
+                    if (!SpecializationExists(viewModel.Id))
                     {
                         return NotFound();
                     }
@@ -115,7 +150,7 @@ namespace med_service.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(specialization);
+            return View(viewModel);
         }
 
         // GET: Specializations/Delete/5
@@ -133,7 +168,14 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            return View(specialization);
+            var viewModel = new SpecializationViewModel
+            {
+                Id = specialization.Id,
+                Name = specialization.Name,
+                Description = specialization.Description
+            };
+
+            return View(viewModel);
         }
 
         // POST: Specializations/Delete/5
