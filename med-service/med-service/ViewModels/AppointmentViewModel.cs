@@ -10,7 +10,7 @@ namespace med_service.ViewModels
         public int Id { get; set; }
 
         [Required (ErrorMessage = "The Status field is required")]
-        [Display(Name = "Status")]
+        [Display(Name = "lblStatus")]
         public AppointmentStatus Status { get; set; }
 
         [Required (ErrorMessage = "The Patient field is required")]
