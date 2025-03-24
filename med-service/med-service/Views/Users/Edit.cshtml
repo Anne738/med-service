@@ -1,36 +1,44 @@
-﻿@model med_service.ViewModels.UserViewModel
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
-<h1>Edit User</h1>
+@model med_service.ViewModels.UserViewModel
 
+@{
+    ViewData["Title"] = Localizer["lblEdit"];
+}
+
+<h1>@Localizer["lblEdit"]</h1>
+
+<h4>@Localizer["lblUser"]</h4>
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
 
     <div class="form-group">
-        <label asp-for="FirstName"></label>
+        <label class="control-label">@Localizer["lblFirstName"]</label>
         <input asp-for="FirstName" class="form-control" />
         <span asp-validation-for="FirstName" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="LastName"></label>
+        <label class="control-label">@Localizer["lblLastName"]</label>
         <input asp-for="LastName" class="form-control" />
         <span asp-validation-for="LastName" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Email"></label>
+        <label class="control-label">@Localizer["lblEmail"]</label>
         <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="UserName"></label>
+        <label class="control-label">@Localizer["lblUsername"]</label>
         <input asp-for="UserName" class="form-control" />
         <span asp-validation-for="UserName" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Role"></label>
+        <label class="control-label">@Localizer["lblRole"]</label>
         <select asp-for="Role" asp-items="Html.GetEnumSelectList<med_service.Models.User.UserRole>()" class="form-control"></select>
         <span asp-validation-for="Role" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-warning">Save Changes</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-warning">@Localizer["lblSaveButton"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["lblCancelButton"]</a>
 </form>

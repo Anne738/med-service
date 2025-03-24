@@ -1,36 +1,41 @@
-﻿@model med_service.ViewModels.UserViewModel
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model med_service.ViewModels.UserViewModel
 
 @{
-    ViewData["Title"] = "Delete User";
+    ViewData["Title"] = Localizer["lblDelete"];
 }
 
-<h1>Are you sure you want to delete this user?</h1>
+<h1>@Localizer["lblDelete"]</h1>
 
+<h3>@Localizer["lblConfirmationQuestion"]</h3>
+<h4>@Localizer["lblUser"]</h4>
 <table class="table">
     <tr>
-        <th>First Name</th>
+        <th>@Localizer["lblFirstName"]</th>
         <td>@Model.FirstName</td>
     </tr>
     <tr>
-        <th>Last Name</th>
+        <th>@Localizer["lblLastName"]</th>
         <td>@Model.LastName</td>
     </tr>
     <tr>
-        <th>Email</th>
+        <th>@Localizer["lblEmail"]</th>
         <td>@Model.Email</td>
     </tr>
     <tr>
-        <th>Username</th>
+        <th>@Localizer["lblUsername"]</th>
         <td>@Model.UserName</td>
     </tr>
     <tr>
-        <th>Role</th>
+        <th>@Localizer["lblRole"]</th>
         <td>@Model.Role</td>
     </tr>
 </table>
 
 <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-danger">Delete</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-danger">@Localizer["lblDeleteButton"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["lblCancelButton"]</a>
 </form>
