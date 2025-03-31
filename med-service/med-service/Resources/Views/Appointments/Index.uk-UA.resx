@@ -156,4 +156,13 @@
   <data name="lblDetails" xml:space="preserve">
     <value>Деталі</value>
   </data>
+  <data name="lblSearchButton" xml:space="preserve">
+    <value>Пошук</value>
+  </data>
+  <data name="lblClearButton" xml:space="preserve">
+    <value>Очистити</value>
+  </data>
+  <data name="lblSearchText" xml:space="preserve">
+    <value>Пошук</value>
+  </data>
 </root>

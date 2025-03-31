@@ -156,4 +156,13 @@
   <data name="lblDetails" xml:space="preserve">
     <value>Details</value>
   </data>
+  <data name="lblSearchButton" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="lblClearButton" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="lblSearchText" xml:space="preserve">
+    <value>Search</value>
+  </data>
 </root>

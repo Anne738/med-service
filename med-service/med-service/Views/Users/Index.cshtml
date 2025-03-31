@@ -8,12 +8,31 @@
     <a asp-action="Create" class="btn btn-primary">@Localizer["lblCreateNew"]</a>
 </p>
 
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="@Localizer["lblSearchText"]" />
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-outline-secondary">@Localizer["lblSearchButton"]</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@Localizer["lblClearButton"]</a>
+        </div>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
-            <th>@Localizer["lblFirstName"]</th>
-            <th>@Localizer["lblLastName"]</th>
-            <th>@Localizer["lblEmail"]</th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["FirstNameSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+					@Localizer["lblFirstName"]
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["LastNameSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+					@Localizer["lblLastName"]
+                </a>
+            </th>
+            <th>
+                @Localizer["lblEmail"]</th>
             <th>@Localizer["lblUsername"]</th>
             <th>@Localizer["lblRole"]</th>
             <th>@Localizer["lblActions"]</th>
@@ -37,3 +56,5 @@
         }
     </tbody>
 </table>
+
+@await Html.PartialAsync("_Pagination", (med_service.ViewModels.PaginationViewModel)ViewBag.PaginationInfo)

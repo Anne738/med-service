@@ -120,6 +120,9 @@
   <data name="lblActions" xml:space="preserve">
     <value>Actions</value>
   </data>
+  <data name="lblClearButton" xml:space="preserve">
+    <value>Clear</value>
+  </data>
   <data name="lblCreateNew" xml:space="preserve">
     <value>Create</value>
   </data>
@@ -143,6 +146,12 @@
   </data>
   <data name="lblRole" xml:space="preserve">
     <value>Role</value>
+  </data>
+  <data name="lblSearchButton" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="lblSearchText" xml:space="preserve">
+    <value>Search</value>
   </data>
   <data name="lblUsername" xml:space="preserve">
     <value>Username</value>

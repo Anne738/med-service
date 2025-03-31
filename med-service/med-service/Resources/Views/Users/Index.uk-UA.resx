@@ -120,6 +120,9 @@
   <data name="lblActions" xml:space="preserve">
     <value>Дії</value>
   </data>
+  <data name="lblClearButton" xml:space="preserve">
+    <value>Очистити</value>
+  </data>
   <data name="lblCreateNew" xml:space="preserve">
     <value>Створити</value>
   </data>
@@ -143,6 +146,12 @@
   </data>
   <data name="lblRole" xml:space="preserve">
     <value>Роль</value>
+  </data>
+  <data name="lblSearchButton" xml:space="preserve">
+    <value>Пошук</value>
+  </data>
+  <data name="lblSearchText" xml:space="preserve">
+    <value>Пошук</value>
   </data>
   <data name="lblUsername" xml:space="preserve">
     <value>Юзернейм</value>
