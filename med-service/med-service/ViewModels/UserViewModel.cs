@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System.ComponentModel.DataAnnotations;
 using static med_service.Models.User; //Importing UserRole enum
 
@@ -6,6 +7,15 @@ namespace med_service.ViewModels
 {
     public class UserViewModel
     {
+
+        //private readonly IStringLocalizer<UserViewModel> _localizer;
+
+        //public UserViewModel(IStringLocalizer<UserViewModel> localizer)
+        //{
+        //    _localizer = localizer;
+        //}
+
+
         public string Id { get; set; } //ID for editing and deleting
 
         [Required (ErrorMessage = "The First Name field is required")]

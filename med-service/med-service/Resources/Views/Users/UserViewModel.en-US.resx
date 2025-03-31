@@ -117,52 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblDoctor" xml:space="preserve">
-    <value>Лікар</value>
-  </data>
-  <data name="lblAppointments" xml:space="preserve">
-    <value>Записи</value>
-  </data>
-  <data name="lblNotes" xml:space="preserve">
-    <value>Нотатки</value>
-  </data>
-  <data name="lblStatus" xml:space="preserve">
-    <value>Статус</value>
-  </data>
-  <data name="lblPatient" xml:space="preserve">
-    <value>Пацієнт</value>
-  </data>
-  <data name="lblActions" xml:space="preserve">
-    <value>Дії</value>
-  </data>
-  <data name="lblFilterBy" xml:space="preserve">
-    <value>Сортувати за статусом:</value>
-  </data>
-  <data name="lblFilterButton" xml:space="preserve">
-    <value>Сортувати</value>
-  </data>
-  <data name="lblCreateNew" xml:space="preserve">
-    <value>Створити</value>
-  </data>
-  <data name="lblFilterAll" xml:space="preserve">
-    <value>Усі</value>
-  </data>
-  <data name="lblEdit" xml:space="preserve">
-    <value>Змінити</value>
-  </data>
-  <data name="lblDelete" xml:space="preserve">
-    <value>Видалити</value>
-  </data>
-  <data name="lblDetails" xml:space="preserve">
-    <value>Деталі</value>
-  </data>
-  <data name="lblSearchButton" xml:space="preserve">
-    <value>Пошук</value>
-  </data>
-  <data name="lblClearButton" xml:space="preserve">
-    <value>Очистити</value>
-  </data>
-  <data name="lblSearchText" xml:space="preserve">
-    <value>Пошук</value>
+  <data name="lblFirstNameRequired" xml:space="preserve">
+    <value>The First Name field is required</value>
   </data>
 </root>
