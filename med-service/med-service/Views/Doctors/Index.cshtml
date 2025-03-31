@@ -11,17 +11,34 @@
 <p>
     <a asp-action="Create" class="btn btn-primary">@Localizer["CreateNew"]</a>
 </p>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="@Localizer["Search"]" />
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-outline-secondary">@Localizer["Search"]</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@Localizer["Clear"]</a>
+        </div>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Localizer["FullName"]
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Localizer["FullName"]
+                </a>
             </th>
             <th>
-                @Localizer["Hospital"]
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["HospitalSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Localizer["Hospital"]
+                </a>
             </th>
             <th>
-                @Localizer["Specialization"]
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["SpecSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Localizer["Specialization"]
+                </a>
             </th>
             <th>
                 @Localizer["Experience"]
@@ -61,3 +78,5 @@
         }
     </tbody>
 </table>
+
+@await Html.PartialAsync("_Pagination", (med_service.ViewModels.PaginationViewModel)ViewBag.PaginationInfo)
