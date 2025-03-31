@@ -150,4 +150,13 @@
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
+  <data name="lblClear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="lblSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="lblSearchDoctor" xml:space="preserve">
+    <value>Doctor search </value>
+  </data>
 </root>

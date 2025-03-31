@@ -3,7 +3,7 @@
 @inject IViewLocalizer Localizer
 
 @{
-    ViewData["Title"] = "Часові слоти";
+    ViewData["Title"] = Localizer["TimeSlotsList"];
 }
 
 <h1>@Localizer["TimeSlotsList"]</h1>
@@ -11,18 +11,31 @@
 <p>
     <a asp-action="Create" class="btn btn-primary">@Localizer["CreateNew"]</a>
 </p>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="@Localizer["lblSearch"]" />
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-outline-secondary">@Localizer["lblSearch"]</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@Localizer["lblClear"]</a>
+        </div>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Localizer["Schedule"]
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["ScheduleSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Localizer["Schedule"]
+                </a>
             </th>
             <th>
-                @Localizer["Time"]
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["TimeSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Localizer["Time"]
+                </a>
             </th>
-            <th>
-                @Localizer["IsBooked"]
-            </th>
+            <th>@Localizer["IsBooked"]</th>
             <th>@Localizer["Actions"]</th>
         </tr>
     </thead>
@@ -30,12 +43,8 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>
-                    @item.ScheduleString
-                </td>
-                <td>
-                    @item.StartTime.ToString(@"hh\:mm") - @item.EndTime.ToString(@"hh\:mm")
-                </td>
+                <td>@item.ScheduleString</td>
+                <td>@item.StartTime.ToString(@"hh\:mm") - @item.EndTime.ToString(@"hh\:mm")</td>
                 <td>
                     @if (item.IsBooked)
                     {
@@ -55,3 +64,5 @@
         }
     </tbody>
 </table>
+
+@await Html.PartialAsync("_Pagination", (med_service.ViewModels.PaginationViewModel)ViewBag.PaginationInfo)
