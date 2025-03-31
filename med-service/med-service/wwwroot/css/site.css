@@ -20,3 +20,23 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.pagination {
+    margin-top: 20px;
+}
+
+    .pagination a {
+        text-decoration: none;
+        color: #007bff;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+        cursor: auto;
+    }
