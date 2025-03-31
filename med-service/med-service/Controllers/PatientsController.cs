@@ -10,6 +10,7 @@ using med_service.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using med_service.ViewModels;
+using med_service.Helpers;
 
 namespace med_service.Controllers
 {
@@ -26,12 +27,63 @@ namespace med_service.Controllers
         }
 
         // GET: Patients
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter,
+                                     string searchString, int? pageIndex)
         {
-            var patients = await _context.Patients
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["DateSortParam"] = sortOrder == "Date" ? "date_desc" : "Date";
+
+            if (searchString != null)
+            {
+                pageIndex = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var patientsQuery = _context.Patients
                 .Include(p => p.User)
-                .ToListAsync();
-            return View(patients);
+                .AsQueryable();
+            
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                patientsQuery = patientsQuery.Where(p =>
+                    (p.User.FirstName + " " + p.User.LastName).Contains(searchString) ||
+                    p.User.FirstName.Contains(searchString) ||
+                    p.User.LastName.Contains(searchString)
+                );
+            }
+
+            patientsQuery = sortOrder switch
+            {
+                "name_desc" => patientsQuery.OrderByDescending(p => p.User.LastName).ThenByDescending(p => p.User.FirstName),
+                "Date" => patientsQuery.OrderBy(p => p.DateOfBirth),
+                "date_desc" => patientsQuery.OrderByDescending(p => p.DateOfBirth),
+                _ => patientsQuery.OrderBy(p => p.User.LastName).ThenBy(p => p.User.FirstName)
+            };
+
+            int pageSize = 10;
+            var paginatedList = await PaginatedList<Patient>.CreateAsync(patientsQuery, pageIndex ?? 1, pageSize);
+
+            var paginationInfo = new PaginationViewModel
+            {
+                PageIndex = paginatedList.PageIndex,
+                TotalPages = paginatedList.TotalPages,
+                HasPreviousPage = paginatedList.HasPreviousPage,
+                HasNextPage = paginatedList.HasNextPage,
+                CurrentSort = sortOrder,
+                CurrentFilter = searchString,
+                ActionName = nameof(Index),
+                ControllerName = "Patients"
+            };
+
+            ViewBag.PaginationInfo = paginationInfo;
+
+            return View(paginatedList.Items);
         }
 
         // GET: Patients/Details/5

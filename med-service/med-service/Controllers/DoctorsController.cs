@@ -10,6 +10,7 @@ using med_service.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Localization;
 using med_service.ViewModels;
+using med_service.Helpers;
 
 namespace med_service.Controllers
 {
@@ -26,16 +27,68 @@ namespace med_service.Controllers
         }
 
         // GET: Doctors
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter,
+                                              string searchString, int? pageIndex)
         {
-            var doctors = await _context.Doctors
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParam"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["HospitalSortParam"] = sortOrder == "Hospital" ? "hospital_desc" : "Hospital";
+            ViewData["SpecSortParam"] = sortOrder == "Specialization" ? "spec_desc" : "Specialization";
+
+            if (searchString != null)
+            {
+                pageIndex = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var doctorsQuery = _context.Doctors
                 .Include(d => d.Hospital)
                 .Include(d => d.Specialization)
                 .Include(d => d.User)
-                .Include(d => d.Schedules)
-                .ToListAsync();
+                .AsQueryable();
 
-            return View(doctors);
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                doctorsQuery = doctorsQuery.Where(d =>
+                    (d.User.LastName + " " + d.User.FirstName).Contains(searchString) ||
+                    d.Hospital.Name.Contains(searchString) ||
+                    d.Specialization.Name.Contains(searchString)
+                );
+            }
+
+            doctorsQuery = sortOrder switch
+            {
+                "name_desc" => doctorsQuery.OrderByDescending(d => d.User.LastName).ThenByDescending(d => d.User.FirstName),
+                "Hospital" => doctorsQuery.OrderBy(d => d.Hospital.Name),
+                "hospital_desc" => doctorsQuery.OrderByDescending(d => d.Hospital.Name),
+                "Specialization" => doctorsQuery.OrderBy(d => d.Specialization.Name),
+                "spec_desc" => doctorsQuery.OrderByDescending(d => d.Specialization.Name),
+                _ => doctorsQuery.OrderBy(d => d.User.LastName).ThenBy(d => d.User.FirstName)
+            };
+
+            int pageSize = 7;
+            var paginatedList = await PaginatedList<Doctor>.CreateAsync(doctorsQuery, pageIndex ?? 1, pageSize);
+
+            var paginationInfo = new PaginationViewModel
+            {
+                PageIndex = paginatedList.PageIndex,
+                TotalPages = paginatedList.TotalPages,
+                HasPreviousPage = paginatedList.HasPreviousPage,
+                HasNextPage = paginatedList.HasNextPage,
+                CurrentSort = sortOrder,
+                CurrentFilter = searchString,
+                ActionName = nameof(Index),
+                ControllerName = "Doctors"
+            };
+
+            ViewBag.PaginationInfo = paginationInfo;
+
+            return View(paginatedList.Items);
         }
 
         // GET: Doctors/Details/5
