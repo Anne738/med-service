@@ -117,7 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblFirstNameRequired" xml:space="preserve">
-    <value>The First Name field is required</value>
+  <data name="lblDoctorRequired" xml:space="preserve">
+    <value>The Doctor field is required</value>
+  </data>
+  <data name="lblNotesRequired" xml:space="preserve">
+    <value>The Notes field is required</value>
+  </data>
+  <data name="lblPatientRequired" xml:space="preserve">
+    <value>The Patient field is required</value>
+  </data>
+  <data name="lblStatusRequired" xml:space="preserve">
+    <value>The Status field is required</value>
+  </data>
+  <data name="lblTimeSlotRequired" xml:space="preserve">
+    <value>The Time Slot field is required</value>
   </data>
 </root>

@@ -117,7 +117,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="lblConfirmPasswordRequired" xml:space="preserve">
+    <value>Поле «Підтвердження Пароля» є обов’язковим для заповнення</value>
+  </data>
+  <data name="lblEmailAddressInvalid" xml:space="preserve">
+    <value>Недійсний формат електронної адреси</value>
+  </data>
+  <data name="lblEmailAddressRequired" xml:space="preserve">
+    <value>Поле «Електронна Пошта» є обов’язковим для заповнення</value>
+  </data>
+  <data name="lblFirstNameRegularExpression" xml:space="preserve">
+    <value>Ім'я може містити лише літери та пробіли</value>
+  </data>
   <data name="lblFirstNameRequired" xml:space="preserve">
-    <value>Ім'я є обов'язковим полем</value>
+    <value>Поле «Ім'я» є обов’язковим для заповнення</value>
+  </data>
+  <data name="lblLastNameRegularExpression" xml:space="preserve">
+    <value>Прізвище може містити лише літери та пробіли</value>
+  </data>
+  <data name="lblLastNameRequired" xml:space="preserve">
+    <value>Поле «Прізвище» є обов’язковим для заповнення</value>
+  </data>
+  <data name="lblPasswordLength" xml:space="preserve">
+    <value>Пароль має бути не менше 6 символів</value>
+  </data>
+  <data name="lblPasswordMatch" xml:space="preserve">
+    <value>Паролі не збігаються</value>
+  </data>
+  <data name="lblPasswordRegularExpression" xml:space="preserve">
+    <value>Пароль повинен містити принаймні одну велику літеру, одну малу літеру, одну цифру та один спеціальний символ</value>
+  </data>
+  <data name="lblPasswordRequired" xml:space="preserve">
+    <value>Поле «Пароль» є обов’язковим для заповнення</value>
+  </data>
+  <data name="lblRoleRequired" xml:space="preserve">
+    <value>Поле «Роль» є обов’язковим для заповнення</value>
+  </data>
+  <data name="lblUsernameMaxLength" xml:space="preserve">
+    <value>Юзернейм не може бути довшим за 15 символів</value>
+  </data>
+  <data name="lblUsernameMinLength" xml:space="preserve">
+    <value>Юзернейм має бути не менше 5 символів</value>
+  </data>
+  <data name="lblUsernameRequired" xml:space="preserve">
+    <value>Поле «Юзернейм» є обов’язковим для заповнення</value>
   </data>
 </root>

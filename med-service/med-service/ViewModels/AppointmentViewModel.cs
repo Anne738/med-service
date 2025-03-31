@@ -9,24 +9,24 @@ namespace med_service.ViewModels
     {
         public int Id { get; set; }
 
-        [Required (ErrorMessage = "The Status field is required")]
-        [Display(Name = "Status")]
+        [Required (ErrorMessage = "lblStatusRequired")]
+        [Display(Name = "lblStatus")]
         public AppointmentStatus Status { get; set; }
 
-        [Required (ErrorMessage = "The Patient field is required")]
-        [Display(Name = "Patient")]
+        [Required (ErrorMessage = "lblPatientRequired")]
+        [Display(Name = "lblPatient")]
         public int PatientId { get; set; }
 
-        [Required (ErrorMessage = "The Doctor field is required")]
-        [Display(Name = "Doctor")]
+        [Required (ErrorMessage = "lblDoctorRequired")]
+        [Display(Name = "lblDoctor")]
         public int DoctorId { get; set; }
 
-        [Required (ErrorMessage = "The Time Slot field is required")]
-        [Display(Name = "Time Slot")]
+        [Required (ErrorMessage = "lblTimeSlotRequired")]
+        [Display(Name = "lblTimeSlot")]
         public int TimeSlotId { get; set; }
 
-        [Required (ErrorMessage = "The Notes field is required")]
-        [Display(Name = "Notes")]
+        [Required (ErrorMessage = "lblNotesRequired")]
+        [Display(Name = "lblNotes")]
         public string Notes { get; set; }
 
 

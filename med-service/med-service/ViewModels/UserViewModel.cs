@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using med_service.Helpers;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using System.ComponentModel.DataAnnotations;
 using static med_service.Models.User; //Importing UserRole enum
@@ -8,53 +9,45 @@ namespace med_service.ViewModels
     public class UserViewModel
     {
 
-        //private readonly IStringLocalizer<UserViewModel> _localizer;
-
-        //public UserViewModel(IStringLocalizer<UserViewModel> localizer)
-        //{
-        //    _localizer = localizer;
-        //}
-
-
         public string Id { get; set; } //ID for editing and deleting
 
-        [Required (ErrorMessage = "The First Name field is required")]
-        [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "First Name can only contain letters and spaces")]
-        [Display(Name = "First Name")]
+        [Required (ErrorMessage = "lblFirstNameRequired")]
+        [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "lblFirstNameRegularExpression")]
+        [Display(Name = "lblFirstName")]
         public string FirstName { get; set; }
 
-        [Required (ErrorMessage = "The Last Name field is required")]
-        [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "Last Name can only contain letters and spaces")]
-        [Display(Name = "Last Name")]
+        [Required (ErrorMessage = "lblLastNameRequired")]
+        [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "lblLastNameRegularExpression")]
+        [Display(Name = "lblLastName")]
         public string LastName { get; set; }
 
-        [Required (ErrorMessage = "The Email field is required")]
-        [EmailAddress]
-        [Display(Name = "Email Address")]
+        [Required (ErrorMessage = "lblEmailAddressRequired")]
+        [LocalizedEmailAddress]
+        [Display(Name = "lblEmailAddress")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "The Password field is required")]
+        [Required(ErrorMessage = "lblPasswordRequired")]
         [DataType(DataType.Password)]
-        [MinLength(6, ErrorMessage = "Password must be at least 6 characters long")]
+        [MinLength(6, ErrorMessage = "lblPasswordLength")]
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{6,}$",
-            ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character")]
-        [Display(Name = "Password")]
+            ErrorMessage = "lblPasswordRegularExpression")]
+        [Display(Name = "lblPassword")]
         public string Password { get; set; }
 
-        [Required(ErrorMessage = "The Confirm Password field is required")]
+        [Required(ErrorMessage = "lblConfirmPasswordRequired")]
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "Passwords do not match")]
-        [Display(Name = "Confirm Password")]
+        [Compare("Password", ErrorMessage = "lblPasswordMatch")]
+        [Display(Name = "lblConfirmPassword")]
         public string ConfirmPassword { get; set; }
 
-        [Required (ErrorMessage = "The Username field is required")]
-        [MinLength(5, ErrorMessage = "Username must be at least 5 characters long")]
-        [MaxLength(15, ErrorMessage = "Username cannot be longer than 15 characters")]
-        [Display(Name = "Username")]
+        [Required (ErrorMessage = "lblUsernameRequired")]
+        [MinLength(5, ErrorMessage = "lblUsernameMinLength")]
+        [MaxLength(15, ErrorMessage = "lblUsernameMaxLength")]
+        [Display(Name = "lblUsername")]
         public string UserName { get; set; }
 
-        [Required (ErrorMessage = "The Role field is required")]
-        [Display(Name = "Role")]
+        [Required (ErrorMessage = "lblRoleRequired")]
+        [Display(Name = "lblRole")]
         public UserRole Role { get; set; } //Enum from the User model
     }
 }

@@ -117,49 +117,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblCancelButton" xml:space="preserve">
-    <value>Скасувати</value>
+  <data name="lblConfirmPasswordRequired" xml:space="preserve">
+    <value>The Confirm Password field is required</value>
   </data>
-  <data name="lblConfirmPassword" xml:space="preserve">
-    <value>Підтвердження Пароля</value>
+  <data name="lblEmailAddressInvalid" xml:space="preserve">
+    <value>Invalid email address format</value>
   </data>
-  <data name="lblCreate" xml:space="preserve">
-    <value>Створити</value>
+  <data name="lblEmailAddressRequired" xml:space="preserve">
+    <value>The Email field is required</value>
   </data>
-  <data name="lblCreateButton" xml:space="preserve">
-    <value>Створити</value>
+  <data name="lblFirstNameRegularExpression" xml:space="preserve">
+    <value>First Name can only contain letters and spaces</value>
   </data>
-  <data name="lblEmail" xml:space="preserve">
-    <value>Електронна Пошта</value>
+  <data name="lblFirstNameRequired" xml:space="preserve">
+    <value>The First Name field is required</value>
   </data>
-  <data name="lblEmailField" xml:space="preserve">
-    <value>Введіть електронну пошту</value>
+  <data name="lblLastNameRegularExpression" xml:space="preserve">
+    <value>Last Name can only contain letters and spaces</value>
   </data>
-  <data name="lblFirstName" xml:space="preserve">
-    <value>Ім'я</value>
+  <data name="lblLastNameRequired" xml:space="preserve">
+    <value>The Last Name field is required</value>
   </data>
-  <data name="lblFirstNameField" xml:space="preserve">
-    <value>Введіть ім'я</value>
+  <data name="lblPasswordLength" xml:space="preserve">
+    <value>Password must be at least 6 characters long</value>
   </data>
-  <data name="lblLastName" xml:space="preserve">
-    <value>Прізвище</value>
+  <data name="lblPasswordMatch" xml:space="preserve">
+    <value>Passwords do not match</value>
   </data>
-  <data name="lblLastNameField" xml:space="preserve">
-    <value>Введіть прізвище</value>
+  <data name="lblPasswordRegularExpression" xml:space="preserve">
+    <value>Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character</value>
   </data>
-  <data name="lblPassword" xml:space="preserve">
-    <value>Пароль</value>
+  <data name="lblPasswordRequired" xml:space="preserve">
+    <value>The Password field is required</value>
   </data>
-  <data name="lblRole" xml:space="preserve">
-    <value>Роль</value>
+  <data name="lblRoleRequired" xml:space="preserve">
+    <value>The Role field is required</value>
   </data>
-  <data name="lblUser" xml:space="preserve">
-    <value>Користувач</value>
+  <data name="lblUsernameMaxLength" xml:space="preserve">
+    <value>Username cannot be longer than 15 characters</value>
   </data>
-  <data name="lblUsername" xml:space="preserve">
-    <value>Юзернейм</value>
+  <data name="lblUsernameMinLength" xml:space="preserve">
+    <value>Username must be at least 5 characters long</value>
   </data>
-  <data name="lblUsernameField" xml:space="preserve">
-    <value>Введіть юзернейм</value>
+  <data name="lblUsernameRequired" xml:space="preserve">
+    <value>The Username field is required</value>
   </data>
 </root>
