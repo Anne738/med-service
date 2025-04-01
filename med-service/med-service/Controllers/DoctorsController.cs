@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Localization;
 using med_service.ViewModels;
 using med_service.Helpers;
+using System.Numerics;
 
 namespace med_service.Controllers
 {
@@ -107,14 +108,15 @@ namespace med_service.Controllers
             if (doctor == null)
                 return NotFound();
 
-            return View(doctor);
+            return PartialView("~/Views/Doctors/_Details.cshtml", doctor);
         }
 
+        // Controller modifications
         // GET: Doctors/Create
         public IActionResult Create()
         {
             PrepareDropdownLists();
-            return View(new DoctorViewModel());
+            return PartialView("~/Views/Doctors/_Create.cshtml", new DoctorViewModel());
         }
 
         // POST: Doctors/Create
@@ -133,7 +135,6 @@ namespace med_service.Controllers
                         SpecializationId = viewModel.SpecializationId,
                         ExperienceYears = viewModel.ExperienceYears
                     };
-
                     _context.Add(doctor);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -149,16 +150,14 @@ namespace med_service.Controllers
                 var errors = ModelState.Values.SelectMany(v => v.Errors)
                    .Select(e => e.ErrorMessage)
                    .ToList();
-
                 foreach (var error in errors)
                 {
                     // Можно логировать ошибки или временно выводить для отладки
                     Console.WriteLine($"Validation error: {error}");
                 }
             }
-
             PrepareDropdownLists();
-            return View(viewModel);
+            return PartialView("~/Views/Doctors/_Create.cshtml", viewModel);
         }
 
         // GET: Doctors/Edit/5
@@ -181,7 +180,8 @@ namespace med_service.Controllers
             };
 
             PrepareDropdownLists();
-            return View(viewModel);
+            //return View(viewModel);
+            return PartialView("~/Views/Doctors/_Edit.cshtml", viewModel);
         }
 
         // POST: Doctors/Edit/5
@@ -222,7 +222,8 @@ namespace med_service.Controllers
             }
 
             PrepareDropdownLists();
-            return View(viewModel);
+            //return View(viewModel);
+            return PartialView("~/Views/Doctors/_Edit.cshtml", viewModel);
         }
 
         // GET: Doctors/Delete/5
@@ -230,17 +231,14 @@ namespace med_service.Controllers
         {
             if (id == null)
                 return NotFound();
-
             var doctor = await _context.Doctors
                 .Include(d => d.Hospital)
                 .Include(d => d.Specialization)
                 .Include(d => d.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
-
             if (doctor == null)
                 return NotFound();
-
-            return View(doctor);
+            return PartialView("~/Views/Doctors/_Delete.cshtml", doctor);
         }
 
         // POST: Doctors/Delete/5
