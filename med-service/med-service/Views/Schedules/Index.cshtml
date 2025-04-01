@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<med_service.Models.Schedule>
 
+@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
 
 @{
@@ -11,11 +12,30 @@
 <p>
     <a asp-action="Create" class="btn btn-primary">@Localizer["lblCreateNew"]</a>
 </p>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="@Localizer["lblSearchDoctor"]" />
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-outline-secondary">@Localizer["lblSearch"]</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@Localizer["lblClear"]</a>
+        </div>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
-            <th>@Localizer["lblDay"]</th>
-            <th>@Localizer["lblDoctor"]</th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["DaySortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Localizer["lblDay"]
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["DoctorSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Localizer["lblDoctor"]
+                </a>
+            </th>
             <th>@Localizer["lblWorkingHours"]</th>
             <th>@Localizer["lblActions"]</th>
         </tr>
@@ -45,3 +65,5 @@
         }
     </tbody>
 </table>
+
+@await Html.PartialAsync("_Pagination", (med_service.ViewModels.PaginationViewModel)ViewBag.PaginationInfo)

@@ -150,4 +150,13 @@
   <data name="Delete" xml:space="preserve">
     <value>Видалити</value>
   </data>
+  <data name="lblClear" xml:space="preserve">
+    <value>Очистити</value>
+  </data>
+  <data name="lblSearch" xml:space="preserve">
+    <value>Пошук</value>
+  </data>
+  <data name="lblSearchDoctor" xml:space="preserve">
+    <value>Пошук лікаря</value>
+  </data>
 </root>

@@ -10,6 +10,7 @@ using med_service.Models;
 using Microsoft.AspNetCore.Authorization;
 using med_service.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using med_service.Helpers;
 
 namespace med_service.Controllers
 {
@@ -24,8 +25,29 @@ namespace med_service.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(Appointment.AppointmentStatus? status)
+        public async Task<IActionResult> Index(Appointment.AppointmentStatus? status,
+                                               string sortOrder, string currentFilter,
+                                               string searchString, int? pageIndex)
         {
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["DoctorSortParam"] = sortOrder == "Doctor" ? "doctor_desc" : "Doctor";
+            ViewData["PatientSortParam"] = sortOrder == "Patient" ? "patient_desc" : "Patient";
+
+            ViewBag.Statuses = Enum.GetValues(typeof(Appointment.AppointmentStatus))
+                                   .Cast<Appointment.AppointmentStatus>()
+                                   .ToList();
+
+            if (searchString != null)
+            {
+                pageIndex = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+
             var appointments = _context.Appointments
                 .Include(a => a.Patient)
                     .ThenInclude(p => p.User)
@@ -34,30 +56,59 @@ namespace med_service.Controllers
                 .Include(a => a.TimeSlot)
                 .AsQueryable();
 
-            ViewBag.Statuses = Enum.GetValues(typeof(Appointment.AppointmentStatus))
-                                   .Cast<Appointment.AppointmentStatus>()
-                                   .ToList();
-
             if (status.HasValue)
             {
                 appointments = appointments.Where(a => a.Status == status.Value);
             }
 
-            var appointmentViewModels = await appointments
-                .Select(a => new AppointmentViewModel
-                {
-                    Id = a.Id,
-                    Status = a.Status,
-                    PatientId = a.PatientId,
-                    PatientName = a.Patient.User.FirstName + " " + a.Patient.User.LastName, //Full name of the Patient
-                    DoctorId = a.DoctorId,
-                    DoctorName = a.Doctor.User.FirstName + " " + a.Doctor.User.LastName,   //Full name of the Doctor
-                    TimeSlotId = a.TimeSlotId,
-                    Notes = a.Notes
-                })
-                .ToListAsync();
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                appointments = appointments.Where(a =>
+                    (a.Patient.User.FirstName + " " + a.Patient.User.LastName).Contains(searchString) ||
+                    (a.Doctor.User.FirstName + " " + a.Doctor.User.LastName).Contains(searchString) ||
+                    a.Notes.Contains(searchString)
+                );
+            }
 
-            return View(appointmentViewModels);
+            var appointmentQuery = appointments.Select(a => new AppointmentViewModel
+            {
+                Id = a.Id,
+                Status = a.Status,
+                PatientId = a.PatientId,
+                PatientName = a.Patient.User.FirstName + " " + a.Patient.User.LastName,
+                DoctorId = a.DoctorId,
+                DoctorName = a.Doctor.User.FirstName + " " + a.Doctor.User.LastName,
+                TimeSlotId = a.TimeSlotId,
+                Notes = a.Notes
+            });
+
+            appointmentQuery = sortOrder switch
+            {
+                "Doctor" => appointmentQuery.OrderBy(a => a.DoctorName),
+                "doctor_desc" => appointmentQuery.OrderByDescending(a => a.DoctorName),
+                "Patient" => appointmentQuery.OrderBy(a => a.PatientName),
+                "patient_desc" => appointmentQuery.OrderByDescending(a => a.PatientName),
+                _ => appointmentQuery.OrderBy(a => a.Status)
+            };
+
+            int pageSize = 7;
+            var paginatedList = await PaginatedList<AppointmentViewModel>.CreateAsync(appointmentQuery, pageIndex ?? 1, pageSize);
+
+            var paginationInfo = new PaginationViewModel
+            {
+                PageIndex = paginatedList.PageIndex,
+                TotalPages = paginatedList.TotalPages,
+                HasPreviousPage = paginatedList.HasPreviousPage,
+                HasNextPage = paginatedList.HasNextPage,
+                CurrentSort = sortOrder,
+                CurrentFilter = searchString,
+                ActionName = nameof(Index),
+                ControllerName = "Appointments"
+            };
+
+            ViewBag.PaginationInfo = paginationInfo;
+
+            return View(paginatedList.Items);
         }
 
         // GET: Appointments/Details/5
