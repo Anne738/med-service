@@ -1,0 +1,55 @@
+﻿@model med_service.Models.Doctor
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">@Localizer["DeleteTitle"]</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <h3>@Localizer["DeleteConfirmation"]</h3>
+            <dl class="row">
+                <dt class="col-sm-4">
+                    @Localizer["User"]
+                </dt>
+                <dd class="col-sm-8">
+                    @if (Model.User != null)
+                    {
+                        @($"{Model.User.LastName} {Model.User.FirstName}")
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(model => model.User.Id)
+                    }
+                </dd>
+                <dt class="col-sm-4">
+                    @Localizer["Hospital"]
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Hospital.Name)
+                </dd>
+                <dt class="col-sm-4">
+                    @Localizer["Specialization"]
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Specialization.Name)
+                </dd>
+                <dt class="col-sm-4">
+                    @Localizer["Experience"]
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.ExperienceYears) @Localizer["Years"]
+                </dd>
+            </dl>
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <div class="text-center">
+                    <input type="submit" value="@Localizer["Delete"]" class="btn btn-danger" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

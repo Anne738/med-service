@@ -37,6 +37,11 @@
         </main>
     </div>
 
+    <!--Modal-->
+    <div class="form-group modal" id="modalX" tavindex="-1" role="dialog" aria-hidden="true">
+
+    </div>
+
     <footer class="border-top footer text-muted">
         <div class="container">
             @await Html.PartialAsync("_SelectLanguagePartial")
@@ -47,6 +52,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+
     @await RenderSectionAsync("Scripts", required: false)
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
