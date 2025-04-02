@@ -23,38 +23,6 @@ function addEntity(url) {
     });
 }
 
-//function addEntity(url) {
-//    $.ajax({
-//        url: "/" + url + "/Create",
-//        type: "GET",
-//        processData: false,
-//        contentType: false,
-//        data: null,
-//        async: true,
-//        error: function (jqxhr, textStatus, errorThrown) {
-//            console.error('Error', jqxhr);
-//            $('.modal').remove();
-//            $('.modal-backdrop').remove();
-//            bootbox.alert(jqxhr.responseText);
-//        }
-//    }).done((data) => {
-//        // Log the received data to see what's being returned
-//        console.log("Response data:", data);
-
-//        // Make sure the modal element exists
-//        if (!$('#modalX').length) {
-//            $('body').append('<div class="modal fade" id="modalX" tabindex="-1" aria-hidden="true"></div>');
-//        }
-
-//        // Clear and append the new content
-//        $('#modalX').empty();
-//        $('#modalX').html(data);
-
-//        // Initialize and show the modal after content is loaded
-//        var modal = new bootstrap.Modal(document.getElementById('modalX'));
-//        modal.show();
-//    });
-//}
 
 function showDetails(url, id) {
     $.ajax({
@@ -74,8 +42,13 @@ function showDetails(url, id) {
         $('#modalX').empty();
         $('#modalX').append(data);
         $('.modal').modal('show');
+        // Закриваємо модальне вікно та очищаємо фон після закриття
+        $('#editModal').on('hidden.bs.modal', function () {
+            $('.modal-backdrop').remove();  // Видаляємо фонове затемнення
+        });
     });
 }
+
 
 
 function showEdit(url, id) {

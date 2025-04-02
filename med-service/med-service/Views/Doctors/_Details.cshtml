@@ -6,22 +6,22 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">@Localizer["Edit Doctor"]</h5>
+                @* <h5 class="modal-title"></h5> *@
+                <h1>@Localizer["DetailsTitle"]</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Показ данных без инпутов -->
                 <div class="mb-3">
                     <label class="form-label">@Localizer["First Name"]</label>
-                    <p>@Model.User.FirstName</p> <!-- Отображаем значение без поля ввода -->
+                    <p>@Model.User.FirstName</p> 
                 </div>
                 <div class="mb-3">
                     <label class="form-label">@Localizer["Last Name"]</label>
-                    <p>@Model.User.LastName</p> <!-- Отображаем значение без поля ввода -->
+                    <p>@Model.User.LastName</p> 
                 </div>
                 <div class="mb-3">
                     <label class="form-label">@Localizer["Experience Years"]</label>
-                    <p>@Model.ExperienceYears</p> <!-- Отображаем значение без поля ввода -->
+                    <p>@Model.ExperienceYears</p> 
                 </div>
             </div>
         </div>
