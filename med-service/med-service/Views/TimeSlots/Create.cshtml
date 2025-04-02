@@ -16,7 +16,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group">
-                <label asp-for="ScheduleId" class="control-label">@Localizer["Schedule"]</label>
+                <label asp-for="ScheduleId" class="control-label"></label>
                 <select asp-for="ScheduleId" class="form-control" asp-items="ViewBag.ScheduleId" id="scheduleSelect">
                     <option value="">@Localizer["SelectSchedule"]</option>
                 </select>
@@ -24,7 +24,7 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="StartTime" class="control-label">@Localizer["StartTime"]</label>
+                <label asp-for="StartTime" class="control-label"></label>
                 <select asp-for="StartTime" class="form-control" id="timeSelect" disabled>
                     <option value="">@Localizer["SelectTimeFirst"]</option>
                 </select>
