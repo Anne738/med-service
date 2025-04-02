@@ -9,26 +9,26 @@ namespace med_service.ViewModels
     {
         public int Id { get; set; }
 
-        //[Required(ErrorMessageResourceType = typeof(Resources.SharedResource), ErrorMessageResourceName = "RequiredField")]
-        [DisplayName("Schedule")]
+        [Required(ErrorMessage = "lblScheduleRequired")]
+        [Display(Name = "lblSchedule")]
         public int ScheduleId { get; set; }
 
         [ValidateNever]
-        [DisplayName("Schedule")]
+        [Display(Name = "lblSchedule")]
         public string ScheduleString { get; set; }
 
-        //[Required(ErrorMessageResourceType = typeof(Resources.SharedResource), ErrorMessageResourceName = "RequiredField")]
-        [DisplayName("StartTime")]
+        [Required(ErrorMessage = "lblStartTimeRequired")]
+        [Display(Name = "lblStartTime")]
         public TimeSpan StartTime { get; set; }
 
-        [DisplayName("EndTime")]
+        [Display(Name = "lblEndTime")]
         public TimeSpan EndTime { get; set; }
 
-        [DisplayName("IsBooked")]
+        [Display(Name = "lblIsBooked")]
         public bool IsBooked { get; set; } = false;
 
         [ValidateNever]
-        [DisplayName("Time")]
+        [Display(Name = "lblTime")]
         public string TimeString => $"{StartTime:hh\\:mm} - {EndTime:hh\\:mm}";
     }
 }

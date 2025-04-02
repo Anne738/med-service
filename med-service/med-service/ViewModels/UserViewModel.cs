@@ -8,7 +8,6 @@ namespace med_service.ViewModels
 {
     public class UserViewModel
     {
-
         public string Id { get; set; } //ID for editing and deleting
 
         [Required (ErrorMessage = "lblFirstNameRequired")]
