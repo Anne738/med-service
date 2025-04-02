@@ -34,65 +34,55 @@
     </div>
 </div>
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-    <script>
-        $(function () {
-            console.log("Modal JS loaded");
+<script>
+    var schedulesWorkHours = @Html.Raw(ViewBag.SchedulesWorkHours);
 
-            var schedulesWorkHours = @Html.Raw(ViewBag.SchedulesWorkHours);
+    $('#scheduleSelect').off('change').on('change', function () {
+        var scheduleId = $(this).val();
+        var timeSelect = $('#timeSelect');
 
-            $('#scheduleSelect').off('change').on('change', function () {
-                var scheduleId = $(this).val();
-                var timeSelect = $('#timeSelect');
+        timeSelect.empty();
 
-                timeSelect.empty();
+        if (!scheduleId) {
+            timeSelect.append('<option value="">@Localizer["SelectTimeFirst"]</option>');
+            timeSelect.prop('disabled', true);
+            return;
+        }
 
-                if (!scheduleId) {
-                    timeSelect.append('<option value="">@Localizer["SelectTimeFirst"]</option>');
-                    timeSelect.prop('disabled', true);
-                    return;
-                }
+        var workHours = schedulesWorkHours[scheduleId];
+        if (!workHours) {
+            timeSelect.append('<option value="">@Localizer["NoAvailableTime"]</option>');
+            timeSelect.prop('disabled', true);
+            return;
+        }
 
-                var workHours = schedulesWorkHours[scheduleId];
-                if (!workHours) {
-                    timeSelect.append('<option value="">@Localizer["NoAvailableTime"]</option>');
-                    timeSelect.prop('disabled', true);
-                    return;
-                }
+        var startHour = workHours.Start;
+        var endHour = workHours.End;
 
-                var startHour = workHours.Start;
-                var endHour = workHours.End;
+        for (var hour = startHour; hour < endHour; hour++) {
+            timeSelect.append(
+                $('<option></option>')
+                    .val(hour.toString().padStart(2, '0') + ':00:00')
+                    .text(hour.toString().padStart(2, '0') + ':00 - ' + hour.toString().padStart(2, '0') + ':30')
+            );
 
-                for (var hour = startHour; hour < endHour; hour++) {
-                    timeSelect.append(
-                        $('<option></option>')
-                            .val(hour.toString().padStart(2, '0') + ':00:00')
-                            .text(hour.toString().padStart(2, '0') + ':00 - ' + hour.toString().padStart(2, '0') + ':30')
-                    );
+            if (hour < endHour - 1 || endHour == startHour + 1) {
+                timeSelect.append(
+                    $('<option></option>')
+                        .val(hour.toString().padStart(2, '0') + ':30:00')
+                        .text(hour.toString().padStart(2, '0') + ':30 - ' + (hour + 1).toString().padStart(2, '0') + ':00')
+                );
+            }
+        }
 
-                    if (hour < endHour - 1 || endHour == startHour + 1) {
-                        timeSelect.append(
-                            $('<option></option>')
-                                .val(hour.toString().padStart(2, '0') + ':30:00')
-                                .text(hour.toString().padStart(2, '0') + ':30 - ' + (hour + 1).toString().padStart(2, '0') + ':00')
-                        );
-                    }
-                }
+        timeSelect.prop('disabled', false);
+    });
 
-                timeSelect.prop('disabled', false);
-            });
-
-            $('form').submit(function () {
-                var timeValue = $('#timeSelect').val();
-                if (timeValue && timeValue.split(':').length === 2) {
-                    $('#timeSelect').val(timeValue + ':00');
-                }
-                return true;
-            });
-        });
-    </script>
-
-}
+    $('form').submit(function () {
+        var timeValue = $('#timeSelect').val();
+        if (timeValue && timeValue.split(':').length === 2) {
+            $('#timeSelect').val(timeValue + ':00');
+        }
+        return true;
+    });
+</script>
