@@ -1,0 +1,32 @@
+﻿@model med_service.ViewModels.AppointmentViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Localizer["lblDetails"]</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row">
+                    <dt class="col-sm-4">@Localizer["lblStatus"]</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.Status)</dd>
+
+                    <dt class="col-sm-4">@Localizer["lblPatient"]</dt>
+                    <dd class="col-sm-8">@Model.PatientName</dd>
+
+                    <dt class="col-sm-4">@Localizer["lblDoctor"]</dt>
+                    <dd class="col-sm-8">@Model.DoctorName</dd>
+
+                    <dt class="col-sm-4">@Localizer["lblNotes"]</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.Notes)</dd>
+
+                    <dt class="col-sm-4">@Localizer["lblTimeSlot"]</dt>
+                    <dd class="col-sm-8">
+                        @Model.TimeSlot?.StartTime.ToString("hh\\:mm") - @Model.TimeSlot?.EndTime.ToString("hh\\:mm")
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>

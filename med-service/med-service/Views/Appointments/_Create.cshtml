@@ -1,0 +1,54 @@
+﻿@model med_service.ViewModels.AppointmentViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">@Localizer["lblCreate"]</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblStatus"]</label>
+                    <select asp-for="Status" asp-items="Html.GetEnumSelectList<med_service.Models.Appointment.AppointmentStatus>()" class="form-control">
+                        <option value="" selected disabled>@Localizer["lblStatus"]</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblTimeSlot"]</label>
+                    <select asp-for="TimeSlotId" class="form-control" asp-items="ViewBag.TimeSlotId"></select>
+                    <span asp-validation-for="TimeSlotId" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblPatient"]</label>
+                    <select asp-for="PatientId" class="form-control" asp-items="ViewBag.PatientId"></select>
+                    <span asp-validation-for="PatientId" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblDoctor"]</label>
+                    <select asp-for="DoctorId" class="form-control" asp-items="ViewBag.DoctorId"></select>
+                    <span asp-validation-for="DoctorId" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblNotes"]</label>
+                    <input asp-for="Notes" class="form-control" placeholder="@Localizer["lblNotesField"]" />
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+                <div class="form-group mt-3">
+                    <input type="submit" value="@Localizer["lblCreateButton"]" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
