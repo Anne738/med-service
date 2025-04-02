@@ -1,0 +1,97 @@
+﻿@model med_service.ViewModels.UserViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">@Localizer["lblEdit"]</h5>
+        </div>
+        <div class="modal-body">
+            <form method="post" id="edit-form" action="/Users/Edit">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="error-container mb-3">
+                    <!-- Validation errors will dynamically appear here -->
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblFirstName"]</label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblLastName"]</label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblEmail"]</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label>@Localizer["lblPassword"]</label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label>@Localizer["lblConfirmPassword"]</label>
+                    <input asp-for="ConfirmPassword" class="form-control" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblUsername"]</label>
+                    <input asp-for="UserName" class="form-control" />
+                    <span asp-validation-for="UserName" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblRole"]</label>
+                    <select asp-for="Role" asp-items="Html.GetEnumSelectList<med_service.Models.User.UserRole>()" class="form-control"></select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-warning">@Localizer["lblSaveButton"]</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["lblCancelButton"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+                $(document).on('submit', '#edit-form', function (event) {
+            event.preventDefault();
+
+            const form = $(this); // Get the form
+            const formData = form.serialize(); // Serialize form input data
+
+            // Clear previous errors
+            form.find('.error-container').html('');
+
+            $.ajax({
+                url: form.attr('action'), // Form action URL
+                method: form.attr('method'), // POST
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        // Redirect to the target URL after success
+                        window.location.href = response.redirectUrl;
+                    } else {
+                        // Display validation errors
+                        const errorsContainer = form.find('.error-container');
+                        response.errors.forEach(function (error) {
+                            errorsContainer.append(`<div class="text-danger">${error}</div>`);
+                        });
+                    }
+                },
+                error: function () {
+                    alert('An unexpected error occurred. Please try again.');
+                }
+            });
+        });
+    </script>
+}

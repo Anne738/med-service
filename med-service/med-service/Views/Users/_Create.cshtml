@@ -1,0 +1,96 @@
+﻿@model med_service.ViewModels.UserViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">@Localizer["lblCreate"]</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="createUserForm" asp-action="Create" asp-method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblFirstName"]</label>
+                    <input asp-for="FirstName" class="form-control" placeholder="@Localizer["lblFirstNameField"]" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblLastName"]</label>
+                    <input asp-for="LastName" class="form-control" placeholder="@Localizer["lblLastNameField"]" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblEmail"]</label>
+                    <input asp-for="Email" class="form-control" placeholder="@Localizer["lblEmailField"]" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblPassword"]</label>
+                    <input asp-for="Password" type="password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblConfirmPassword"]</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblUsername"]</label>
+                    <input asp-for="UserName" class="form-control" placeholder="@Localizer["lblUsernameField"]" />
+                    <span asp-validation-for="UserName" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label">@Localizer["lblRole"]</label>
+                    <select asp-for="Role" asp-items="Html.GetEnumSelectList<med_service.Models.User.UserRole>()" class="form-control">
+                        <option value="" selected disabled>@Localizer["lblRole"]</option>
+                    </select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                </div>
+                <div class="form-group mt-3">
+                    <input type="submit" value="@Localizer["lblCreateButton"]" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            $("#createUserForm").submit(function (event) {
+                event.preventDefault(); // Prevent normal form submission
+
+                var form = $(this);
+                var formData = form.serialize(); // Serialize form data
+
+                $.ajax({
+                    url: form.attr("action"), // Get the action URL
+                    type: form.attr("method"), // Should be "POST"
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            // Close the modal on success
+                            var modal = bootstrap.Modal.getInstance(document.getElementById('modalLabel'));
+                            modal.hide();
+
+                            // Refresh the page or update user list dynamically
+                            location.reload();
+                        } else {
+                            // Replace only the modal content with updated form (validation messages)
+                            $(".modal-content").html(response);
+                        }
+                    },
+                    error: function () {
+                        alert("An error occurred while processing the request.");
+                    }
+                });
+            });
+        });
+    </script>
+}

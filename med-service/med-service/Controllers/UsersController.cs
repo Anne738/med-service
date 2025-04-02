@@ -99,13 +99,13 @@ namespace med_service.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return StatusCode(404);
             }
 
             var user = await _userManager.Users.FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
-                return NotFound();
+                return StatusCode(404);
             }
 
             var userViewModel = new UserViewModel
@@ -118,13 +118,14 @@ namespace med_service.Controllers
                 Role = user.Role
             };
 
-            return View(userViewModel);
+            // Return PartialView so it can be dynamically inserted in the modal
+            return PartialView("~/Views/Users/_Details.cshtml", userViewModel);
         }
 
         // GET: Users/Create
         public IActionResult Create()
         {
-            return View();
+            return PartialView("~/Views/Users/_Create.cshtml", new UserViewModel());
         }
 
         // POST: Users/Create
@@ -146,7 +147,7 @@ namespace med_service.Controllers
                         Console.WriteLine($"Error: {error.ErrorMessage}");
                     }
                 }
-                return View(userViewModel); // Re-display the form with validation messages
+                return PartialView("~/Views/Users/_Create.cshtml", userViewModel);
             }
 
             // Map ViewModel to User model
@@ -179,27 +180,23 @@ namespace med_service.Controllers
                 ModelState.AddModelError("", error.Description);
             }
 
-            return View(userViewModel);
+            return PartialView("~/Views/Users/_Create.cshtml", userViewModel);
         }
-
-
-
 
         // GET: Users/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
             {
-                return NotFound();
+                return StatusCode(404);
             }
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
-                return NotFound();
+                return StatusCode(404);
             }
 
-            // Map User to UserViewModel
             var userViewModel = new UserViewModel
             {
                 Id = user.Id,
@@ -208,11 +205,11 @@ namespace med_service.Controllers
                 Email = user.Email,
                 UserName = user.UserName,
                 Role = user.Role,
-                Password = string.Empty, // Initialize empty password field
-                ConfirmPassword = string.Empty // Initialize empty confirm password field
+                Password = string.Empty,
+                ConfirmPassword = string.Empty
             };
 
-            return View(userViewModel);
+            return PartialView("~/Views/Users/_Edit.cshtml", userViewModel);
         }
 
         // POST: Users/Edit/5
@@ -220,88 +217,137 @@ namespace med_service.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, UserViewModel userViewModel)
         {
-            if (id != userViewModel.Id)
+            // Validate ID
+            if (id == null || id != userViewModel.Id)
             {
-                return NotFound();
+                ModelState.AddModelError("", "Invalid user ID.");
             }
 
+            // Validate ModelState
             if (!ModelState.IsValid)
             {
-                return View(userViewModel);
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") // Check if it’s an AJAX request
+                {
+                    // Collect validation errors and return as JSON
+                    var errors = ModelState.Values
+                        .Where(v => v.Errors.Count > 0)
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+
+                    return Json(new { success = false, errors });
+                }
+
+                // Non-AJAX (fallback): Return the view with validation errors
+                return PartialView("~/Views/Users/_Edit.cshtml", userViewModel);
+            }
+
+            var existingUser = await _userManager.FindByIdAsync(userViewModel.Id);
+
+            if (existingUser == null)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") // AJAX
+                {
+                    return Json(new { success = false, errors = new List<string> { "User not found." } });
+                }
+
+                // Standard fallback
+                ModelState.AddModelError("", "User not found.");
+                return PartialView("~/Views/Users/_Edit.cshtml", userViewModel);
             }
 
             try
             {
-                var existingUser = await _userManager.FindByIdAsync(userViewModel.Id);
-                if (existingUser == null)
-                {
-                    return NotFound();
-                }
-
-                // Update non-password fields
+                // Update user properties
                 existingUser.FirstName = userViewModel.FirstName;
                 existingUser.LastName = userViewModel.LastName;
                 existingUser.Email = userViewModel.Email;
                 existingUser.UserName = userViewModel.UserName;
                 existingUser.Role = userViewModel.Role;
 
-                // If new password is provided, update the password
+                // Optional: Password update
                 if (!string.IsNullOrEmpty(userViewModel.Password))
                 {
                     if (userViewModel.Password != userViewModel.ConfirmPassword)
                     {
-                        ModelState.AddModelError("ConfirmPassword", "The password and confirmation password do not match.");
-                        return View(userViewModel);
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") // AJAX
+                        {
+                            return Json(new { success = false, errors = new List<string> { "Passwords do not match." } });
+                        }
+
+                        // Standard fallback
+                        ModelState.AddModelError("", "Passwords do not match.");
+                        return PartialView("~/Views/Users/_Edit.cshtml", userViewModel);
                     }
 
-                    // Remove existing password (if configured) and set the new one
+                    // Handle password update
                     var removePasswordResult = await _userManager.RemovePasswordAsync(existingUser);
                     if (!removePasswordResult.Succeeded)
                     {
-                        foreach (var error in removePasswordResult.Errors)
+                        var errors = removePasswordResult.Errors.Select(e => e.Description).ToList();
+
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") // AJAX
                         {
-                            ModelState.AddModelError(string.Empty, error.Description);
+                            return Json(new { success = false, errors });
                         }
-                        return View(userViewModel);
+
+                        // Standard fallback
+                        ModelState.AddModelError("", string.Join("; ", errors));
+                        return PartialView("~/Views/Users/_Edit.cshtml", userViewModel);
                     }
 
                     var addPasswordResult = await _userManager.AddPasswordAsync(existingUser, userViewModel.Password);
                     if (!addPasswordResult.Succeeded)
                     {
-                        foreach (var error in addPasswordResult.Errors)
+                        var errors = addPasswordResult.Errors.Select(e => e.Description).ToList();
+
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") // AJAX
                         {
-                            ModelState.AddModelError(string.Empty, error.Description);
+                            return Json(new { success = false, errors });
                         }
-                        return View(userViewModel);
+
+                        // Standard fallback
+                        ModelState.AddModelError("", string.Join("; ", errors));
+                        return PartialView("~/Views/Users/_Edit.cshtml", userViewModel);
                     }
                 }
 
-                // Update user in database
-                var identityResult = await _userManager.UpdateAsync(existingUser);
-                if (identityResult.Succeeded)
+                // Save user
+                var updateResult = await _userManager.UpdateAsync(existingUser);
+                if (!updateResult.Succeeded)
                 {
-                    return RedirectToAction(nameof(Index));
+                    var errors = updateResult.Errors.Select(e => e.Description).ToList();
+
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") // AJAX
+                    {
+                        return Json(new { success = false, errors });
+                    }
+
+                    // Standard fallback
+                    ModelState.AddModelError("", string.Join("; ", errors));
+                    return PartialView("~/Views/Users/_Edit.cshtml", userViewModel);
                 }
 
-                foreach (var error in identityResult.Errors)
+                // Success: Redirect for both AJAX and non-AJAX
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") // AJAX
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    return Json(new { success = true, redirectUrl = Url.Action(nameof(Index)) });
                 }
+
+                return RedirectToAction(nameof(Index));
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!UserExists(userViewModel.Id))
+                // Handle unexpected errors
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") // AJAX
                 {
-                    return NotFound();
+                    return Json(new { success = false, errors = new List<string> { $"An unexpected error occurred: {ex.Message}" } });
                 }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Concurrency error: the user was modified by another user.");
-                    return View(userViewModel);
-                }
-            }
 
-            return View(userViewModel);
+                // Standard fallback
+                ModelState.AddModelError("", $"An unexpected error occurred: {ex.Message}");
+                return PartialView("~/Views/Users/_Edit.cshtml", userViewModel);
+            }
         }
 
 
@@ -310,16 +356,15 @@ namespace med_service.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return StatusCode(404);
             }
 
             var user = await _userManager.Users.FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
-                return NotFound();
+                return StatusCode(404);
             }
 
-            // Map User to UserViewModel
             var userViewModel = new UserViewModel
             {
                 Id = user.Id,
@@ -330,7 +375,7 @@ namespace med_service.Controllers
                 Role = user.Role
             };
 
-            return View(userViewModel);
+            return PartialView("~/Views/Users/_Delete.cshtml", userViewModel);
         }
 
         // POST: Users/Delete/5
