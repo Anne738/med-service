@@ -10,7 +10,8 @@
 <h1>@Localizer["lblAppointments"]</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">@Localizer["lblCreateNew"]</a>
+    @* <a asp-action="Create" class="btn btn-primary">@Localizer["lblCreateNew"]</a> *@
+    <button class="btn btn-info" onclick="addEntity('Appointments')">@Localizer["lblCreateNew"]</button>
 </p>
 
 <form asp-action="Index" method="get" class="mb-3">
@@ -64,9 +65,14 @@
                 <td>@item.DoctorName</td>  <!-- Display Doctor's Full Name -->
                 <td>@item.Notes</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">@Localizer["lblEdit"]</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">@Localizer["lblDetails"]</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">@Localizer["lblDelete"]</a>
+                    @* <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">@Localizer["lblEdit"]</a> *@
+                    @* <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">@Localizer["lblDetails"]</a> *@
+                    @* <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">@Localizer["lblDelete"]</a> *@
+                    <button class="btn btn-sm btn-warning" onclick="showEdit('Appointments', @item.Id)">@Localizer["lblEdit"]</button>
+
+                    <button class="btn btn-info" onclick="showDetails('Appointments', @item.Id)">@Localizer["lblDetails"]</button>
+
+                    <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('Appointments', @item.Id)">@Localizer["lblDelete"]</button>
                 </td>
             </tr>
         }

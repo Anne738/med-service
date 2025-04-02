@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using med_service.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using med_service.Helpers;
+using System.Numerics;
+using Microsoft.Extensions.Localization;
 
 namespace med_service.Controllers
 {
@@ -18,10 +20,12 @@ namespace med_service.Controllers
     public class AppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IStringLocalizer<AppointmentsController> _localizer;
 
-        public AppointmentsController(ApplicationDbContext context)
+        public AppointmentsController(ApplicationDbContext context, IStringLocalizer<AppointmentsController> localizer)
         {
             _context = context;
+            _localizer = localizer;
         }
 
         [HttpGet]
@@ -136,17 +140,17 @@ namespace med_service.Controllers
                 DoctorName = $"{appointment.Doctor.User.FirstName} {appointment.Doctor.User.LastName}",
                 TimeSlotId = appointment.TimeSlotId,
                 Notes = appointment.Notes,
-                TimeSlot = appointment.TimeSlot 
+                TimeSlot = appointment.TimeSlot
             };
 
-            return View(viewModel);
+            return PartialView("~/Views/Appointments/_Details.cshtml", viewModel);
         }
 
         // GET: Appointments/Create
         public IActionResult Create()
         {
             PopulateDropdowns();
-            return View();
+            return PartialView("~/Views/Appointments/_Create.cshtml", new AppointmentViewModel());
         }
 
         // POST: Appointments/Create
@@ -187,7 +191,7 @@ namespace med_service.Controllers
                     selectedDoctorId: appointmentViewModel.DoctorId,
                     selectedPatientId: appointmentViewModel.PatientId
                 );
-                return View(appointmentViewModel);
+                return PartialView("~/Views/Appointments/_Create.cshtml", appointmentViewModel);
             }
 
             _context.Add(appointment);
@@ -196,15 +200,14 @@ namespace med_service.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Appointments/Edit/{id}
         // GET: Appointments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
             var appointment = await _context.Appointments
-                .Include(a => a.Doctor)
-                .Include(a => a.Patient)
-                .FirstOrDefaultAsync(a => a.Id == id); // No TimeSlot Include here
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (appointment == null) return NotFound();
 
@@ -215,67 +218,44 @@ namespace med_service.Controllers
                 PatientId = appointment.PatientId,
                 DoctorId = appointment.DoctorId,
                 TimeSlotId = appointment.TimeSlotId,
-                Notes = appointment.Notes //No TimeSlot object here
+                Notes = appointment.Notes
             };
 
-            //Populate dropdowns for TimeSlot, Doctor, and Patient
-            PopulateDropdowns(selectedTimeSlotId: appointment.TimeSlotId,
-                              selectedDoctorId: appointment.DoctorId,
-                              selectedPatientId: appointment.PatientId);
+            PopulateDropdowns(appointment.TimeSlotId, appointment.DoctorId, appointment.PatientId);
 
-            return View(viewModel);
+            return PartialView("~/Views/Appointments/_Edit.cshtml", viewModel);
         }
 
-        // POST: Appointments/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, AppointmentViewModel appointmentViewModel)
+        public async Task<IActionResult> Edit(int id, AppointmentViewModel model)
         {
-            if (id != appointmentViewModel.Id)
+            if (id != model.Id)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Invalid appointment ID." });
             }
 
             if (!ModelState.IsValid)
             {
-                //Repopulate dropdowns for corrections
-                PopulateDropdowns(appointmentViewModel.TimeSlotId, appointmentViewModel.DoctorId, appointmentViewModel.PatientId);
-                return View(appointmentViewModel);
+                PopulateDropdowns(model.TimeSlotId, model.DoctorId, model.PatientId);
+                return PartialView("~/Views/Appointments/_Edit.cshtml", model);
             }
 
-            var existingAppointment = await _context.Appointments
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (existingAppointment == null)
+            var appointment = await _context.Appointments.FirstOrDefaultAsync(a => a.Id == id);
+            if (appointment == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Appointment not found." });
             }
 
-            existingAppointment.Status = appointmentViewModel.Status;
-            existingAppointment.PatientId = appointmentViewModel.PatientId;
-            existingAppointment.DoctorId = appointmentViewModel.DoctorId;
-            existingAppointment.TimeSlotId = appointmentViewModel.TimeSlotId;
-            existingAppointment.Notes = appointmentViewModel.Notes;
+            // Update fields
+            appointment.Status = model.Status;
+            appointment.PatientId = model.PatientId;
+            appointment.DoctorId = model.DoctorId;
+            appointment.TimeSlotId = model.TimeSlotId;
+            appointment.Notes = model.Notes;
 
-            //Handle TimeSlot updates
-            if (existingAppointment.TimeSlotId != appointmentViewModel.TimeSlotId)
-            {
-                var oldSlot = await _context.TimeSlots.FirstOrDefaultAsync(ts => ts.Id == existingAppointment.TimeSlotId);
-                if (oldSlot != null)
-                {
-                    oldSlot.isBooked = false; //Free the old slot
-                    _context.Update(oldSlot);
-                }
-
-                var newSlot = await _context.TimeSlots.FirstOrDefaultAsync(ts => ts.Id == appointmentViewModel.TimeSlotId);
-                if (newSlot != null)
-                {
-                    newSlot.isBooked = true; //Reserve the new slot
-                    _context.Update(newSlot);
-                }
-            }
-
-            _context.Update(existingAppointment);
+            // Save changes to database
+            _context.Update(appointment);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -309,7 +289,7 @@ namespace med_service.Controllers
                 TimeSlot = appointment.TimeSlot
             };
 
-            return View(viewModel);
+            return PartialView("~/Views/Appointments/_Delete.cshtml", viewModel);
         }
 
         // POST: Appointments/Delete/5
