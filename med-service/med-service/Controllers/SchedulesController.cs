@@ -10,6 +10,7 @@ using med_service.Models;
 using Microsoft.AspNetCore.Authorization;
 using med_service.ViewModels;
 using med_service.Helpers;
+using System.Numerics;
 
 
 namespace med_service.Controllers
@@ -113,7 +114,8 @@ namespace med_service.Controllers
 
             ViewData["DoctorFullName"] = $"{schedule.Doctor?.User?.LastName} {schedule.Doctor?.User?.FirstName}";
 
-            return View(model);
+            //return View(model);
+            return PartialView("~/Views/Schedules/_Details.cshtml", model);
         }
 
 
@@ -144,7 +146,8 @@ namespace med_service.Controllers
                 WorkDayEnd = 18
             };
 
-            return View(vm);
+            //return View(vm);
+            return PartialView("~/Views/Schedules/_Create.cshtml", vm);
         }
 
 
@@ -197,7 +200,8 @@ namespace med_service.Controllers
                 Text = $"{h}:00"
             });
 
-            return View(model);
+            //return View(model);
+            return PartialView("~/Views/Schedules/_Create.cshtml", model);
         }
 
 
@@ -249,7 +253,8 @@ namespace med_service.Controllers
                 Text = $"{h}:00"
             });
 
-            return View(model);
+            //return View(model);
+            return PartialView("~/Views/Schedules/_Edit.cshtml", model);
         }
 
 
@@ -324,7 +329,8 @@ namespace med_service.Controllers
                 Text = $"{h}:00"
             });
 
-            return View(model);
+            //return View(model);
+            return PartialView("~/Views/Schedules/_Edit.cshtml", model);
         }
 
         // GET: Schedules/Delete/5
@@ -357,7 +363,8 @@ namespace med_service.Controllers
 
             ViewData["DoctorFullName"] = $"{schedule.Doctor?.User?.LastName} {schedule.Doctor?.User?.FirstName}";
 
-            return View(model);
+            //return View(model);
+            return PartialView("~/Views/Schedules/_Delete.cshtml", model);
         }
 
 

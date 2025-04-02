@@ -10,7 +10,7 @@
 <h1>@Localizer["lblIndexTitle"]</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">@Localizer["lblCreateNew"]</a>
+    <button class="btn btn-primary" onclick="addEntity('Schedules')">@Localizer["lblCreateNew"]</button>
 </p>
 
 <form asp-action="Index" method="get" class="mb-3">
@@ -23,7 +23,7 @@
     </div>
 </form>
 
-<table class="table">
+<table class="table table-bordered">
     <thead>
         <tr>
             <th>
@@ -57,9 +57,9 @@
                 </td>
                 <td>@item.WorkingHours</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">@Localizer["lblEdit"]</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">@Localizer["lblDetails"]</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">@Localizer["lblDelete"]</a>
+                    <button class="btn btn-sm btn-warning" onclick="showEdit('Schedules', @item.Id)">@Localizer["lblEdit"]</button>
+                    <button class="btn btn-sm btn-info" onclick="showDetails('Schedules', @item.Id)">@Localizer["lblDetails"]</button>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('Schedules', @item.Id)">@Localizer["lblDelete"]</button>
                 </td>
             </tr>
         }
@@ -67,3 +67,30 @@
 </table>
 
 @await Html.PartialAsync("_Pagination", (med_service.ViewModels.PaginationViewModel)ViewBag.PaginationInfo)
+
+@section Scripts {
+    <script>
+        $(document).on('submit', '#modalX form', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (response) {
+                    if ($(response).find('.validation-summary-errors').length > 0 ||
+                        $(response).find('.field-validation-error').length > 0) {
+                        $('#modalX').html(response);
+                    } else {
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('modalX'));
+                        modal.hide();
+                        window.location.reload();
+                    }
+                },
+                error: function (error) {
+                    console.error('Error submitting form:', error);
+                }
+            });
+        });
+    </script>
+}

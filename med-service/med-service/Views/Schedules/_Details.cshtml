@@ -1,0 +1,20 @@
+﻿<!-- Details Modal -->
+@model med_service.ViewModels.ScheduleViewModel
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">@Localizer["lblDetailsTitle"]</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <dl class="row">
+                <dt class="col-sm-4">@Localizer["lblDay"]</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Day)</dd>
+                <dt class="col-sm-4">@Localizer["lblDoctor"]</dt>
+                <dd class="col-sm-8">@Model.DoctorFullName</dd>
+                <dt class="col-sm-4">@Localizer["lblWorkingHours"]</dt>
+                <dd class="col-sm-8">@Model.WorkingHours</dd>
+            </dl>
+        </div>
+    </div>
+</div>
