@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using med_service.Helpers;
 
 namespace med_service.Controllers
 {
@@ -23,12 +24,38 @@ namespace med_service.Controllers
         }
 
         // GET: Users/Index
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter,
+                                               string searchString, int? pageIndex)
         {
-            var users = await _userManager.Users.ToListAsync();
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["FirstNameSortParam"] = sortOrder == "FirstName" ? "firstName_desc" : "FirstName";
+            ViewData["LastNameSortParam"] = sortOrder == "LastName" ? "lastName_desc" : "LastName";
 
-            //Convert to ViewModel
-            var userViewModels = users.Select(user => new UserViewModel
+            if (searchString != null)
+            {
+                pageIndex = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var users = _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                users = users.Where(u =>
+                    u.FirstName.Contains(searchString) ||
+                    u.LastName.Contains(searchString) ||
+                    u.Email.Contains(searchString) ||
+                    u.UserName.Contains(searchString)
+                );
+            }
+
+            //Convert to ViewModel before pagination
+            var userQuery = users.Select(user => new UserViewModel
             {
                 Id = user.Id,
                 FirstName = user.FirstName,
@@ -36,9 +63,35 @@ namespace med_service.Controllers
                 Email = user.Email,
                 UserName = user.UserName,
                 Role = user.Role
-            }).ToList();
+            });
 
-            return View(userViewModels);
+            userQuery = sortOrder switch
+            {
+                "FirstName" => userQuery.OrderBy(u => u.FirstName),
+                "firstName_desc" => userQuery.OrderByDescending(u => u.FirstName),
+                "LastName" => userQuery.OrderBy(u => u.LastName),
+                "lastName_desc" => userQuery.OrderByDescending(u => u.LastName),
+                _ => userQuery
+            };
+
+            int pageSize = 7;
+            var paginatedList = await PaginatedList<UserViewModel>.CreateAsync(userQuery, pageIndex ?? 1, pageSize);
+
+            var paginationInfo = new PaginationViewModel
+            {
+                PageIndex = paginatedList.PageIndex,
+                TotalPages = paginatedList.TotalPages,
+                HasPreviousPage = paginatedList.HasPreviousPage,
+                HasNextPage = paginatedList.HasNextPage,
+                CurrentSort = sortOrder,
+                CurrentFilter = searchString,
+                ActionName = nameof(Index),
+                ControllerName = "Users"
+            };
+
+            ViewBag.PaginationInfo = paginationInfo;
+
+            return View(paginatedList.Items);
         }
 
         // GET: Users/Details/5
