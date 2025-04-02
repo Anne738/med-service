@@ -15,25 +15,25 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-            
+
             <div class="form-group">
-                <label asp-for="ScheduleId" class="control-label">@Localizer["Schedule"]</label>
+                <label asp-for="ScheduleId" class="control-label"></label>
                 <select asp-for="ScheduleId" class="form-control" asp-items="ViewBag.ScheduleId" id="scheduleSelect"></select>
                 <span asp-validation-for="ScheduleId" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="StartTime" class="control-label">@Localizer["StartTime"]</label>
+                <label asp-for="StartTime" class="control-label"></label>
                 <select asp-for="StartTime" class="form-control" asp-items="ViewBag.TimeOptions" id="timeSelect"></select>
                 <span asp-validation-for="StartTime" class="text-danger"></span>
             </div>
 
             <div class="form-group form-check">
                 <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsBooked" /> @Localizer["IsBooked"]
+                    <input class="form-check-input" asp-for="IsBooked" /> @Html.DisplayNameFor(model => model.IsBooked)
                 </label>
             </div>
-            
+
             <div class="form-group mt-3">
                 <input type="submit" value="@Localizer["Save"]" class="btn btn-primary" />
             </div>
