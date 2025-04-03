@@ -1,31 +1,49 @@
 ﻿@model med_service.ViewModels.HospitalViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
+<partial name="_ValidationScriptsPartial" />
 
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title">@Localizer["lblDeleteTitle"]</h5>
+            <h5 class="modal-title" id="modalLabel">@Localizer["lblEditTitle"]</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <p>@Localizer["lblDeleteConfirm"]</p>
-
-            <dl class="row">
-                <dt class="col-sm-4">@Localizer["lblName"]</dt>
-                <dd class="col-sm-8">@Model.Name</dd>
-
-                <dt class="col-sm-4">@Localizer["lblAddress"]</dt>
-                <dd class="col-sm-8">@Model.Address</dd>
-
-                <dt class="col-sm-4">@Localizer["lblContact"]</dt>
-                <dd class="col-sm-8">@Model.Contact</dd>
-            </dl>
-
-            <form asp-action="Delete" asp-route-id="@Model.Id">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Id" />
-                <button type="submit" class="btn btn-danger">@Localizer["lblDelete"]</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["lblCancel"]</button>
+                <div class="form-group mb-3">
+                    <label asp-for="Name" class="control-label">@Localizer["lblName"]</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Address" class="control-label">@Localizer["lblAddress"]</label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Contact">@Localizer["lblContact"]</label>
+                    <input asp-for="Contact" class="form-control" id="phone" />
+                    <span asp-validation-for="Contact" class="text-danger"></span>
+                </div>
+                <div class="form-group mt-3">
+                    <input type="submit" value="@Localizer["lblSave"]" class="btn btn-primary" />
+                </div>
             </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        const input = document.querySelector("#phone");
+        window.intlTelInput(input, {
+            initialCountry: "auto",
+            nationalMode: false,
+            preferredCountries: ["us", "gb", "ua"],
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js"
+        });
+    </script>
+}
