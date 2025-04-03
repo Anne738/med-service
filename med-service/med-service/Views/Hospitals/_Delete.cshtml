@@ -1,0 +1,50 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model med_service.ViewModels.HospitalViewModel
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">@Localizer["lblDeleteTitle"]</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <h3>@Localizer["lblDeleteConfirmation"]</h3>
+            <dl class="row">
+                <dt class="col-sm-4">
+                    @Localizer["lblName"]
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Name)
+                </dd>
+                <dt class="col-sm-4">
+                    @Localizer["lblAddress"]
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Address)
+                </dd>
+                <dt class="col-sm-4">
+                    @Localizer["lblContact"]
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Contact)
+                </dd>
+            </dl>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["Error"]
+                </div>
+            }
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <div class="text-center">
+                    <input type="submit" value="@Localizer["lblDelete"]" class="btn btn-danger" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["lblCancel"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

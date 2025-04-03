@@ -117,25 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblBackToList" xml:space="preserve">
+  <data name="BackToList" xml:space="preserve">
     <value>Повернутися до списку</value>
   </data>
-  <data name="lblHospital" xml:space="preserve">
+  <data name="Hospital" xml:space="preserve">
     <value>Лікарня</value>
   </data>
-  <data name="lblName" xml:space="preserve">
+  <data name="Name" xml:space="preserve">
     <value>Назва лікарні</value>
   </data>
-  <data name="lblCreate" xml:space="preserve">
+  <data name="Create" xml:space="preserve">
     <value>Створити</value>
   </data>
-  <data name="lblAddress" xml:space="preserve">
+  <data name="Address" xml:space="preserve">
     <value>Адреса</value>
   </data>
-  <data name="lblCreateTitle" xml:space="preserve">
+  <data name="CreateTitle" xml:space="preserve">
     <value>Створити лікарню</value>
   </data>
-  <data name="lblContact" xml:space="preserve">
+  <data name="Contact" xml:space="preserve">
     <value>Контактний номер</value>
+  </data>
+  <data name="CreateHospital" xml:space="preserve">
+    <value>Створити лікарню</value>
   </data>
 </root>
