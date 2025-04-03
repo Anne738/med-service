@@ -1,0 +1,39 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model med_service.Models.Patient
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">@Localizer["PatientDetails"]</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <dl class="row">
+                <dt class="col-sm-4">
+                    @Localizer["FirstName"]
+                </dt>
+                <dd class="col-sm-8">
+                    @Model.User?.FirstName
+                </dd>
+                <dt class="col-sm-4">
+                    @Localizer["LastName"]
+                </dt>
+                <dd class="col-sm-8">
+                    @Model.User?.LastName
+                </dd>
+                <dt class="col-sm-4">
+                    @Localizer["DateOfBirth"]
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.DateOfBirth)
+                </dd>
+            </dl>
+            <div class="text-center mt-3">
+                <a href="@Url.Action("GetPatientHistory", "Appointments", new { patientId = Model.Id })" class="btn btn-outline-success">
+                    📅 @Localizer["YourAppointmentHistory"]
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

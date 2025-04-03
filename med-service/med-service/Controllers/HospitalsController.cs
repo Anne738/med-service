@@ -8,6 +8,7 @@ using med_service.Data;
 using med_service.Models;
 using med_service.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Localization;
 
 namespace med_service.Controllers
 {
@@ -15,10 +16,12 @@ namespace med_service.Controllers
     public class HospitalsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IStringLocalizer<HospitalsController> _localizer;
 
-        public HospitalsController(ApplicationDbContext context)
+        public HospitalsController(ApplicationDbContext context, IStringLocalizer<HospitalsController> localizer)
         {
             _context = context;
+            _localizer = localizer;
         }
 
         // GET: Hospitals
@@ -52,13 +55,13 @@ namespace med_service.Controllers
                 Contact = hospital.Contact
             };
 
-            return View(model);
+            return PartialView("~/Views/Hospitals/_Details.cshtml", model);
         }
 
         // GET: Hospitals/Create
         public IActionResult Create()
         {
-            return View(new HospitalViewModel());
+            return PartialView("~/Views/Hospitals/_Create.cshtml", new HospitalViewModel());
         }
 
         // POST: Hospitals/Create
@@ -80,7 +83,7 @@ namespace med_service.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(model);
+            return PartialView("~/Views/Hospitals/_Create.cshtml", model);
         }
 
         // GET: Hospitals/Edit/5
@@ -99,7 +102,7 @@ namespace med_service.Controllers
                 Contact = hospital.Contact
             };
 
-            return View(model);
+            return PartialView("~/Views/Hospitals/_Edit.cshtml", model);
         }
 
         // POST: Hospitals/Edit/5
@@ -129,9 +132,13 @@ namespace med_service.Controllers
                     if (!HospitalExists(model.Id)) return NotFound();
                     else throw;
                 }
+                catch (DbUpdateException)
+                {
+                    ModelState.AddModelError("", _localizer["UpdateError"]);
+                }
             }
 
-            return View(model);
+            return PartialView("~/Views/Hospitals/_Edit.cshtml", model);
         }
 
         // GET: Hospitals/Delete/5
@@ -150,7 +157,7 @@ namespace med_service.Controllers
                 Contact = hospital.Contact
             };
 
-            return View(model);
+            return PartialView("~/Views/Hospitals/_Delete.cshtml", model);
         }
 
         // POST: Hospitals/Delete/5

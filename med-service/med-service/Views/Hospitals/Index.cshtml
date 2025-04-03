@@ -1,6 +1,5 @@
 ﻿@model IEnumerable<med_service.ViewModels.HospitalViewModel>
-
-
+@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
 
 @{
@@ -10,7 +9,7 @@
 <h1>@Localizer["lblIndexTitle"]</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">@Localizer["lblCreateNew"]</a>
+    <button class="btn btn-primary" onclick="addEntity('Hospitals')">@Localizer["lblCreateNew"]</button>
 </p>
 <table class="table">
     <thead>
@@ -29,11 +28,38 @@
                 <td>@Html.DisplayFor(modelItem => item.Address)</td>
                 <td>@Html.DisplayFor(modelItem => item.Contact)</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">@Localizer["lblEdit"]</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">@Localizer["lblDetails"]</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">@Localizer["lblDelete"]</a>
+                    <button class="btn btn-sm btn-warning" onclick="showEdit('Hospitals', @item.Id)">@Localizer["lblEdit"]</button>
+                    <button class="btn btn-info" onclick="showDetails('Hospitals', @item.Id)">@Localizer["lblDetails"]</button>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('Hospitals', @item.Id)">@Localizer["lblDelete"]</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@section Scripts {
+    <script>
+        $(document).on('submit', '#modalX form', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (response) {
+                    if ($(response).find('.validation-summary-errors').length > 0 ||
+                        $(response).find('.field-validation-error').length > 0) {
+                        $('#modalX').html(response);
+                    } else {
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('modalX'));
+                        modal.hide();
+                        window.location.reload();
+                    }
+                },
+                error: function (error) {
+                    console.error('Ошибка отправки формы:', error);
+                }
+            });
+        });
+    </script>
+}
