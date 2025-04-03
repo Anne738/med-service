@@ -387,7 +387,7 @@ namespace med_service.Controllers
             var query = _context.Appointments
                 .Where(a => a.DoctorId == doctorId)
                 .Include(a => a.Patient)
-                .ThenInclude(p => p.User) 
+                .ThenInclude(p => p.User)
                 .Include(a => a.TimeSlot)
                 .OrderByDescending(a => a.TimeSlot.StartTime)
                 .AsQueryable();
