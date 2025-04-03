@@ -1,16 +1,18 @@
 ﻿@model med_service.ViewModels.HospitalViewModel
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
+<partial name="_ValidationScriptsPartial" />
 
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title" id="modalLabel">@Localizer["lblCreateTitle"]</h5>
+            <h5 class="modal-title" id="modalLabel">@Localizer["lblEditTitle"]</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form asp-action="Create">
+            <form asp-action="Edit">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
                 <div class="form-group mb-3">
                     <label asp-for="Name" class="control-label">@Localizer["lblName"]</label>
                     <input asp-for="Name" class="form-control" />
@@ -27,7 +29,7 @@
                     <span asp-validation-for="Contact" class="text-danger"></span>
                 </div>
                 <div class="form-group mt-3">
-                    <input type="submit" value="@Localizer["lblCreate"]" class="btn btn-primary" />
+                    <input type="submit" value="@Localizer["lblSave"]" class="btn btn-primary" />
                 </div>
             </form>
         </div>

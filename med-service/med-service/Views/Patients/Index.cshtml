@@ -9,7 +9,7 @@
 <h1>@Localizer["PatientsList"]</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">@Localizer["CreateNew"]</a>
+    <button class="btn btn-primary" onclick="addEntity('Patients')">@Localizer["CreateNew"]</button>
 </p>
 
 <form asp-action="Index" method="get" class="mb-3">
@@ -49,9 +49,12 @@
                     @Html.DisplayFor(modelItem => item.DateOfBirth)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">@Localizer["Edit"]</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">@Localizer["Details"]</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">@Localizer["Delete"]</a>
+                    <button class="btn btn-sm btn-warning" onclick="showEdit('Patients', @item.Id)">@Localizer["Edit"]</button>
+                    <button class="btn btn-sm btn-info" onclick="showDetails('Patients', @item.Id)">@Localizer["Details"]</button>
+                    <button class="btn btn-sm btn-danger" onclick="confirmDelete('Patients', @item.Id)">@Localizer["Delete"]</button>
+                    <a href="@Url.Action("GetPatientHistory", "Appointments", new { patientId = item.Id })" class="btn btn-sm btn-outline-success">
+                        📅 @Localizer["History"]
+                    </a>
                 </td>
             </tr>
         }
@@ -59,3 +62,30 @@
 </table>
 
 @await Html.PartialAsync("_Pagination", (med_service.ViewModels.PaginationViewModel)ViewBag.PaginationInfo)
+
+@section Scripts {
+    <script>
+        $(document).on('submit', '#modalX form', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (response) {
+                    if ($(response).find('.validation-summary-errors').length > 0 ||
+                        $(response).find('.field-validation-error').length > 0) {
+                        $('#modalX').html(response);
+                    } else {
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('modalX'));
+                        modal.hide();
+                        window.location.reload();
+                    }
+                },
+                error: function (error) {
+                    console.error('Ошибка отправки формы:', error);
+                }
+            });
+        });
+    </script>
+}
