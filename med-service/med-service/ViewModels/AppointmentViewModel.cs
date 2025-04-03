@@ -17,7 +17,6 @@ namespace med_service.ViewModels
         [Display(Name = "lblPatient")]
         public int PatientId { get; set; }
 
-        [Required (ErrorMessage = "lblDoctorRequired")]
         [Display(Name = "lblDoctor")]
         public int DoctorId { get; set; }
 
