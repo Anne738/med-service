@@ -16,12 +16,10 @@ namespace med_service.Controllers
     public class HospitalsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IStringLocalizer<HospitalsController> _localizer;
 
-        public HospitalsController(ApplicationDbContext context, IStringLocalizer<HospitalsController> localizer)
+        public HospitalsController(ApplicationDbContext context)
         {
             _context = context;
-            _localizer = localizer;
         }
 
         // GET: Hospitals
@@ -131,10 +129,6 @@ namespace med_service.Controllers
                 {
                     if (!HospitalExists(model.Id)) return NotFound();
                     else throw;
-                }
-                catch (DbUpdateException)
-                {
-                    ModelState.AddModelError("", _localizer["UpdateError"]);
                 }
             }
 
