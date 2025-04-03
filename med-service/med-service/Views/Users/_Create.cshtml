@@ -3,6 +3,8 @@
 
 @inject IViewLocalizer Localizer
 
+<partial name="_ValidationScriptsPartial" />
+
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
@@ -58,9 +60,6 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
     <script>
         $(document).ready(function () {
             $("#createUserForm").submit(function (event) {

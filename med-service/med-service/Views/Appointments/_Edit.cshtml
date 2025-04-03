@@ -2,6 +2,8 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
 
+<partial name="_ValidationScriptsPartial" />
+
 <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -51,9 +53,6 @@
     </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
     <script>
                 $(document).on('submit', '#edit-form', function (event) {
             event.preventDefault(); // Prevent the default form submission
