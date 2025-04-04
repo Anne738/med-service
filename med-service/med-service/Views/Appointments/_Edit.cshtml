@@ -2,6 +2,8 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
 
+<partial name="_ValidationScriptsPartial" />
+
 <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -30,11 +32,6 @@
                             <span asp-validation-for="PatientId" class="text-danger"></span>
                         </div>
                         <div class="form-group">
-                            <label class="control-label">@Localizer["lblDoctor"]</label>
-                            <select asp-for="DoctorId" class="form-control" asp-items="ViewBag.DoctorId"></select>
-                            <span asp-validation-for="DoctorId" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
                             <label class="control-label">@Localizer["lblNotes"]</label>
                             <input asp-for="Notes" class="form-control" />
                             <span asp-validation-for="Notes" class="text-danger"></span>
@@ -51,30 +48,27 @@
     </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
     <script>
                 $(document).on('submit', '#edit-form', function (event) {
-            event.preventDefault(); // Prevent the default form submission
+            event.preventDefault(); //Prevent the default form submission
 
-            var form = $(this); // Get the form being submitted
-            var formData = form.serialize(); // Serialize the form data
+            var form = $(this); //Get the form being submitted
+            var formData = form.serialize(); //Serialize the form data
 
             $.ajax({
-                url: form.attr('action'),  // Action URL from the form
-                method: form.attr('method'), // HTTP method (POST)
-                data: formData,              // Form data
+                url: form.attr('action'),  //Action URL from the form
+                method: form.attr('method'), //HTTP method (POST)
+                data: formData,              //Form data
                 success: function (response) {
                     if (response.success) {
-                        // Close modal on success
+                        //Close modal on success
                         var modal = bootstrap.Modal.getInstance(document.getElementById('modalX'));
                         modal.hide();
 
-                        // Optionally refresh the page or update content dynamically
+                        //Optionally refresh the page or update content dynamically
                         location.reload(); // Refresh the page to show changes
                     } else {
-                        // Validation or other issues: Replace modal content with updated form
+                        //Validation or other issues: Replace modal content with updated form
                         $('#modalX').html(response);
                     }
                 },
