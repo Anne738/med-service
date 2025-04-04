@@ -58,13 +58,13 @@ namespace med_service.Controllers
                 Description = specialization.Description
             };
 
-            return View(viewModel);
+            return PartialView("~/Views/Specializations/_Details.cshtml", viewModel);
         }
 
         // GET: Specializations/Create
         public IActionResult Create()
         {
-            return View(new SpecializationViewModel());
+            return PartialView("~/Views/Specializations/_Create.cshtml", new SpecializationViewModel());
         }
 
         // POST: Specializations/Create
@@ -84,7 +84,7 @@ namespace med_service.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(viewModel);
+            return PartialView("~/Views/Specializations/_Create.cshtml", viewModel);
         }
 
         // GET: Specializations/Edit/5
@@ -108,7 +108,7 @@ namespace med_service.Controllers
                 Description = specialization.Description
             };
 
-            return View(viewModel);
+            return PartialView("~/Views/Specializations/_Edit.cshtml", viewModel);
         }
 
         // POST: Specializations/Edit/5
@@ -150,7 +150,7 @@ namespace med_service.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(viewModel);
+            return PartialView("~/Views/Specializations/_Edit.cshtml", viewModel);
         }
 
         // GET: Specializations/Delete/5
@@ -175,7 +175,7 @@ namespace med_service.Controllers
                 Description = specialization.Description
             };
 
-            return View(viewModel);
+            return PartialView("~/Views/Specializations/_Delete.cshtml", viewModel);
         }
 
         // POST: Specializations/Delete/5

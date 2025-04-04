@@ -180,7 +180,7 @@ namespace med_service.Controllers
 
             ViewBag.AppointmentDate = appointmentDate.ToString("yyyy-MM-dd");
 
-            return View("Book", viewModel);
+            return PartialView("~/Views/Timetables/_Book.cshtml", viewModel);
         }
 
         // POST: Timetables/Book
@@ -329,7 +329,7 @@ namespace med_service.Controllers
                     model.PatientName = $"{currentUser.FirstName} {currentUser.LastName}";
                 }
 
-                return View(model);
+                return PartialView("~/Views/Timetables/_Book.cshtml", model);
             }
             catch (Exception ex)
             {
