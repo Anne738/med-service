@@ -84,4 +84,34 @@
 <data name="statusCanceled" xml:space="preserve">
   <value>Скасовано</value>
 </data>
+<data name="actions" xml:space="preserve">
+  <value>Дії</value>
+</data>
+<data name="confirm" xml:space="preserve">
+  <value>Підтвердити</value>
+</data>
+<data name="complete" xml:space="preserve">
+  <value>Завершити</value>
+</data>
+<data name="cancel" xml:space="preserve">
+  <value>Скасувати</value>
+</data>
+<data name="StatusConfirmedMessage" xml:space="preserve">
+  <value>Запис підтверджено</value>
+</data>
+<data name="StatusCompletedMessage" xml:space="preserve">
+  <value>Запис позначено як завершений</value>
+</data>
+<data name="StatusCanceledMessage" xml:space="preserve">
+  <value>Запис скасовано</value>
+</data>
+<data name="StatusUpdatedMessage" xml:space="preserve">
+  <value>Статус запису оновлено</value>
+</data>
+<data name="StatusUpdateError" xml:space="preserve">
+  <value>Помилка при оновленні статусу запису</value>
+</data>
+<data name="StatusUpdateFailed" xml:space="preserve">
+  <value>Не вдалося оновити статус</value>
+</data>
 </root>

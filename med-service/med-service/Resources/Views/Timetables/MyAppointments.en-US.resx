@@ -84,4 +84,35 @@
 <data name="statusCanceled" xml:space="preserve">
   <value>Canceled</value>
 </data>
+<data name="actions" xml:space="preserve">
+  <value>Actions</value>
+</data>
+<data name="confirm" xml:space="preserve">
+  <value>Confirm</value>
+</data>
+<data name="complete" xml:space="preserve">
+  <value>Complete</value>
+</data>
+<data name="cancel" xml:space="preserve">
+  <value>Cancel</value>
+</data>
+<data name="StatusConfirmedMessage" xml:space="preserve">
+  <value>Appointment has been confirmed</value>
+</data>
+<data name="StatusCompletedMessage" xml:space="preserve">
+  <value>Appointment has been marked as completed</value>
+</data>
+<data name="StatusCanceledMessage" xml:space="preserve">
+  <value>Appointment has been canceled</value>
+</data>
+<data name="StatusUpdatedMessage" xml:space="preserve">
+  <value>Appointment status has been updated</value>
+</data>
+<data name="StatusUpdateError" xml:space="preserve">
+  <value>Error updating appointment status</value>
+</data>
+<data name="StatusUpdateFailed" xml:space="preserve">
+  <value>Failed to update status</value>
+</data>
+
 </root>
