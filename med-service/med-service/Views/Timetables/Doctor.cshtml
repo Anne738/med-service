@@ -77,9 +77,10 @@
                         }
                         else
                         {
-                            <a asp-action="Book" asp-route-day="@selectedDay" asp-route-hour="@hour"
-                               asp-route-minute="0" asp-route-doctorId="@ViewBag.DoctorId"
-                               class="btn btn-sm btn-primary w-100">@Localizer["book"]</a>
+                            <button type="button" class="btn btn-sm btn-primary w-100" onclick="openBookModal('@ViewBag.DoctorId', '@((int)selectedDay)', '@hour')">
+                                @Localizer["book"]
+                            </button>
+
                         }
                     </div>
                 </div>
@@ -108,9 +109,16 @@
                         }
                         else
                         {
-                            <a asp-action="Book" asp-route-day="@selectedDay" asp-route-hour="@hour"
-                               asp-route-minute="30" asp-route-doctorId="@ViewBag.DoctorId"
-                               class="btn btn-sm btn-primary w-100">@Localizer["book"]</a>
+                            <a class="btn btn-sm btn-primary w-100"
+                               asp-controller="Appointment"
+                               asp-action="Book"
+                               asp-route-day="@((int)selectedDay)"
+                               asp-route-hour="@hour"
+                               asp-route-minute="30"
+                               asp-route-doctorId="@ViewBag.DoctorId">
+                                @Localizer["book"]
+                            </a>
+
                         }
                     </div>
                 </div>
