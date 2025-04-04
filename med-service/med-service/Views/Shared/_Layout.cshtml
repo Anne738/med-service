@@ -57,6 +57,8 @@
     @await RenderSectionAsync("Scripts", required: false)
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
-
+    <form id="__AntiForgeryForm" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
 </body>
 </html>

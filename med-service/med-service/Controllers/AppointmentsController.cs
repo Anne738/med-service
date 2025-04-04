@@ -17,19 +17,24 @@ using static med_service.Models.Appointment;
 
 namespace med_service.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class AppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IStringLocalizer<AppointmentsController> _localizer;
+        private readonly UserManager<User> _userManager;
 
-        public AppointmentsController(ApplicationDbContext context, IStringLocalizer<AppointmentsController> localizer)
+        public AppointmentsController(ApplicationDbContext context,
+            IStringLocalizer<AppointmentsController> localizer,
+            UserManager<User> userManager)
         {
             _context = context;
             _localizer = localizer;
+            _userManager = userManager;
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index(Appointment.AppointmentStatus? status,
                                                string sortOrder, string currentFilter,
                                                string searchString, int? pageIndex)
@@ -118,6 +123,7 @@ namespace med_service.Controllers
         }
 
         // GET: Appointments/Details/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -149,8 +155,8 @@ namespace med_service.Controllers
             return PartialView("~/Views/Appointments/_Details.cshtml", viewModel);
         }
 
-
         // GET: Appointments/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             PopulateDropdowns();
@@ -160,6 +166,7 @@ namespace med_service.Controllers
         // POST: Appointments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("Status,PatientId,TimeSlotId,Notes")] AppointmentViewModel appointmentViewModel)
         {
             if (!ModelState.IsValid)
@@ -205,6 +212,7 @@ namespace med_service.Controllers
         }
 
         // GET: Appointments/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -240,6 +248,7 @@ namespace med_service.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, AppointmentViewModel model)
         {
             if (id != model.Id)
@@ -331,8 +340,8 @@ namespace med_service.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         // GET: Appointments/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -366,6 +375,7 @@ namespace med_service.Controllers
         // POST: Appointments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var appointment = await _context.Appointments.FindAsync(id);
@@ -385,6 +395,96 @@ namespace med_service.Controllers
             }
 
             return RedirectToAction(nameof(Index)); //Redirect to the list of appointments
+        }
+
+        // Новый метод для асинхронного обновления статуса записи
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> UpdateStatus(int id, string status)
+        {
+            // Проверяем существование записи
+            var appointment = await _context.Appointments
+                .Include(a => a.TimeSlot)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (appointment == null)
+            {
+                return Json(new { success = false, message = _localizer["AppointmentNotFound"].Value });
+            }
+
+            // Проверка корректности статуса
+            if (!Enum.TryParse<Appointment.AppointmentStatus>(status, out var newStatus))
+            {
+                return Json(new { success = false, message = _localizer["InvalidStatus"].Value });
+            }
+
+            // Проверяем права доступа
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Json(new { success = false, message = _localizer["Unauthorized"].Value });
+            }
+
+            bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+            bool isDoctor = await _userManager.IsInRoleAsync(currentUser, "Doctor");
+
+            // Проверяем права на изменение
+            if (!isAdmin)
+            {
+                if (isDoctor)
+                {
+                    // Врач может изменять только свои записи
+                    var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == currentUser.Id);
+                    if (doctor == null || doctor.Id != appointment.DoctorId)
+                    {
+                        return Json(new { success = false, message = _localizer["AccessDenied"].Value });
+                    }
+                }
+                else
+                {
+                    // Пациент может только отменить свою запись
+                    var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == currentUser.Id);
+                    if (patient == null || patient.Id != appointment.PatientId)
+                    {
+                        return Json(new { success = false, message = _localizer["AccessDenied"].Value });
+                    }
+
+                    // Пациент может только отменить запись
+                    if (newStatus != Appointment.AppointmentStatus.CANCELED)
+                    {
+                        return Json(new { success = false, message = _localizer["OnlyCancelAllowed"].Value });
+                    }
+                }
+            }
+
+            // Если отменяем запись, освобождаем слот
+            if (newStatus == Appointment.AppointmentStatus.CANCELED && appointment.TimeSlot != null)
+            {
+                appointment.TimeSlot.isBooked = false;
+            }
+
+            // Обновляем статус
+            appointment.Status = newStatus;
+            await _context.SaveChangesAsync();
+
+            // Возвращаем успешный результат
+            return Json(new
+            {
+                success = true,
+                message = GetStatusUpdateMessage(newStatus)
+            });
+        }
+
+        private string GetStatusUpdateMessage(Appointment.AppointmentStatus status)
+        {
+            return status switch
+            {
+                Appointment.AppointmentStatus.CONFIRMED => _localizer["StatusConfirmedMessage"].Value,
+                Appointment.AppointmentStatus.COMPLETED => _localizer["StatusCompletedMessage"].Value,
+                Appointment.AppointmentStatus.CANCELED => _localizer["StatusCanceledMessage"].Value,
+                _ => _localizer["StatusUpdatedMessage"].Value
+            };
         }
 
         private void PopulateDropdowns(int? selectedTimeSlotId = null, int? selectedPatientId = null)
@@ -412,7 +512,6 @@ namespace med_service.Controllers
             );
         }
 
-
         private bool AppointmentExists(int id)
         {
             return _context.Appointments.Any(e => e.Id == id);
@@ -430,8 +529,6 @@ namespace med_service.Controllers
                 .OrderByDescending(a => a.TimeSlot.StartTime)
                 .AsQueryable();
 
-
-
             if (status.HasValue)
             {
                 query = query.Where(a => a.Status == status.Value);
@@ -440,11 +537,9 @@ namespace med_service.Controllers
             var history = await query.AsNoTracking().ToListAsync();
 
             return View("PatientHistory", history);
-            //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
         }
 
         // отримати історію прийомів лікаря
-
         [HttpGet("doctor/{doctorId}/history")]
         public async Task<IActionResult> GetDoctorHistory(int doctorId, Appointment.AppointmentStatus? status)
         {
@@ -464,9 +559,6 @@ namespace med_service.Controllers
             var history = await query.AsNoTracking().ToListAsync();
             return View("DoctorHistory", history);
         }
-
-
-        //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
     }
 
 }
