@@ -23,7 +23,6 @@ namespace med_service.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly IStringLocalizer<AppointmentsController> _localizer;
-        private readonly UserManager<User> _userManager;
 
         public AppointmentsController(ApplicationDbContext context, IStringLocalizer<AppointmentsController> localizer, UserManager<User> userManager)
         {
