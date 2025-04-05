@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,19 +17,22 @@ using static med_service.Models.Appointment;
 
 namespace med_service.Controllers
 {
-    [Authorize(Roles = "Admin")]
+
     public class AppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
         private readonly IStringLocalizer<AppointmentsController> _localizer;
 
-        public AppointmentsController(ApplicationDbContext context, IStringLocalizer<AppointmentsController> localizer)
+        public AppointmentsController(ApplicationDbContext context, IStringLocalizer<AppointmentsController> localizer, UserManager<User> userManager)
         {
             _context = context;
             _localizer = localizer;
+            _userManager = userManager;
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index(Appointment.AppointmentStatus? status,
                                                string sortOrder, string currentFilter,
                                                string searchString, int? pageIndex)
@@ -118,6 +121,7 @@ namespace med_service.Controllers
         }
 
         // GET: Appointments/Details/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -149,8 +153,8 @@ namespace med_service.Controllers
             return PartialView("~/Views/Appointments/_Details.cshtml", viewModel);
         }
 
-
         // GET: Appointments/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             PopulateDropdowns();
@@ -160,6 +164,7 @@ namespace med_service.Controllers
         // POST: Appointments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("Status,PatientId,TimeSlotId,Notes")] AppointmentViewModel appointmentViewModel)
         {
             if (!ModelState.IsValid)
@@ -205,6 +210,7 @@ namespace med_service.Controllers
         }
 
         // GET: Appointments/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -240,6 +246,7 @@ namespace med_service.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, AppointmentViewModel model)
         {
             if (id != model.Id)
@@ -331,8 +338,8 @@ namespace med_service.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         // GET: Appointments/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -366,6 +373,7 @@ namespace med_service.Controllers
         // POST: Appointments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var appointment = await _context.Appointments.FindAsync(id);
@@ -385,6 +393,86 @@ namespace med_service.Controllers
             }
 
             return RedirectToAction(nameof(Index)); //Redirect to the list of appointments
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> UpdateStatus(int id, string status)
+        {
+            var appointment = await _context.Appointments
+                .Include(a => a.TimeSlot)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (appointment == null)
+            {
+                return Json(new { success = false, message = _localizer["AppointmentNotFound"].Value });
+            }
+
+            if (!Enum.TryParse<Appointment.AppointmentStatus>(status, out var newStatus))
+            {
+                return Json(new { success = false, message = _localizer["InvalidStatus"].Value });
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Json(new { success = false, message = _localizer["Unauthorized"].Value });
+            }
+
+            bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+            bool isDoctor = await _userManager.IsInRoleAsync(currentUser, "Doctor");
+
+            if (!isAdmin)
+            {
+                if (isDoctor)
+                {
+                    var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == currentUser.Id);
+                    if (doctor == null || doctor.Id != appointment.DoctorId)
+                    {
+                        return Json(new { success = false, message = _localizer["AccessDenied"].Value });
+                    }
+                }
+                else
+                {
+                    var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == currentUser.Id);
+                    if (patient == null || patient.Id != appointment.PatientId)
+                    {
+                        return Json(new { success = false, message = _localizer["AccessDenied"].Value });
+                    }
+
+                    if (newStatus != Appointment.AppointmentStatus.CANCELED)
+                    {
+                        return Json(new { success = false, message = _localizer["OnlyCancelAllowed"].Value });
+                    }
+                }
+            }
+
+            if (newStatus == Appointment.AppointmentStatus.CANCELED && appointment.TimeSlot != null)
+            {
+                appointment.TimeSlot.isBooked = false;
+            }
+
+            appointment.Status = newStatus;
+            await _context.SaveChangesAsync();
+
+            return Json(new
+            {
+                success = true,
+                message = GetStatusUpdateMessage(newStatus)
+            });
+        }
+
+
+        private string GetStatusUpdateMessage(Appointment.AppointmentStatus status)
+        {
+            return status switch
+            {
+                Appointment.AppointmentStatus.CONFIRMED => _localizer["StatusConfirmedMessage"].Value,
+                Appointment.AppointmentStatus.COMPLETED => _localizer["StatusCompletedMessage"].Value,
+                Appointment.AppointmentStatus.CANCELED => _localizer["StatusCanceledMessage"].Value,
+                _ => _localizer["StatusUpdatedMessage"].Value
+            };
         }
 
         private void PopulateDropdowns(int? selectedTimeSlotId = null, int? selectedPatientId = null)
@@ -412,39 +500,45 @@ namespace med_service.Controllers
             );
         }
 
-
         private bool AppointmentExists(int id)
         {
             return _context.Appointments.Any(e => e.Id == id);
         }
 
-        // отримати історію прийомів пацієнта
-        [HttpGet("patient/{patientId}/history")]
-        public async Task<IActionResult> GetPatientHistory(int patientId, Appointment.AppointmentStatus? status)
+        // отримати історію записів пацієнта
+
+        //GET: Patients/PatientHistory/5
+        [Authorize(Roles = "Patient")]
+        [HttpGet("Patient/MyHistory")]
+        public async Task<IActionResult> PatientHistory()
         {
-            var query = _context.Appointments
-                .Where(a => a.PatientId == patientId)
-                .Include(a => a.Doctor)
-                .ThenInclude(d => d.User)
-                .Include(a => a.TimeSlot)
+            var userId = _userManager.GetUserId(User); //отримуємо ID залогіненого юзера
+
+            var patient = await _context.Patients
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
+            var appointments = _context.Appointments
+                .Include(a => a.Doctor).ThenInclude(d => d.User)
+                .Include(a => a.TimeSlot).ThenInclude(ts => ts.Schedule)
+                .Where(a => a.PatientId == patient.Id)
                 .OrderByDescending(a => a.TimeSlot.StartTime)
                 .AsQueryable();
 
+            ViewBag.PatientName = $"{patient.User.FirstName} {patient.User.LastName}";
+            ViewBag.PatientId = patient.Id;
 
-
-            if (status.HasValue)
-            {
-                query = query.Where(a => a.Status == status.Value);
-            }
-
-            var history = await query.AsNoTracking().ToListAsync();
-
+            //return View(appointments);
+            var history = await appointments.AsNoTracking().ToListAsync();
             return View("PatientHistory", history);
-            //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
         }
 
         // отримати історію прийомів лікаря
-
         [HttpGet("doctor/{doctorId}/history")]
         public async Task<IActionResult> GetDoctorHistory(int doctorId, Appointment.AppointmentStatus? status)
         {
@@ -464,9 +558,6 @@ namespace med_service.Controllers
             var history = await query.AsNoTracking().ToListAsync();
             return View("DoctorHistory", history);
         }
-
-
-        //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
     }
 
 }

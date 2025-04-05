@@ -44,12 +44,13 @@ else
                     <th>@Localizer["time"]</th>
                     <th>@Localizer["status"]</th>
                     <th>@Localizer["notes"]</th>
+                    <th>@Localizer["actions"]</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
-                    <tr>
+                    <tr id="appointment-row-@item.Id">
                         @if (ViewBag.UserRole == "Doctor")
                         {
                             <td>@item.Patient.User.LastName @item.Patient.User.FirstName</td>
@@ -61,26 +62,152 @@ else
                         <td>@item.TimeSlot.Schedule.Day</td>
                         <td>@item.TimeSlot.StartTime.ToString(@"hh\:mm") - @item.TimeSlot.EndTime.ToString(@"hh\:mm")</td>
                         <td>
-                            @switch (item.Status)
-                            {
-                                case Appointment.AppointmentStatus.PENDING:
-                                    <span class="badge bg-warning">@Localizer["statusPending"]</span>
-                                    break;
-                                case Appointment.AppointmentStatus.CONFIRMED:
-                                    <span class="badge bg-success">@Localizer["statusConfirmed"]</span>
-                                    break;
-                                case Appointment.AppointmentStatus.COMPLETED:
-                                    <span class="badge bg-primary">@Localizer["statusCompleted"]</span>
-                                    break;
-                                case Appointment.AppointmentStatus.CANCELED:
-                                    <span class="badge bg-danger">@Localizer["statusCanceled"]</span>
-                                    break;
-                            }
+                            <span id="status-badge-@item.Id" class="badge @GetStatusBadgeClass(item.Status)">
+                                @GetStatusText(item.Status)
+                            </span>
                         </td>
                         <td>@(string.IsNullOrEmpty(item.Notes) ? "—" : item.Notes)</td>
+                        <td id="actions-cell-@item.Id">
+                            @if (item.Status == Appointment.AppointmentStatus.PENDING ||
+                           item.Status == Appointment.AppointmentStatus.CONFIRMED)
+                            {
+                                <div class="btn-group" role="group">
+                                    @if (ViewBag.UserRole == "Doctor" && item.Status == Appointment.AppointmentStatus.PENDING)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-success me-1"
+                                                onclick="updateAppointmentStatus(@item.Id, 'CONFIRMED')">
+                                            @Localizer["confirm"]
+                                        </button>
+                                    }
+                                    @if (ViewBag.UserRole == "Doctor")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-primary me-1"
+                                                onclick="updateAppointmentStatus(@item.Id, 'COMPLETED')">
+                                            @Localizer["complete"]
+                                        </button>
+                                    }
+                                    <button type="button" class="btn btn-sm btn-danger"
+                                            onclick="updateAppointmentStatus(@item.Id, 'CANCELED')">
+                                        @Localizer["cancel"]
+                                    </button>
+                                </div>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
+}
+
+@functions {
+    private string GetStatusBadgeClass(Appointment.AppointmentStatus status)
+    {
+        return status switch
+        {
+            Appointment.AppointmentStatus.PENDING => "bg-warning",
+            Appointment.AppointmentStatus.CONFIRMED => "bg-success",
+            Appointment.AppointmentStatus.COMPLETED => "bg-primary",
+            Appointment.AppointmentStatus.CANCELED => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    private LocalizedHtmlString GetStatusText(Appointment.AppointmentStatus status)
+    {
+        return status switch
+        {
+            Appointment.AppointmentStatus.PENDING => Localizer["statusPending"],
+            Appointment.AppointmentStatus.CONFIRMED => Localizer["statusConfirmed"],
+            Appointment.AppointmentStatus.COMPLETED => Localizer["statusCompleted"],
+            Appointment.AppointmentStatus.CANCELED => Localizer["statusCanceled"],
+            _ => Localizer["Unknown"]
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        function updateAppointmentStatus(appointmentId, newStatus) {
+            const actionsCell = document.getElementById(`actions-cell-${appointmentId}`);
+            if (!actionsCell) return;
+
+            const originalContent = actionsCell.innerHTML;
+            actionsCell.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
+
+            const token = document.querySelector('form input[name="__RequestVerificationToken"]')?.value;
+
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            formData.append('__RequestVerificationToken', token);
+
+            fetch(`/Appointments/UpdateStatus/${appointmentId}`, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                body: new URLSearchParams({
+                    'status': newStatus,
+                    '__RequestVerificationToken': token
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('@Html.Raw(Localizer["StatusUpdateError"].Value)');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    updateStatusDisplay(appointmentId, newStatus);
+
+                    if (newStatus === 'CANCELED' || newStatus === 'COMPLETED') {
+                        actionsCell.innerHTML = '';
+                    } else {
+                        actionsCell.innerHTML = originalContent;
+                    }
+
+                } else {
+                    actionsCell.innerHTML = originalContent;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                actionsCell.innerHTML = originalContent;
+            });
+        }
+
+        function updateStatusDisplay(appointmentId, newStatus) {
+            const statusBadge = document.getElementById(`status-badge-${appointmentId}`);
+            if (!statusBadge) return;
+
+            let badgeClass = '';
+            let statusText = '';
+
+            switch(newStatus) {
+                case 'PENDING':
+                    badgeClass = 'bg-warning';
+                    statusText = '@Html.Raw(Localizer["statusPending"].Value)';
+                    break;
+                case 'CONFIRMED':
+                    badgeClass = 'bg-success';
+                    statusText = '@Html.Raw(Localizer["statusConfirmed"].Value)';
+                    break;
+                case 'COMPLETED':
+                    badgeClass = 'bg-primary';
+                    statusText = '@Html.Raw(Localizer["statusCompleted"].Value)';
+                    break;
+                case 'CANCELED':
+                    badgeClass = 'bg-danger';
+                    statusText = '@Html.Raw(Localizer["statusCanceled"].Value)';
+                    break;
+                default:
+                    badgeClass = 'bg-secondary';
+                    statusText = 'Unknown';
+            }
+
+            statusBadge.className = `badge ${badgeClass}`;
+            statusBadge.textContent = statusText;
+        }
+    </script>
 }

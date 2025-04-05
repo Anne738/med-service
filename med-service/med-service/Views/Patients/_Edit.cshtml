@@ -10,21 +10,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            @if (!ViewData.ModelState.IsValid)
-            {
-                <div class="alert alert-danger">
-                    <h5>@Localizer["Errors"]:</h5>
-                    <ul>
-                        @foreach (var modelStateEntry in ViewData.ModelState.Values)
-                        {
-                            foreach (var error in modelStateEntry.Errors)
-                            {
-                                <li>@error.ErrorMessage</li>
-                            }
-                        }
-                    </ul>
-                </div>
-            }
 
             <form asp-action="Edit">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>

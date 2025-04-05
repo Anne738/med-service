@@ -240,11 +240,6 @@ namespace med_service.Controllers
                         ModelState.AddModelError("TimeSlotId", "Вказаний часовий слот не знайдено");
                         TempData["FormError"] = "Вказаний часовий слот не знайдено";
                     }
-                    else if (timeSlot.isBooked)
-                    {
-                        ModelState.AddModelError("TimeSlotId", "Вибачте, цей слот вже зайнятий");
-                        TempData["FormError"] = "Вибачте, цей слот вже зайнятий";
-                    }
                     else
                     {
                         // Перевіряємо, чи обрано пацієнта
@@ -257,29 +252,52 @@ namespace med_service.Controllers
                         {
                             try
                             {
-                                // Всі перевірки пройдені, створюємо запис
-                                var appointment = new Appointment
-                                {
-                                    PatientId = model.PatientId,
-                                    DoctorId = timeSlot.Schedule.DoctorId,
-                                    TimeSlotId = timeSlot.Id,
-                                    Status = Appointment.AppointmentStatus.PENDING,
-                                    Notes = model.Notes
-                                };
+                                // Перевіряємо, чи існує вже запис на цей слот
+                                var existingAppointment = await _db.Appointments
+                                    .FirstOrDefaultAsync(a => a.TimeSlotId == timeSlot.Id);
 
-                                _db.Appointments.Add(appointment);
+                                if (existingAppointment != null)
+                                {
+                                    // Якщо запис існує, оновлюємо його
+                                    existingAppointment.PatientId = model.PatientId;
+                                    existingAppointment.DoctorId = timeSlot.Schedule.DoctorId;
+                                    existingAppointment.Status = Appointment.AppointmentStatus.PENDING;
+                                    existingAppointment.Notes = model.Notes;
+                                    _db.Appointments.Update(existingAppointment);
+                                }
+                                else
+                                {
+                                    // Створюємо новий запис
+                                    var appointment = new Appointment
+                                    {
+                                        PatientId = model.PatientId,
+                                        DoctorId = timeSlot.Schedule.DoctorId,
+                                        TimeSlotId = timeSlot.Id,
+                                        Status = Appointment.AppointmentStatus.PENDING,
+                                        Notes = model.Notes
+                                    };
+                                    _db.Appointments.Add(appointment);
+                                }
+
+                                // Позначаємо слот як зайнятий
                                 timeSlot.isBooked = true;
+                                _db.TimeSlots.Update(timeSlot);
+
                                 await _db.SaveChangesAsync();
 
                                 // Перенаправляем пациента на список его записей, а админа - на детали записи
                                 if (isAdmin)
                                 {
-                                    return RedirectToAction("Details", "Appointments", new { id = appointment.Id });
+                                    var latestAppointment = await _db.Appointments
+                                        .Where(a => a.TimeSlotId == timeSlot.Id)
+                                        .FirstOrDefaultAsync();
+                                    return RedirectToAction("Index", "Appointments");
                                 }
                                 else
                                 {
                                     // Перенаправляем на страницу с записями пациента
                                     return RedirectToAction("MyAppointments");
+                                    
                                 }
                             }
                             catch (Exception ex)
@@ -370,29 +388,26 @@ namespace med_service.Controllers
             }
         }
 
+
         [Authorize]
         public async Task<IActionResult> MyAppointments()
         {
-            // Получаем текущего пользователя
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
             {
-                return Challenge(); // Перенаправляет на страницу входа
+                return Challenge(); 
             }
 
-            // Проверяем роли пользователя
             bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
             bool isDoctor = await _userManager.IsInRoleAsync(currentUser, "Doctor");
 
             if (isAdmin)
             {
-                // Админов перенаправляем на полный список записей
                 return RedirectToAction("Index", "Appointments");
             }
 
             if (isDoctor)
             {
-                // Для докторов показываем их записи
                 var doctor = await _db.Doctors
                     .FirstOrDefaultAsync(d => d.UserId == currentUser.Id);
 
@@ -414,7 +429,6 @@ namespace med_service.Controllers
             }
             else
             {
-                // Для пациентов показываем их записи
                 var patient = await _db.Patients
                     .FirstOrDefaultAsync(p => p.UserId == currentUser.Id);
 
@@ -439,7 +453,6 @@ namespace med_service.Controllers
         // GET: Timetables/FindDoctor
         public async Task<IActionResult> FindDoctor(DoctorFilterViewModel model)
         {
-            // Заполним списки для фильтров
             model.Specializations = await _db.Specializations
                 .Select(s => new SelectListItem { Value = s.Id.ToString(), Text = s.Name })
                 .ToListAsync();
@@ -448,14 +461,12 @@ namespace med_service.Controllers
                 .Select(h => new SelectListItem { Value = h.Id.ToString(), Text = h.Name })
                 .ToListAsync();
 
-            // Получаем запрос на выборку докторов
             var doctorsQuery = _db.Doctors
                 .Include(d => d.User)
                 .Include(d => d.Hospital)
                 .Include(d => d.Specialization)
                 .AsQueryable();
 
-            // Применяем фильтры
             if (model.SpecializationId.HasValue)
             {
                 doctorsQuery = doctorsQuery.Where(d => d.SpecializationId == model.SpecializationId.Value);
@@ -473,17 +484,14 @@ namespace med_service.Controllers
                     d.User.LastName.Contains(model.DoctorName));
             }
 
-            // Выполняем запрос
             model.Doctors = await doctorsQuery.ToListAsync();
             model.IsSearched = true;
 
-            // Если найден только один доктор, сразу перенаправляем на его расписание
             if (model.Doctors.Count == 1)
             {
                 return RedirectToAction("Doctor", new { id = model.Doctors[0].Id });
             }
 
-            // Возвращаем результаты на главную страницу
             return View("~/Views/Home/Index.cshtml", model);
         }
     
@@ -498,23 +506,4 @@ namespace med_service.Controllers
         }
 
     }
-
-
-    public class BookAppointmentViewModel
-    {
-        public int TimeSlotId { get; set; }
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
-        public int DoctorId { get; set; }
-        public string DoctorName { get; set; }
-        public Schedule.DayOfWeek ScheduleDay { get; set; }
-        public int PatientId { get; set; }
-
-        [ValidateNever]
-        public string PatientName { get; set; }
-        public string Notes { get; set; }
-        public bool IsAdmin { get; set; }
-        public List<SelectListItem> PatientsList { get; set; } = new List<SelectListItem>();
-    }
-
 }

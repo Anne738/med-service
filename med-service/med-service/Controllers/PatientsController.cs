@@ -18,9 +18,9 @@ namespace med_service.Controllers
     public class PatientsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<User> _userManager; 
 
-        public PatientsController(ApplicationDbContext context, UserManager<User> userManager)
+        public PatientsController(ApplicationDbContext context, UserManager<User> userManager) 
         {
             _context = context;
             _userManager = userManager;
@@ -335,29 +335,5 @@ namespace med_service.Controllers
             return _context.Patients.Any(e => e.Id == id);
         }
 
-        // GET: Patients/GetPatientHistory/5
-        public async Task<IActionResult> GetPatientHistory(int patientId)
-        {
-            var patient = await _context.Patients
-                .Include(p => p.User)
-                .FirstOrDefaultAsync(p => p.Id == patientId);
-
-            if (patient == null)
-            {
-                return NotFound();
-            }
-
-            var appointments = await _context.Appointments
-                .Include(a => a.Doctor).ThenInclude(d => d.User)
-                .Include(a => a.TimeSlot).ThenInclude(ts => ts.Schedule)
-                .Where(a => a.PatientId == patientId)
-                .OrderByDescending(a => a.TimeSlot.StartTime)
-                .ToListAsync();
-
-            ViewBag.PatientName = $"{patient.User.FirstName} {patient.User.LastName}";
-            ViewBag.PatientId = patientId;
-
-            return View(appointments);
-        }
     }
 }

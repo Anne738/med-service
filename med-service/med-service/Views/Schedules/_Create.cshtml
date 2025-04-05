@@ -1,0 +1,44 @@
+﻿@model med_service.ViewModels.ScheduleViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+<partial name="_ValidationScriptsPartial" />
+
+<!-- Create Modal -->
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">@Localizer["lblTitle"]</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group mb-3">
+                    <label asp-for="Day" class="control-label">@Localizer["lblDay"]</label>
+                    <select asp-for="Day" asp-items="Html.GetEnumSelectList<med_service.Models.Schedule.DayOfWeek>()" class="form-control">
+                        <option value="" selected disabled>@Localizer["lblDayPlaceholder"]</option>
+                    </select>
+                    <span asp-validation-for="Day" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="DoctorId" class="control-label">@Localizer["lblDoctorId"]</label>
+                    <select asp-for="DoctorId" class="form-control" asp-items="ViewBag.DoctorId"></select>
+                    <span asp-validation-for="DoctorId" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="WorkDayStart" class="control-label">@Localizer["lblWorkDayStart"]</label>
+                    <select asp-for="WorkDayStart" class="form-control" asp-items="ViewBag.Hours"></select>
+                    <span asp-validation-for="WorkDayStart" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="WorkDayEnd" class="control-label">@Localizer["lblWorkDayEnd"]</label>
+                    <select asp-for="WorkDayEnd" class="form-control" asp-items="ViewBag.Hours"></select>
+                    <span asp-validation-for="WorkDayEnd" class="text-danger"></span>
+                </div>
+                <div class="form-group mt-3">
+                    <input type="submit" value="@Localizer["lblSubmitButton"]" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

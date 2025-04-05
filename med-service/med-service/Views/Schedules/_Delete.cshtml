@@ -1,0 +1,28 @@
+﻿<!-- Delete Modal -->
+@model med_service.ViewModels.ScheduleViewModel
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">@Localizer["lblDeleteTitle"]</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <h3>@Localizer["lblDeleteConfirmation"]</h3>
+            <dl class="row">
+                <dt class="col-sm-4">@Localizer["lblDay"]</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Day)</dd>
+                <dt class="col-sm-4">@Localizer["lblDoctor"]</dt>
+                <dd class="col-sm-8">@Model.DoctorFullName</dd>
+                <dt class="col-sm-4">@Localizer["lblWorkingHours"]</dt>
+                <dd class="col-sm-8">@Model.WorkingHours</dd>
+            </dl>
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <div class="text-center">
+                    <input type="submit" value="@Localizer["lblDelete"]" class="btn btn-danger" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["lblBackToList"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
