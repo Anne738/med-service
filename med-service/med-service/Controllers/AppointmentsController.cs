@@ -395,13 +395,11 @@ namespace med_service.Controllers
             return RedirectToAction(nameof(Index)); //Redirect to the list of appointments
         }
 
-        // Новый метод для асинхронного обновления статуса записи
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> UpdateStatus(int id, string status)
         {
-            // Проверяем существование записи
             var appointment = await _context.Appointments
                 .Include(a => a.TimeSlot)
                 .FirstOrDefaultAsync(a => a.Id == id);
@@ -411,13 +409,11 @@ namespace med_service.Controllers
                 return Json(new { success = false, message = _localizer["AppointmentNotFound"].Value });
             }
 
-            // Проверка корректности статуса
             if (!Enum.TryParse<Appointment.AppointmentStatus>(status, out var newStatus))
             {
                 return Json(new { success = false, message = _localizer["InvalidStatus"].Value });
             }
 
-            // Проверяем права доступа
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
             {
@@ -427,12 +423,10 @@ namespace med_service.Controllers
             bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
             bool isDoctor = await _userManager.IsInRoleAsync(currentUser, "Doctor");
 
-            // Проверяем права на изменение
             if (!isAdmin)
             {
                 if (isDoctor)
                 {
-                    // Врач может изменять только свои записи
                     var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == currentUser.Id);
                     if (doctor == null || doctor.Id != appointment.DoctorId)
                     {
@@ -441,14 +435,12 @@ namespace med_service.Controllers
                 }
                 else
                 {
-                    // Пациент может только отменить свою запись
                     var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == currentUser.Id);
                     if (patient == null || patient.Id != appointment.PatientId)
                     {
                         return Json(new { success = false, message = _localizer["AccessDenied"].Value });
                     }
 
-                    // Пациент может только отменить запись
                     if (newStatus != Appointment.AppointmentStatus.CANCELED)
                     {
                         return Json(new { success = false, message = _localizer["OnlyCancelAllowed"].Value });
@@ -456,23 +448,21 @@ namespace med_service.Controllers
                 }
             }
 
-            // Если отменяем запись, освобождаем слот
             if (newStatus == Appointment.AppointmentStatus.CANCELED && appointment.TimeSlot != null)
             {
                 appointment.TimeSlot.isBooked = false;
             }
 
-            // Обновляем статус
             appointment.Status = newStatus;
             await _context.SaveChangesAsync();
 
-            // Возвращаем успешный результат
             return Json(new
             {
                 success = true,
                 message = GetStatusUpdateMessage(newStatus)
             });
         }
+
 
         private string GetStatusUpdateMessage(Appointment.AppointmentStatus status)
         {

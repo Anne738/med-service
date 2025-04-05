@@ -1,5 +1,6 @@
 ﻿// Файл: Models/ViewModels/BookAppointmentViewModel.cs
 using med_service.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace med_service.ViewModels
@@ -13,7 +14,11 @@ namespace med_service.ViewModels
         public string DoctorName { get; set; }
         public Schedule.DayOfWeek ScheduleDay { get; set; }
         public int PatientId { get; set; }
+
+        [ValidateNever]
+        public string PatientName { get; set; }
         public string Notes { get; set; }
+        public bool IsAdmin { get; set; }
         public List<SelectListItem> PatientsList { get; set; } = new List<SelectListItem>();
     }
 }
