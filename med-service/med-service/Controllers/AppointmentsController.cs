@@ -17,7 +17,7 @@ using static med_service.Models.Appointment;
 
 namespace med_service.Controllers
 {
-
+    //Appointment controller
     public class AppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
