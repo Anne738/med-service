@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,15 +13,17 @@ using Microsoft.AspNetCore.Identity;
 using med_service.Helpers;
 using System.Numerics;
 using Microsoft.Extensions.Localization;
+using static med_service.Models.Appointment;
 
 namespace med_service.Controllers
 {
+
     public class AppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly IStringLocalizer<AppointmentsController> _localizer;
-
+        private readonly UserManager<User> _userManager;
 
         public AppointmentsController(ApplicationDbContext context, IStringLocalizer<AppointmentsController> localizer, UserManager<User> userManager)
         {
@@ -41,8 +43,9 @@ namespace med_service.Controllers
             ViewData["PatientSortParam"] = sortOrder == "Patient" ? "patient_desc" : "Patient";
 
             ViewBag.Statuses = Enum.GetValues(typeof(Appointment.AppointmentStatus))
-                                   .Cast<Appointment.AppointmentStatus>()
-                                   .ToList();
+                       .Cast<Appointment.AppointmentStatus>()
+                       .Where(s => s != Appointment.AppointmentStatus.CANCELED) //Exclude CANCELED
+                       .ToList();
 
             if (searchString != null)
             {
@@ -130,6 +133,7 @@ namespace med_service.Controllers
                 .Include(a => a.Doctor)
                     .ThenInclude(d => d.User)
                 .Include(a => a.TimeSlot)
+                    .ThenInclude(ts => ts.Schedule) // Ensure Schedule (and Day) is included
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (appointment == null) return NotFound();
@@ -144,7 +148,7 @@ namespace med_service.Controllers
                 DoctorName = $"{appointment.Doctor.User.FirstName} {appointment.Doctor.User.LastName}",
                 TimeSlotId = appointment.TimeSlotId,
                 Notes = appointment.Notes,
-                TimeSlot = appointment.TimeSlot
+                TimeSlot = appointment.TimeSlot //Pass the entire TimeSlot object, including Schedule and Day
             };
 
             return PartialView("~/Views/Appointments/_Details.cshtml", viewModel);
@@ -162,51 +166,50 @@ namespace med_service.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([Bind("Status,PatientId,DoctorId,TimeSlotId,Notes")] AppointmentViewModel appointmentViewModel)
+        public async Task<IActionResult> Create([Bind("Status,PatientId,TimeSlotId,Notes")] AppointmentViewModel appointmentViewModel)
         {
             if (!ModelState.IsValid)
             {
-                PopulateDropdowns(
-                    selectedTimeSlotId: appointmentViewModel.TimeSlotId,
-                    selectedDoctorId: appointmentViewModel.DoctorId,
-                    selectedPatientId: appointmentViewModel.PatientId
-                );
-                return View(appointmentViewModel);
+                PopulateDropdowns(selectedTimeSlotId: appointmentViewModel.TimeSlotId, selectedPatientId: appointmentViewModel.PatientId);
+                return PartialView("~/Views/Appointments/_Create.cshtml", appointmentViewModel);
             }
+
+            // Fetch the selected TimeSlot and its associated doctor
+            var timeSlot = await _context.TimeSlots
+                .Include(ts => ts.Schedule)
+                    .ThenInclude(s => s.Doctor)
+                .FirstOrDefaultAsync(ts => ts.Id == appointmentViewModel.TimeSlotId);
+
+            if (timeSlot == null || timeSlot.Schedule?.Doctor == null)
+            {
+                ModelState.AddModelError("TimeSlotId", "The selected time slot is invalid or does not have an associated doctor.");
+                PopulateDropdowns(selectedTimeSlotId: appointmentViewModel.TimeSlotId, selectedPatientId: appointmentViewModel.PatientId);
+                return PartialView("~/Views/Appointments/_Create.cshtml", appointmentViewModel);
+            }
+
+            // Automatically assign the DoctorId based on TimeSlot
+            var doctorId = timeSlot.Schedule.Doctor.Id;
 
             var appointment = new Appointment
             {
                 Status = appointmentViewModel.Status,
                 PatientId = appointmentViewModel.PatientId,
-                DoctorId = appointmentViewModel.DoctorId,
+                DoctorId = doctorId, // Set the DoctorId automatically
                 TimeSlotId = appointmentViewModel.TimeSlotId,
                 Notes = appointmentViewModel.Notes
             };
 
-            var timeSlot = await _context.TimeSlots.FirstOrDefaultAsync(ts => ts.Id == appointmentViewModel.TimeSlotId);
-            if (timeSlot != null)
-            {
-                timeSlot.isBooked = true;
-                _context.Update(timeSlot);
-            }
-            else
-            {
-                ModelState.AddModelError("TimeSlotId", "The selected time slot is invalid.");
-                PopulateDropdowns(
-                    selectedTimeSlotId: appointmentViewModel.TimeSlotId,
-                    selectedDoctorId: appointmentViewModel.DoctorId,
-                    selectedPatientId: appointmentViewModel.PatientId
-                );
-                return PartialView("~/Views/Appointments/_Create.cshtml", appointmentViewModel);
-            }
+            // Mark the TimeSlot as booked
+            timeSlot.isBooked = true;
+            _context.Update(timeSlot);
 
+            // Save the appointment
             _context.Add(appointment);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Appointments/Edit/{id}
         // GET: Appointments/Edit/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
@@ -214,6 +217,12 @@ namespace med_service.Controllers
             if (id == null) return NotFound();
 
             var appointment = await _context.Appointments
+                .Include(a => a.TimeSlot)
+                    .ThenInclude(ts => ts.Schedule)
+                        .ThenInclude(s => s.Doctor)
+                            .ThenInclude(d => d.User)
+                .Include(a => a.Patient)
+                    .ThenInclude(p => p.User)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (appointment == null) return NotFound();
@@ -223,12 +232,15 @@ namespace med_service.Controllers
                 Id = appointment.Id,
                 Status = appointment.Status,
                 PatientId = appointment.PatientId,
-                DoctorId = appointment.DoctorId,
                 TimeSlotId = appointment.TimeSlotId,
+                DoctorName = appointment.TimeSlot?.Schedule?.Doctor?.User != null
+                    ? $"{appointment.TimeSlot.Schedule.Doctor.User.FirstName} {appointment.TimeSlot.Schedule.Doctor.User.LastName}"
+                    : "Unavailable", // Dynamically derive doctor's full name
                 Notes = appointment.Notes
             };
 
-            PopulateDropdowns(appointment.TimeSlotId, appointment.DoctorId, appointment.PatientId);
+            // Populate dropdowns (no manual selection for DoctorId)
+            PopulateDropdowns(appointment.TimeSlotId, appointment.PatientId);
 
             return PartialView("~/Views/Appointments/_Edit.cshtml", viewModel);
         }
@@ -245,24 +257,82 @@ namespace med_service.Controllers
 
             if (!ModelState.IsValid)
             {
-                PopulateDropdowns(model.TimeSlotId, model.DoctorId, model.PatientId);
+                PopulateDropdowns(model.TimeSlotId, model.PatientId);
                 return PartialView("~/Views/Appointments/_Edit.cshtml", model);
             }
 
-            var appointment = await _context.Appointments.FirstOrDefaultAsync(a => a.Id == id);
+            // Fetch the existing appointment
+            var appointment = await _context.Appointments
+                .Include(a => a.TimeSlot) // Include TimeSlot for update logic
+                .FirstOrDefaultAsync(a => a.Id == id);
+
             if (appointment == null)
             {
                 return Json(new { success = false, message = "Appointment not found." });
             }
 
-            // Update fields
+            // Handle status change to CANCELED
+            if (model.Status == Appointment.AppointmentStatus.CANCELED)
+            {
+                if (appointment.TimeSlot != null)
+                {
+                    var associatedTimeSlot = await _context.TimeSlots
+                        .FirstOrDefaultAsync(ts => ts.Id == appointment.TimeSlotId);
+
+                    if (associatedTimeSlot != null)
+                    {
+                        associatedTimeSlot.isBooked = false; // Mark TimeSlot as available
+                        _context.Update(associatedTimeSlot);
+                    }
+                }
+
+                // Delete the appointment since it's canceled
+                _context.Appointments.Remove(appointment);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index)); // Return immediately after deletion
+            }
+
+            // Check if TimeSlotId has changed
+            bool timeSlotChanged = appointment.TimeSlotId != model.TimeSlotId;
+
+            if (timeSlotChanged)
+            {
+                // Reset the old TimeSlot's isBooked flag
+                var oldTimeSlot = await _context.TimeSlots.FirstOrDefaultAsync(ts => ts.Id == appointment.TimeSlotId);
+                if (oldTimeSlot != null)
+                {
+                    oldTimeSlot.isBooked = false; // Un-book the old TimeSlot
+                    _context.Update(oldTimeSlot);
+                }
+
+                // Set the new TimeSlot's isBooked flag
+                var newTimeSlot = await _context.TimeSlots
+                    .Include(ts => ts.Schedule) // Include Schedule to derive DoctorId
+                    .ThenInclude(s => s.Doctor)
+                    .FirstOrDefaultAsync(ts => ts.Id == model.TimeSlotId);
+
+                if (newTimeSlot != null && newTimeSlot.Schedule?.Doctor != null)
+                {
+                    newTimeSlot.isBooked = true; // Mark the new TimeSlot as booked
+                    appointment.DoctorId = newTimeSlot.Schedule.Doctor.Id; // Safely derive DoctorId from TimeSlot's Schedule
+                    _context.Update(newTimeSlot);
+                }
+                else
+                {
+                    ModelState.AddModelError("TimeSlotId", "The selected time slot is invalid or does not have an associated doctor.");
+                    PopulateDropdowns(model.TimeSlotId, model.PatientId);
+                    return PartialView("~/Views/Appointments/_Edit.cshtml", model);
+                }
+            }
+
+            // Update appointment fields
             appointment.Status = model.Status;
             appointment.PatientId = model.PatientId;
-            appointment.DoctorId = model.DoctorId;
             appointment.TimeSlotId = model.TimeSlotId;
             appointment.Notes = model.Notes;
 
-            // Save changes to database
+            // Save changes
             _context.Update(appointment);
             await _context.SaveChangesAsync();
 
@@ -326,11 +396,100 @@ namespace med_service.Controllers
             return RedirectToAction(nameof(Index)); //Redirect to the list of appointments
         }
 
-        private void PopulateDropdowns(int? selectedTimeSlotId = null, int? selectedDoctorId = null, int? selectedPatientId = null)
+        // Новый метод для асинхронного обновления статуса записи
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> UpdateStatus(int id, string status)
         {
-            //Include available slots or keep the current (selected) one
+            // Проверяем существование записи
+            var appointment = await _context.Appointments
+                .Include(a => a.TimeSlot)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (appointment == null)
+            {
+                return Json(new { success = false, message = _localizer["AppointmentNotFound"].Value });
+            }
+
+            // Проверка корректности статуса
+            if (!Enum.TryParse<Appointment.AppointmentStatus>(status, out var newStatus))
+            {
+                return Json(new { success = false, message = _localizer["InvalidStatus"].Value });
+            }
+
+            // Проверяем права доступа
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Json(new { success = false, message = _localizer["Unauthorized"].Value });
+            }
+
+            bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+            bool isDoctor = await _userManager.IsInRoleAsync(currentUser, "Doctor");
+
+            // Проверяем права на изменение
+            if (!isAdmin)
+            {
+                if (isDoctor)
+                {
+                    // Врач может изменять только свои записи
+                    var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == currentUser.Id);
+                    if (doctor == null || doctor.Id != appointment.DoctorId)
+                    {
+                        return Json(new { success = false, message = _localizer["AccessDenied"].Value });
+                    }
+                }
+                else
+                {
+                    // Пациент может только отменить свою запись
+                    var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == currentUser.Id);
+                    if (patient == null || patient.Id != appointment.PatientId)
+                    {
+                        return Json(new { success = false, message = _localizer["AccessDenied"].Value });
+                    }
+
+                    // Пациент может только отменить запись
+                    if (newStatus != Appointment.AppointmentStatus.CANCELED)
+                    {
+                        return Json(new { success = false, message = _localizer["OnlyCancelAllowed"].Value });
+                    }
+                }
+            }
+
+            // Если отменяем запись, освобождаем слот
+            if (newStatus == Appointment.AppointmentStatus.CANCELED && appointment.TimeSlot != null)
+            {
+                appointment.TimeSlot.isBooked = false;
+            }
+
+            // Обновляем статус
+            appointment.Status = newStatus;
+            await _context.SaveChangesAsync();
+
+            // Возвращаем успешный результат
+            return Json(new
+            {
+                success = true,
+                message = GetStatusUpdateMessage(newStatus)
+            });
+        }
+
+        private string GetStatusUpdateMessage(Appointment.AppointmentStatus status)
+        {
+            return status switch
+            {
+                Appointment.AppointmentStatus.CONFIRMED => _localizer["StatusConfirmedMessage"].Value,
+                Appointment.AppointmentStatus.COMPLETED => _localizer["StatusCompletedMessage"].Value,
+                Appointment.AppointmentStatus.CANCELED => _localizer["StatusCanceledMessage"].Value,
+                _ => _localizer["StatusUpdatedMessage"].Value
+            };
+        }
+
+        private void PopulateDropdowns(int? selectedTimeSlotId = null, int? selectedPatientId = null)
+        {
             var availableSlots = _context.TimeSlots
-                .Where(ts => !ts.isBooked || ts.Id == selectedTimeSlotId) //Show unbooked and selected slot
+                .Where(ts => !ts.isBooked || ts.Id == selectedTimeSlotId)
                 .Include(ts => ts.Schedule)
                     .ThenInclude(s => s.Doctor)
                         .ThenInclude(d => d.User)
@@ -339,23 +498,16 @@ namespace med_service.Controllers
             var timeSlotItems = availableSlots.Select(ts => new SelectListItem
             {
                 Value = ts.Id.ToString(),
-                Text = $"{ts.Schedule.Day} - {ts.Schedule.Doctor?.User?.LastName} - {ts.StartTime:hh\\:mm} - {ts.EndTime:hh\\:mm}",
-                Selected = ts.Id == selectedTimeSlotId //Preselect the correct TimeSlot
+                Text = $"{ts.Schedule.Day} - {ts.Schedule.Doctor.User.LastName} - {ts.StartTime:hh\\:mm} - {ts.EndTime:hh\\:mm}",
+                Selected = ts.Id == selectedTimeSlotId
             }).ToList();
 
-            //Populate ViewBag data for dropdowns
             ViewBag.TimeSlotId = new SelectList(timeSlotItems, "Value", "Text");
-            ViewBag.DoctorId = new SelectList(
-                _context.Doctors.Include(d => d.User),
-                "Id",
-                "User.LastName",
-                selectedDoctorId //Preselect Doctor
-            );
             ViewBag.PatientId = new SelectList(
                 _context.Patients.Include(p => p.User),
                 "Id",
                 "User.LastName",
-                selectedPatientId //Preselect Patient
+                selectedPatientId
             );
         }
 
@@ -398,14 +550,13 @@ namespace med_service.Controllers
         }
 
         // отримати історію прийомів лікаря
-
         [HttpGet("doctor/{doctorId}/history")]
         public async Task<IActionResult> GetDoctorHistory(int doctorId, Appointment.AppointmentStatus? status)
         {
             var query = _context.Appointments
                 .Where(a => a.DoctorId == doctorId)
                 .Include(a => a.Patient)
-                .ThenInclude(p => p.User) 
+                .ThenInclude(p => p.User)
                 .Include(a => a.TimeSlot)
                 .OrderByDescending(a => a.TimeSlot.StartTime)
                 .AsQueryable();
@@ -418,9 +569,6 @@ namespace med_service.Controllers
             var history = await query.AsNoTracking().ToListAsync();
             return View("DoctorHistory", history);
         }
-
-
-        //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
     }
 
 }

@@ -1,41 +1,42 @@
 ﻿@model med_service.ViewModels.HospitalViewModel
-@using Microsoft.AspNetCore.Mvc.Localization
+
 @inject IViewLocalizer Localizer
+<partial name="_ValidationScriptsPartial" />
 
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title" id="modalLabel">@Localizer["lblCreateTitle"]</h5>
+            <h5 class="modal-title">@Localizer["CreateTitle"]</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
             <form asp-action="Create">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-group mb-3">
-                    <label asp-for="Name" class="control-label">@Localizer["lblName"]</label>
+                    <label asp-for="Name" class="control-label">@Localizer["Name"]</label>
                     <input asp-for="Name" class="form-control" />
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
                 <div class="form-group mb-3">
-                    <label asp-for="Address" class="control-label">@Localizer["lblAddress"]</label>
+                    <label asp-for="Address" class="control-label">@Localizer["Address"]</label>
                     <input asp-for="Address" class="form-control" />
                     <span asp-validation-for="Address" class="text-danger"></span>
                 </div>
                 <div class="form-group mb-3">
-                    <label asp-for="Contact">@Localizer["lblContact"]</label>
+                    <label asp-for="Contact">@Localizer["Contact"]</label>
                     <input asp-for="Contact" class="form-control" id="phone" />
                     <span asp-validation-for="Contact" class="text-danger"></span>
                 </div>
                 <div class="form-group mt-3">
-                    <input type="submit" value="@Localizer["lblCreate"]" class="btn btn-primary" />
+                    <input type="submit" value="@Localizer["Create"]" class="btn btn-primary" />
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
         const input = document.querySelector("#phone");
         window.intlTelInput(input, {
             initialCountry: "auto",
@@ -43,5 +44,5 @@
             preferredCountries: ["us", "gb", "ua"],
             utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js"
         });
-    </script>
-}
+    });
+</script>

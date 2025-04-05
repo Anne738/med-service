@@ -1,4 +1,6 @@
-﻿using med_service.Helpers;
+﻿using AspNetCoreGeneratedDocument;
+using med_service.Helpers;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using System.ComponentModel.DataAnnotations;
@@ -21,8 +23,8 @@ namespace med_service.ViewModels
         public string LastName { get; set; }
 
         [Required (ErrorMessage = "lblEmailAddressRequired")]
-        [LocalizedEmailAddress]
-        [Display(Name = "lblEmailAddress")]
+        [EmailAddress(ErrorMessage = "lblEmailAddressInvalid")]
+        [Display(Name = "lblEmail")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "lblPasswordRequired")]

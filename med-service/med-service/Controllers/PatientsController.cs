@@ -102,7 +102,7 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            return View(patient);
+            return PartialView("~/Views/Patients/_Details.cshtml", patient);
         }
 
         // GET: Patients/Create
@@ -119,7 +119,7 @@ namespace med_service.Controllers
                 DateOfBirth = DateTime.Today,
                 UserList = new SelectList(users, "Id", "FullName")
             };
-            return View(viewModel);
+            return PartialView("~/Views/Patients/_Create.cshtml", viewModel);
         }
 
         // POST: Patients/Create
@@ -141,7 +141,7 @@ namespace med_service.Controllers
                     }).ToList();
 
                     viewModel.UserList = new SelectList(users, "Id", "FullName", viewModel.UserId);
-                    return View(viewModel);
+                    return PartialView("~/Views/Patients/_Create.cshtml", viewModel);
                 }
 
                 var existingPatient = await _context.Patients
@@ -158,7 +158,7 @@ namespace med_service.Controllers
                     }).ToList();
 
                     viewModel.UserList = new SelectList(users, "Id", "FullName", viewModel.UserId);
-                    return View(viewModel);
+                    return PartialView("~/Views/Patients/_Create.cshtml", viewModel);
                 }
 
                 var patient = new Patient
@@ -179,7 +179,7 @@ namespace med_service.Controllers
             }).ToList();
 
             viewModel.UserList = new SelectList(userList, "Id", "FullName", viewModel.UserId);
-            return View(viewModel);
+            return PartialView("~/Views/Patients/_Create.cshtml", viewModel);
         }
 
         // GET: Patients/Edit/5
@@ -214,7 +214,7 @@ namespace med_service.Controllers
                 UserList = new SelectList(users, "Id", "FullName", patient.UserId)
             };
 
-            return View(viewModel);
+            return PartialView("~/Views/Patients/_Edit.cshtml", viewModel);
         }
 
         // POST: Patients/Edit/5
@@ -253,7 +253,7 @@ namespace med_service.Controllers
                             }).ToList();
 
                             viewModel.UserList = new SelectList(users, "Id", "FullName", viewModel.UserId);
-                            return View(viewModel);
+                            return PartialView("~/Views/Patients/_Edit.cshtml", viewModel);
                         }
                     }
 
@@ -284,7 +284,7 @@ namespace med_service.Controllers
             }).ToList();
 
             viewModel.UserList = new SelectList(userList, "Id", "FullName", viewModel.UserId);
-            return View(viewModel);
+            return PartialView("~/Views/Patients/_Edit.cshtml", viewModel);
         }
 
         // GET: Patients/Delete/5
@@ -303,7 +303,7 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            return View(patient);
+            return PartialView("~/Views/Patients/_Delete.cshtml", patient);
         }
 
         // POST: Patients/Delete/5

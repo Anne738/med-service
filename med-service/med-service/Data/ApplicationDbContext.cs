@@ -78,7 +78,7 @@ namespace med_service.Data
                 .WithMany(h => h.Doctors)
                 .HasForeignKey(d => d.HospitalId)
                 .OnDelete(DeleteBehavior.Restrict); // Запобігаємо каскадне видалення лікаря при видаленні госпіталю.
-                                                    
+
             // One-to-many relationship between Doctor and Specialization.
             // Якщо в сутності Specialization немає колекції лікарів, використовуємо WithMany без параметрів.
             modelBuilder.Entity<Doctor>()
@@ -86,7 +86,7 @@ namespace med_service.Data
                 .WithMany()
                 .HasForeignKey(d => d.SpecializationId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+
             // One-to-many relationship between Doctor and Schedule.
             // Один лікар може мати декілька розкладів.
             modelBuilder.Entity<Doctor>()
@@ -95,7 +95,7 @@ namespace med_service.Data
                 .HasForeignKey(s => s.DoctorId)
                 .OnDelete(DeleteBehavior.Cascade); // При видаленні лікаря, його розклади видаляються.
             #endregion
-            
+
             #region Patient
             // primary key
             modelBuilder.Entity<Patient>()
@@ -108,13 +108,13 @@ namespace med_service.Data
                 .HasForeignKey<Patient>(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade); // При видаленні користувача, видаляється і пацієнт.
             #endregion
-            
+
             #region Hospital
             // primary key
             modelBuilder.Entity<Hospital>()
                 .HasKey(h => h.Id);
             #endregion
-            
+
             #region Schedule
             // primary key
             modelBuilder.Entity<Schedule>()
@@ -127,7 +127,7 @@ namespace med_service.Data
                 .HasForeignKey(ts => ts.ScheduleId)
                 .OnDelete(DeleteBehavior.Cascade); // При видаленні розкладу, його часові інтервали видаляються.
             #endregion
-            
+
             /*#region TimeSlot
             // primary key
             modelBuilder.Entity<TimeSlot>()

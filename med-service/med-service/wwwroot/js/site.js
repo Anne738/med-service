@@ -114,3 +114,80 @@ function confirmDelete(url, id) {
         modal.show();
     });
 }
+
+//function openBookModal(doctorId, selectedDay, hour) {
+//    console.log('openBookModal called', doctorId, selectedDay, hour);  // Логування аргументів
+
+//    $.ajax({
+//        url: "/Timetables/Book?day=" + selectedDay + "&hour=" + hour + "&minute=0&doctorId=" + doctorId,
+//        type: "GET",
+//        processData: false,
+//        contentType: false,
+//        data: null,
+//        async: true,
+//        success: function (data) {
+//            console.log("Response data:", data);
+
+//            // Перевірка, чи існує модальне вікно
+//            if (!$('#bookAppointmentModal').length) {
+//                // Якщо модального вікна ще немає, створимо нове
+//                console.log('Creating a new modal');
+//                $('body').append('<div class="modal fade" id="bookAppointmentModal" tabindex="-1" aria-labelledby="bookAppointmentModalLabel" aria-hidden="true"></div>');
+//            }
+
+//            // Очистити попередній вміст модалки
+//            $('#bookAppointmentModal').empty();
+
+//            // Вставити новий HTML-контент у модальне вікно
+//            $('#bookAppointmentModal').html(data);
+
+//            // Ініціалізувати модальне вікно та показати його
+//            var modal = new bootstrap.Modal(document.getElementById('bookAppointmentModal'));
+//            modal.show();
+//            console.log('Modal shown');
+//        },
+//        error: function (jqxhr, textStatus, errorThrown) {
+//            console.error('Error loading modal content', jqxhr);
+//            alert("Помилка: " + jqxhr.responseText); // Простий варіант
+//        }
+//    });
+//}
+
+
+function openBookModal(doctorId, selectedDay, hour) {
+    console.log('openBookModal called', doctorId, selectedDay, hour);  // Логирование аргументов
+
+    $.ajax({
+        url: "/Timetables/Book?day=" + selectedDay + "&hour=" + hour + "&minute=0&doctorId=" + doctorId,
+        type: "GET",
+        processData: false,
+        contentType: false,
+        data: null,
+        async: true,
+        error: function (jqxhr, textStatus, errorThrown) {
+            console.error('Error loading modal content', jqxhr);
+            bootbox.alert("Помилка: " + jqxhr.responseText); // Простое оповещение об ошибке
+            $('.modal').remove();
+            $('.modal-backdrop').remove();
+        },
+        success: function (data) {
+            // Проверяем, есть ли уже модальное окно с таким ID
+            if (!$('#modalX').length) {
+                // Если модального окна нет, создаём его
+                console.log('Creating a new modal');
+                $('body').append('<div class="modal fade" id="modalX" tabindex="-1" aria-labelledby="modalXLabel" aria-hidden="true"></div>');
+            }
+
+            // Очищаем содержимое модального окна перед вставкой нового контента
+            $('#modalX').empty();
+
+            // Вставляем новый HTML контент в модальное окно
+            $('#modalX').html(data);
+
+            // Инициализируем и показываем модальное окно
+            var modal = new bootstrap.Modal(document.getElementById('modalX'));
+            modal.show();
+            console.log('Modal shown');
+        }
+    });
+}
