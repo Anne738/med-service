@@ -16,19 +16,22 @@ using Microsoft.Extensions.Localization;
 
 namespace med_service.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class AppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
         private readonly IStringLocalizer<AppointmentsController> _localizer;
 
-        public AppointmentsController(ApplicationDbContext context, IStringLocalizer<AppointmentsController> localizer)
+
+        public AppointmentsController(ApplicationDbContext context, IStringLocalizer<AppointmentsController> localizer, UserManager<User> userManager)
         {
             _context = context;
             _localizer = localizer;
+            _userManager = userManager;
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index(Appointment.AppointmentStatus? status,
                                                string sortOrder, string currentFilter,
                                                string searchString, int? pageIndex)
@@ -116,6 +119,7 @@ namespace med_service.Controllers
         }
 
         // GET: Appointments/Details/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -147,6 +151,7 @@ namespace med_service.Controllers
         }
 
         // GET: Appointments/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             PopulateDropdowns();
@@ -156,6 +161,7 @@ namespace med_service.Controllers
         // POST: Appointments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("Status,PatientId,DoctorId,TimeSlotId,Notes")] AppointmentViewModel appointmentViewModel)
         {
             if (!ModelState.IsValid)
@@ -202,6 +208,7 @@ namespace med_service.Controllers
 
         // GET: Appointments/Edit/{id}
         // GET: Appointments/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -228,6 +235,7 @@ namespace med_service.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, AppointmentViewModel model)
         {
             if (id != model.Id)
@@ -262,6 +270,7 @@ namespace med_service.Controllers
         }
 
         // GET: Appointments/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -295,6 +304,7 @@ namespace med_service.Controllers
         // POST: Appointments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var appointment = await _context.Appointments.FindAsync(id);
@@ -354,29 +364,37 @@ namespace med_service.Controllers
             return _context.Appointments.Any(e => e.Id == id);
         }
 
-        // отримати історію прийомів пацієнта
-        [HttpGet("patient/{patientId}/history")]
-        public async Task<IActionResult> GetPatientHistory(int patientId, Appointment.AppointmentStatus? status)
+        // отримати історію записів пацієнта
+
+        //GET: Patients/PatientHistory/5
+        [Authorize(Roles = "Patient")]
+        [HttpGet("Patient/MyHistory")]
+        public async Task<IActionResult> PatientHistory()
         {
-            var query = _context.Appointments
-                .Where(a => a.PatientId == patientId)
-                .Include(a => a.Doctor)
-                .ThenInclude(d => d.User)
-                .Include(a => a.TimeSlot)
+            var userId = _userManager.GetUserId(User); //отримуємо ID залогіненого юзера
+
+            var patient = await _context.Patients
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
+            var appointments = _context.Appointments
+                .Include(a => a.Doctor).ThenInclude(d => d.User)
+                .Include(a => a.TimeSlot).ThenInclude(ts => ts.Schedule)
+                .Where(a => a.PatientId == patient.Id)
                 .OrderByDescending(a => a.TimeSlot.StartTime)
                 .AsQueryable();
 
+            ViewBag.PatientName = $"{patient.User.FirstName} {patient.User.LastName}";
+            ViewBag.PatientId = patient.Id;
 
-
-            if (status.HasValue)
-            {
-                query = query.Where(a => a.Status == status.Value);
-            }
-
-            var history = await query.AsNoTracking().ToListAsync();
-
+            //return View(appointments);
+            var history = await appointments.AsNoTracking().ToListAsync();
             return View("PatientHistory", history);
-            //return history.Any() ? Ok(history) : NotFound("No past appointments found.");
         }
 
         // отримати історію прийомів лікаря
