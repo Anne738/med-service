@@ -54,4 +54,7 @@
 	<data name="DescriptionLength" xml:space="preserve">
 	<value>Description cannot exceed 500 characters</value>
 	</data>
+  <data name="DescriptionRequired" xml:space="preserve">
+  <value>Description is required</value>
+</data>
 </root>

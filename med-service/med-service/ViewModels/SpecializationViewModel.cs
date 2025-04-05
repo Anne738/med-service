@@ -12,7 +12,8 @@ namespace med_service.ViewModels
         [Display(Name = "Name")]
         public string Name { get; set; }
 
-        [StringLength(500, ErrorMessage = "DescriptionLength")]
+        [Required(ErrorMessage = "DescriptionRequired")]
+        [StringLength(200, ErrorMessage = "DescriptionLength")]
         [Display(Name = "Description")]
         public string Description { get; set; }
     }
