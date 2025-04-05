@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,16 +17,15 @@ using static med_service.Models.Appointment;
 
 namespace med_service.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+
     public class AppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
         private readonly IStringLocalizer<AppointmentsController> _localizer;
         private readonly UserManager<User> _userManager;
 
-        public AppointmentsController(ApplicationDbContext context,
-            IStringLocalizer<AppointmentsController> localizer,
-            UserManager<User> userManager)
+        public AppointmentsController(ApplicationDbContext context, IStringLocalizer<AppointmentsController> localizer, UserManager<User> userManager)
         {
             _context = context;
             _localizer = localizer;
@@ -517,25 +516,36 @@ namespace med_service.Controllers
             return _context.Appointments.Any(e => e.Id == id);
         }
 
-        // отримати історію прийомів пацієнта
-        [HttpGet("patient/{patientId}/history")]
-        public async Task<IActionResult> GetPatientHistory(int patientId, Appointment.AppointmentStatus? status)
+        // отримати історію записів пацієнта
+
+        //GET: Patients/PatientHistory/5
+        [Authorize(Roles = "Patient")]
+        [HttpGet("Patient/MyHistory")]
+        public async Task<IActionResult> PatientHistory()
         {
-            var query = _context.Appointments
-                .Where(a => a.PatientId == patientId)
-                .Include(a => a.Doctor)
-                .ThenInclude(d => d.User)
-                .Include(a => a.TimeSlot)
+            var userId = _userManager.GetUserId(User); //отримуємо ID залогіненого юзера
+
+            var patient = await _context.Patients
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
+            var appointments = _context.Appointments
+                .Include(a => a.Doctor).ThenInclude(d => d.User)
+                .Include(a => a.TimeSlot).ThenInclude(ts => ts.Schedule)
+                .Where(a => a.PatientId == patient.Id)
                 .OrderByDescending(a => a.TimeSlot.StartTime)
                 .AsQueryable();
 
-            if (status.HasValue)
-            {
-                query = query.Where(a => a.Status == status.Value);
-            }
+            ViewBag.PatientName = $"{patient.User.FirstName} {patient.User.LastName}";
+            ViewBag.PatientId = patient.Id;
 
-            var history = await query.AsNoTracking().ToListAsync();
-
+            //return View(appointments);
+            var history = await appointments.AsNoTracking().ToListAsync();
             return View("PatientHistory", history);
         }
 

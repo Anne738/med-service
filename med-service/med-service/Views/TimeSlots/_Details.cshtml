@@ -1,0 +1,33 @@
+﻿@model med_service.ViewModels.TimeSlotViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+
+<!-- Details Modal -->
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">@Localizer["TimeSlotDetails"]</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <dl class="row">
+                <dt class="col-sm-4">@Localizer["Schedule"]</dt>
+                <dd class="col-sm-8">@Model.ScheduleString</dd>
+                <dt class="col-sm-4">@Localizer["Time"]</dt>
+                <dd class="col-sm-8">@Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</dd>
+                <dt class="col-sm-4">@Localizer["IsBooked"]</dt>
+                <dd class="col-sm-8">
+                    @if (Model.IsBooked)
+                    {
+                        <span class="badge bg-danger">@Localizer["Booked"]</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">@Localizer["Available"]</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>

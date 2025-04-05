@@ -11,6 +11,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using med_service.ViewModels;
 using med_service.Helpers;
+using System.Numerics;
 
 namespace med_service.Controllers
 {
@@ -124,7 +125,8 @@ namespace med_service.Controllers
                 return NotFound();
             }
 
-            return View(timeSlot);
+            //return View(timeSlot);
+            return PartialView("~/Views/TimeSlots/_Details.cshtml", timeSlot);
         }
 
         // GET: TimeSlots/Create
@@ -159,7 +161,8 @@ namespace med_service.Controllers
             // часові опції будуть завантажуватися динамічно в залежності від розкладу
             ViewBag.TimeOptions = new SelectList(Enumerable.Empty<SelectListItem>());
 
-            return View(new TimeSlotViewModel());
+            //return View(new TimeSlotViewModel());
+            return PartialView("~/Views/TimeSlots/_Create.cshtml", new TimeSlotViewModel());
         }
 
         // POST: TimeSlots/Create
@@ -250,7 +253,8 @@ namespace med_service.Controllers
                 ViewBag.SchedulesWorkHours = JsonSerializer.Serialize(schedulesWorkHours);
             }
 
-            return View(viewModel);
+            //return View(viewModel);
+            return PartialView("~/Views/TimeSlots/_Create.cshtml", viewModel);
         }
 
         // GET: TimeSlots/Edit/5
@@ -320,7 +324,8 @@ namespace med_service.Controllers
                 ViewBag.TimeOptions = new SelectList(Enumerable.Empty<SelectListItem>());
             }
 
-            return View(viewModel);
+            //return View(viewModel);
+            return PartialView("~/Views/TimeSlots/_Edit.cshtml", viewModel);
         }
 
         // POST: TimeSlots/Edit/5
@@ -340,7 +345,7 @@ namespace med_service.Controllers
                     (viewModel.StartTime.Hours == schedule.WorkDayEnd - 1 && viewModel.StartTime.Minutes > 0))
                 {
                     ModelState.AddModelError("StartTime",
-                        $"Время слота должно быть в рамках рабочего времени ({schedule.WorkDayStart}:00 - {schedule.WorkDayEnd}:00)");
+                        $"Час має бути в діапазоні робочого часу ({schedule.WorkDayStart}:00 - {schedule.WorkDayEnd}:00)");
                 }
             }
 
@@ -403,7 +408,8 @@ namespace med_service.Controllers
                     $"{viewModel.StartTime.Hours:D2}:{viewModel.StartTime.Minutes:D2}:00");
             }
 
-            return View(viewModel);
+            //return View(viewModel);
+            return PartialView("~/Views/TimeSlots/_Edit.cshtml", viewModel);
         }
 
         // GET: TimeSlots/Delete/5
@@ -440,10 +446,11 @@ namespace med_service.Controllers
 
             if (hasRelatedAppointment)
             {
-                TempData["ErrorMessage"] = "Нельзя удалить слот, связанный с приёмами.";
+                TempData["ErrorMessage"] = "Неможна видалити слот, пов'язаний з прийомом.";
             }
 
-            return View(timeSlot);
+            //return View(timeSlot);
+            return PartialView("~/Views/TimeSlots/_Delete.cshtml", timeSlot);
         }
 
         // POST: TimeSlots/Delete/5
