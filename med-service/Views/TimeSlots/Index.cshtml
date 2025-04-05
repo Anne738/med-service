@@ -1,0 +1,57 @@
+﻿@model IEnumerable<med_service.ViewModels.TimeSlotViewModel>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = "Часові слоти";
+}
+
+<h1>@Localizer["TimeSlotsList"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">@Localizer["CreateNew"]</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Localizer["Schedule"]
+            </th>
+            <th>
+                @Localizer["Time"]
+            </th>
+            <th>
+                @Localizer["IsBooked"]
+            </th>
+            <th>@Localizer["Actions"]</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.ScheduleString
+                </td>
+                <td>
+                    @item.StartTime.ToString(@"hh\:mm") - @item.EndTime.ToString(@"hh\:mm")
+                </td>
+                <td>
+                    @if (item.IsBooked)
+                    {
+                        <span class="badge bg-danger">@Localizer["Booked"]</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">@Localizer["Available"]</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">@Localizer["Edit"]</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">@Localizer["Details"]</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">@Localizer["Delete"]</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

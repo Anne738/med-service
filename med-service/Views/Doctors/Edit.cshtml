@@ -1,0 +1,59 @@
+﻿@model med_service.ViewModels.DoctorViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["EditTitle"];
+}
+
+<h1>@Localizer["EditTitle"]</h1>
+
+<h4>@Localizer["Doctor"]</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group mb-3">
+                <label asp-for="UserId" class="control-label">@Localizer["User"]</label>
+                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId">
+                    <option value="">@Localizer["SelectUser"]</option>
+                </select>
+                <span asp-validation-for="UserId" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="HospitalId" class="control-label">@Localizer["Hospital"]</label>
+                <select asp-for="HospitalId" class="form-control" asp-items="ViewBag.HospitalId">
+                    <option value="">@Localizer["SelectHospital"]</option>
+                </select>
+                <span asp-validation-for="HospitalId" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="SpecializationId" class="control-label">@Localizer["Specialization"]</label>
+                <select asp-for="SpecializationId" class="form-control" asp-items="ViewBag.SpecializationId">
+                    <option value="">@Localizer["SelectSpecialization"]</option>
+                </select>
+                <span asp-validation-for="SpecializationId" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="ExperienceYears" class="control-label">@Localizer["ExperienceYears"]</label>
+                <input asp-for="ExperienceYears" class="form-control" />
+                <span asp-validation-for="ExperienceYears" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-3">
+                <input type="submit" value="@Localizer["Save"]" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">@Localizer["BackToList"]</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
