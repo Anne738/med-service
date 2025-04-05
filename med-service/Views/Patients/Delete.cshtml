@@ -1,0 +1,42 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model med_service.Models.Patient
+
+@{
+    ViewData["Title"] = Localizer["DeletePatient"];
+}
+
+<h1>@Localizer["DeletePatient"]</h1>
+
+<h3>@Localizer["DeleteConfirmation"]</h3>
+<div>
+    <h4>@Localizer["Patient"]</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Localizer["User"]
+        </dt>
+        <dd class="col-sm-10">
+            @(Model.User?.FirstName + " " + Model.User?.LastName)
+        </dd>
+        <dt class="col-sm-2">
+            @Localizer["DateOfBirth"]
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DateOfBirth)
+        </dd>
+    </dl>
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="@Localizer["Delete"]" class="btn btn-danger" /> |
+        <a asp-action="Index">@Localizer["BackToList"]</a>
+    </form>
+</div>

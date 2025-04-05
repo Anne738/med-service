@@ -1,0 +1,63 @@
+﻿@model IEnumerable<med_service.Models.Doctor>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["DoctorsList"];
+}
+
+<h1>@Localizer["DoctorsList"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">@Localizer["CreateNew"]</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Localizer["FullName"]
+            </th>
+            <th>
+                @Localizer["Hospital"]
+            </th>
+            <th>
+                @Localizer["Specialization"]
+            </th>
+            <th>
+                @Localizer["Experience"]
+            </th>
+            <th>@Localizer["Actions"]</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @if (item.User != null)
+                    {
+                        @($"{item.User.LastName} {item.User.FirstName}")
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.User.Id)
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Hospital.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Specialization.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ExperienceYears) @Localizer["Years"]
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">@Localizer["Edit"]</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">@Localizer["Details"]</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">@Localizer["Delete"]</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

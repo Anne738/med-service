@@ -1,0 +1,43 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model med_service.Models.Patient
+
+@{
+    ViewData["Title"] = Localizer["PatientDetails"];
+}
+
+<h1>@Localizer["PatientDetails"]</h1>
+
+<div>
+    <h4>@Localizer["Patient"]</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Localizer["FirstName"]
+        </dt>
+        <dd class="col-sm-10">
+            @Model.User?.FirstName
+        </dd>
+        <dt class="col-sm-2">
+            @Localizer["LastName"]
+        </dt>
+        <dd class="col-sm-10">
+            @Model.User?.LastName
+        </dd>
+        <dt class="col-sm-2">
+            @Localizer["DateOfBirth"]
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DateOfBirth)
+        </dd>
+    </dl>
+</div>
+<div class="mt-3 mb-3 d-flex gap-2">
+    <a href="@Url.Action("GetPatientHistory", "Appointments", new { patientId = Model.Id })" class="btn btn-outline-success">
+        📅 @Localizer["YourAppointmentHistory"]
+    </a>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">@Localizer["Edit"]</a> |
+    <a asp-action="Index">@Localizer["BackToList"]</a>
+</div>

@@ -1,0 +1,58 @@
+﻿@using Humanizer.Localisation
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+
+@model IEnumerable<med_service.ViewModels.AppointmentViewModel>
+
+@{
+    ViewData["Title"] = "Appointments";
+}
+
+<h1>@Localizer["lblAppointments"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<form method="get">
+    <label for="status">Filter by Status:</label>
+    <select name="status" id="status">
+        <option value="">All</option>
+        @foreach (var status in ViewBag.Statuses)
+        {
+            <option value="@status" selected="@(status.ToString() == Context.Request.Query["status"] ? "selected" : null)">
+                @status
+            </option>
+        }
+    </select>
+    <button type="submit">Filter</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.First().Status)</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>@Html.DisplayNameFor(model => model.First().Notes)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Status</td>
+                <td>@item.PatientName</td> <!-- Display Patient's Full Name -->
+                <td>@item.DoctorName</td>  <!-- Display Doctor's Full Name -->
+                <td>@item.Notes</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
