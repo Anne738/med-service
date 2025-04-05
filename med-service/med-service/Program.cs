@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
+//test
+
 var builder = WebApplication.CreateBuilder(args);
 
 const string EN_US_CULTURE = "en-US", UK_UA_CULTURE = "uk-UA";
