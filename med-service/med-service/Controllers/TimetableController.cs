@@ -291,13 +291,13 @@ namespace med_service.Controllers
                                     var latestAppointment = await _db.Appointments
                                         .Where(a => a.TimeSlotId == timeSlot.Id)
                                         .FirstOrDefaultAsync();
-
-                                    return RedirectToAction("Details", "Appointments", new { id = latestAppointment.Id });
+                                    return RedirectToAction("Index", "Appointments");
                                 }
                                 else
                                 {
                                     // Перенаправляем на страницу с записями пациента
                                     return RedirectToAction("MyAppointments");
+                                    
                                 }
                             }
                             catch (Exception ex)
