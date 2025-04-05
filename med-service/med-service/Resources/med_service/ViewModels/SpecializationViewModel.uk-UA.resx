@@ -54,4 +54,7 @@
 	<data name="DescriptionLength" xml:space="preserve">
 	<value>Опис не може перевищувати 500 символів</value>
 	</data>
+  <data name="DescriptionRequired" xml:space="preserve">
+  <value>Опис є обов'язковим</value>
+  </data>
 </root>
