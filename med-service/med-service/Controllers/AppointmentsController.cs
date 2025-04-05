@@ -539,13 +539,24 @@ namespace med_service.Controllers
         }
 
         // отримати історію прийомів лікаря
-        [HttpGet("doctor/{doctorId}/history")]
-        public async Task<IActionResult> GetDoctorHistory(int doctorId, Appointment.AppointmentStatus? status)
+        [Authorize(Roles = "Doctor")]
+        [HttpGet("Doctor/MyHistory")]
+        public async Task<IActionResult> MyHistory(Appointment.AppointmentStatus? status)
         {
+            var userId = _userManager.GetUserId(User); // отримуємо ID залогіненого користувача
+
+            var doctor = await _context.Doctors
+                .Include(d => d.User)
+                .FirstOrDefaultAsync(d => d.UserId == userId);
+
+            if (doctor == null)
+            {
+                return NotFound();
+            }
+
             var query = _context.Appointments
-                .Where(a => a.DoctorId == doctorId)
-                .Include(a => a.Patient)
-                .ThenInclude(p => p.User)
+                .Where(a => a.DoctorId == doctor.Id)
+                .Include(a => a.Patient).ThenInclude(p => p.User)
                 .Include(a => a.TimeSlot)
                 .OrderByDescending(a => a.TimeSlot.StartTime)
                 .AsQueryable();
@@ -556,8 +567,13 @@ namespace med_service.Controllers
             }
 
             var history = await query.AsNoTracking().ToListAsync();
+
+            ViewBag.DoctorName = $"{doctor.User.FirstName} {doctor.User.LastName}";
+            ViewBag.DoctorId = doctor.Id;
+
             return View("DoctorHistory", history);
         }
+
     }
 
 }

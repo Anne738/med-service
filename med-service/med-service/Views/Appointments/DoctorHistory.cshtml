@@ -34,7 +34,7 @@
                         @(appointment.TimeSlot?.EndTime != null ? appointment.TimeSlot.EndTime.ToString(@"hh\:mm") : "Невідомо")
                     </dd>
                 </dl>
-                <a asp-action="Edit" asp-route-id="@appointment.Id" class="btn btn-warning">Редагувати</a>
+                @* <a asp-action="Edit" asp-route-id="@appointment.Id" class="btn btn-warning">Редагувати</a> *@
             </div>
         </div>
     }
