@@ -5,12 +5,16 @@
 @{
     ViewData["Title"] = Localizer["doctorScheduleTitle"];
 
-    // Дні тижня, на які складається розклад
-    var days = Enum.GetValues(typeof(Schedule.DayOfWeek)).Cast<Schedule.DayOfWeek>();
+    var availableDays = Model.Select(s => s.Day).ToList();
 
-    // Отримуємо вибраний день із запиту або встановлюємо за замовчуванням перший день із переліку
-    var selectedDay = Schedule.DayOfWeek.Monday;
-    if (ViewBag.SelectedDay != null)
+    if (!availableDays.Any())
+    {
+        availableDays = new List<Schedule.DayOfWeek>();
+    }
+
+    // Отримуємо вибраний день із запиту або встановлюємо за замовчуванням перший день із доступних
+    var selectedDay = availableDays.FirstOrDefault();
+    if (ViewBag.SelectedDay != null && availableDays.Contains((Schedule.DayOfWeek)ViewBag.SelectedDay))
     {
         selectedDay = (Schedule.DayOfWeek)ViewBag.SelectedDay;
     }
@@ -27,23 +31,32 @@
 
 <div class="row mb-4">
     <div class="col-md-4">
-        <form id="daySelectForm" asp-action="Doctor" asp-route-id="@ViewBag.DoctorId" method="get">
-            <div class="input-group">
-                <label class="input-group-text" for="selectedDay">@Localizer["weekday"]:</label>
-                <select id="selectedDay" name="selectedDay" class="form-select" onchange="this.form.submit()">
-                    @foreach (var day in days)
-                    {
-                        <option value="@((int)day)" selected="@(day == selectedDay)">@day</option>
-                    }
-                </select>
+        @if (availableDays.Any())
+        {
+            <form id="daySelectForm" asp-action="Doctor" asp-route-id="@ViewBag.DoctorId" method="get">
+                <div class="input-group">
+                    <label class="input-group-text" for="selectedDay">@Localizer["weekday"]:</label>
+                    <select id="selectedDay" name="selectedDay" class="form-select" onchange="this.form.submit()">
+                        @foreach (var day in availableDays)
+                        {
+                            <option value="@((int)day)" selected="@(day == selectedDay)">@day</option>
+                        }
+                    </select>
+                </div>
+            </form>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                @Localizer["noScheduleDays"]
             </div>
-        </form>
+        }
     </div>
 </div>
 
 <div class="calendar-container mb-4">
     <div class="calendar-header d-flex justify-content-between align-items-center bg-light p-2 rounded">
-        <div class="calendar-day fs-5 fw-bold">@selectedDay</div>
+        <div class="calendar-day fs-5 fw-bold">@(selectedDay != default ? selectedDay.ToString() : "")</div>
         <div class="calendar-date fs-5">@ViewBag.SelectedDate</div>
 
         @if (schedule != null)
@@ -53,76 +66,75 @@
     </div>
 
     <div class="time-slots-grid">
-        @for (int hour = startHour; hour < endHour; hour++)
+        @if (schedule != null)
         {
-            // Перша половина години (XX:00-XX:30)
+            for (int hour = startHour; hour < endHour; hour++)
             {
-                var slotTime = new TimeSpan(hour, 0, 0);
-                var endTime = slotTime.Add(TimeSpan.FromMinutes(30));
-                var slot = schedule?.AvailableSlots.FirstOrDefault(ts =>
-                ts.StartTime.Hours == hour && ts.StartTime.Minutes == 0);
-                bool isBooked = slot?.isBooked ?? false;
-                string slotClass = isBooked ? "time-slot booked" : "time-slot available";
+                // Перша половина години (XX:00-XX:30)
+                {
+                    var slotTime = new TimeSpan(hour, 0, 0);
+                    var endTime = slotTime.Add(TimeSpan.FromMinutes(30));
+                    var slot = schedule.AvailableSlots.FirstOrDefault(ts =>
+                    ts.StartTime.Hours == hour && ts.StartTime.Minutes == 0);
+                    bool isBooked = slot?.isBooked ?? false;
+                    string slotClass = isBooked ? "time-slot booked" : "time-slot available";
 
-                <div class="@slotClass">
-                    <div class="time-label">@hour:00 - @hour:30</div>
-                    <div class="slot-status">
-                        @if (schedule == null)
-                        {
-                            <span>@Localizer["noSchedule"]</span>
-                        }
-                        else if (isBooked)
-                        {
-                            <span class="badge bg-secondary">@Localizer["booked"]</span>
-                        }
-                        else
-                        {
-                            <button type="button" class="btn btn-sm btn-primary w-100" onclick="openBookModal('@ViewBag.DoctorId', '@((int)selectedDay)', '@hour')">
-                                @Localizer["book"]
-                            </button>
-
-                        }
+                    <div class="@slotClass">
+                        <div class="time-label">@hour:00 - @hour:30</div>
+                        <div class="slot-status">
+                            @if (isBooked)
+                            {
+                                <span class="badge bg-secondary">@Localizer["booked"]</span>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-sm btn-primary w-100" onclick="openBookModal('@ViewBag.DoctorId', '@((int)selectedDay)', '@hour')">
+                                    @Localizer["book"]
+                                </button>
+                            }
+                        </div>
                     </div>
-                </div>
-            }
+                }
 
-            // Друга половина години (XX:30-YY:00)
-            {
-                var slotTime = new TimeSpan(hour, 30, 0);
-                var endTime = slotTime.Add(TimeSpan.FromMinutes(30));
-                var nextHour = hour + 1;
-                var slot = schedule?.AvailableSlots.FirstOrDefault(ts =>
-                ts.StartTime.Hours == hour && ts.StartTime.Minutes == 30);
-                bool isBooked = slot?.isBooked ?? false;
-                string slotClass = isBooked ? "time-slot booked" : "time-slot available";
+                // Друга половина години (XX:30-YY:00)
+                {
+                    var slotTime = new TimeSpan(hour, 30, 0);
+                    var endTime = slotTime.Add(TimeSpan.FromMinutes(30));
+                    var nextHour = hour + 1;
+                    var slot = schedule.AvailableSlots.FirstOrDefault(ts =>
+                    ts.StartTime.Hours == hour && ts.StartTime.Minutes == 30);
+                    bool isBooked = slot?.isBooked ?? false;
+                    string slotClass = isBooked ? "time-slot booked" : "time-slot available";
 
-                <div class="@slotClass">
-                    <div class="time-label">@hour:30 - @nextHour:00</div>
-                    <div class="slot-status">
-                        @if (schedule == null)
-                        {
-                            <span>@Localizer["noSchedule"]</span>
-                        }
-                        else if (isBooked)
-                        {
-                            <span class="badge bg-secondary">@Localizer["booked"]</span>
-                        }
-                        else
-                        {
-                            <a class="btn btn-sm btn-primary w-100"
-                               asp-controller="Appointment"
-                               asp-action="Book"
-                               asp-route-day="@((int)selectedDay)"
-                               asp-route-hour="@hour"
-                               asp-route-minute="30"
-                               asp-route-doctorId="@ViewBag.DoctorId">
-                                @Localizer["book"]
-                            </a>
-
-                        }
+                    <div class="@slotClass">
+                        <div class="time-label">@hour:30 - @nextHour:00</div>
+                        <div class="slot-status">
+                            @if (isBooked)
+                            {
+                                <span class="badge bg-secondary">@Localizer["booked"]</span>
+                            }
+                            else
+                            {
+                                <a class="btn btn-sm btn-primary w-100"
+                                   asp-controller="Appointment"
+                                   asp-action="Book"
+                                   asp-route-day="@((int)selectedDay)"
+                                   asp-route-hour="@hour"
+                                   asp-route-minute="30"
+                                   asp-route-doctorId="@ViewBag.DoctorId">
+                                    @Localizer["book"]
+                                </a>
+                            }
+                        </div>
                     </div>
-                </div>
+                }
             }
+        }
+        else
+        {
+            <div class="alert alert-info w-100 text-center">
+                @Localizer["noScheduleForSelectedDay"]
+            </div>
         }
     </div>
 </div>
