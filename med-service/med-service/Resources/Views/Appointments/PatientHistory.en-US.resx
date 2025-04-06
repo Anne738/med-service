@@ -117,34 +117,31 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblScheduleDay" xml:space="preserve">
-    <value>День тижня</value>
+  <data name="lblAppointment" xml:space="preserve">
+    <value>Appointment №</value>
   </data>
-  <data name="lblScheduleDayRequired" xml:space="preserve">
-    <value>День тижня обов’язковий</value>
+  <data name="lblBackHome" xml:space="preserve">
+    <value>Back to home</value>
   </data>
-  <data name="lblScheduleDoctorId" xml:space="preserve">
-    <value>ID лікаря</value>
+  <data name="lblDoctor" xml:space="preserve">
+    <value>Doctor</value>
   </data>
-  <data name="lblScheduleDoctorRequired" xml:space="preserve">
-    <value>Лікар обов’язковий</value>
+  <data name="lblNoAppointments" xml:space="preserve">
+    <value>No appointment history</value>
   </data>
-  <data name="lblScheduleFieldRequired" xml:space="preserve">
-    <value>Поле обов’язкове</value>
+  <data name="lblNotes" xml:space="preserve">
+    <value>Notes</value>
   </data>
-  <data name="lblScheduleHourRange" xml:space="preserve">
-    <value>Значення має бути між 0 та 23</value>
+  <data name="lblPatient" xml:space="preserve">
+    <value>Patient</value>
   </data>
-  <data name="lblScheduleWorkDayEnd" xml:space="preserve">
-    <value>Кінець робочого дня</value>
+  <data name="lblStatus" xml:space="preserve">
+    <value>Status</value>
   </data>
-  <data name="lblScheduleWorkDayStart" xml:space="preserve">
-    <value>Початок робочого дня</value>
+  <data name="lblTime" xml:space="preserve">
+    <value>Appointment Time</value>
   </data>
-  <data name="lblScheduleWorkingHours" xml:space="preserve">
-    <value>Робочі часи</value>
-  </data>
-  <data name="lblTimeValidationMessage" xml:space="preserve">
-    <value>Кінець робочого дня має бути пізніше початку</value>
+  <data name="lblTitle" xml:space="preserve">
+    <value>Appointment History</value>
   </data>
 </root>
