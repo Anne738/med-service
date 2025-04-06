@@ -34,34 +34,25 @@ namespace med_service.Controllers
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index(Appointment.AppointmentStatus? status,
-                                               string sortOrder, string currentFilter,
-                                               string searchString, int? pageIndex)
+                                       string sortOrder,
+                                       string searchString,
+                                       int? pageIndex)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["DoctorSortParam"] = sortOrder == "Doctor" ? "doctor_desc" : "Doctor";
             ViewData["PatientSortParam"] = sortOrder == "Patient" ? "patient_desc" : "Patient";
 
             ViewBag.Statuses = Enum.GetValues(typeof(Appointment.AppointmentStatus))
-                       .Cast<Appointment.AppointmentStatus>()
-                       .Where(s => s != Appointment.AppointmentStatus.CANCELED) //Exclude CANCELED
-                       .ToList();
+                .Cast<Appointment.AppointmentStatus>()
+                .ToList();
 
-            if (searchString != null)
-            {
-                pageIndex = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-
+            // Always set ViewData
             ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentStatus"] = status?.ToString();
 
             var appointments = _context.Appointments
-                .Include(a => a.Patient)
-                    .ThenInclude(p => p.User)
-                .Include(a => a.Doctor)
-                    .ThenInclude(d => d.User)
+                .Include(a => a.Patient).ThenInclude(p => p.User)
+                .Include(a => a.Doctor).ThenInclude(d => d.User)
                 .Include(a => a.TimeSlot)
                 .AsQueryable();
 
@@ -115,6 +106,7 @@ namespace med_service.Controllers
                 ControllerName = "Appointments"
             };
 
+            ViewBag.CurrentStatus = status;
             ViewBag.PaginationInfo = paginationInfo;
 
             return View(paginatedList.Items);
