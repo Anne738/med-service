@@ -2,6 +2,12 @@
 @inject UserManager<User> UserManager
 @inject SignInManager<User> SignInManager
 
+@using Microsoft.AspNetCore.Mvc.Localization
+
+@inject IViewLocalizer Localizer
+
+<partial name="_ValidationScriptsPartial" />
+
 @{
     var userId = UserManager.GetUserId(User);
 }
@@ -37,47 +43,47 @@
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Users">Users</a>
+                                    <a class="nav-link text-dark" href="/Users">@Localizer["lblUsers"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Patients">Patients</a>
+                                    <a class="nav-link text-dark" href="/Patients">@Localizer["lblPatients"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Doctors">Doctors</a>
+                                    <a class="nav-link text-dark" href="/Doctors">@Localizer["lblDoctors"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Specializations">Specializations</a>
+                                    <a class="nav-link text-dark" href="/Specializations">@Localizer["lblSpecializations"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Hospitals">Hospitals</a>
+                                    <a class="nav-link text-dark" href="/Hospitals">@Localizer["lblHospitals"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Appointments">Appointments</a>
+                                    <a class="nav-link text-dark" href="/Appointments">@Localizer["lblAppointments"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Schedules">Schedules</a>
+                                    <a class="nav-link text-dark" href="/Schedules">@Localizer["lblSchedules"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/TimeSlots">TimeSlots</a>
+                                    <a class="nav-link text-dark" href="/TimeSlots">@Localizer["lblTimeslots"]</a>
                                 </li>
                             }
 
                             else if (User.IsInRole("Doctor"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Timetables/MyAppointments">Appointments Management</a>
+                                    <a class="nav-link text-dark" href="/Timetables/MyAppointments">@Localizer["lblAppointmentsManagement"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Doctor/MyHistory">My History</a>
+                                    <a class="nav-link text-dark" href="/Doctor/MyHistory">@Localizer["lblMyHistory"]</a>
                                 </li>
                             }
                             else if (User.IsInRole("Patient"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Timetables/MyAppointments">My Appointments</a>
+                                    <a class="nav-link text-dark" href="/Timetables/MyAppointments">@Localizer["lblMyAppointments"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Patient/MyHistory">My History</a>
+                                    <a class="nav-link text-dark" href="/Patient/MyHistory">@Localizer["lblMyHistory"]</a>
                                 </li>
                             }
                         }

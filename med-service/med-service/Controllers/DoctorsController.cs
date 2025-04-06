@@ -241,19 +241,75 @@ namespace med_service.Controllers
             return PartialView("~/Views/Doctors/_Delete.cshtml", doctor);
         }
 
-        // POST: Doctors/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var doctor = await _context.Doctors.FindAsync(id);
-            if (doctor != null)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                _context.Doctors.Remove(doctor);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    var appointments = await _context.Appointments
+                        .Where(a => a.DoctorId == id)
+                        .ToListAsync();
+
+                    foreach (var appointment in appointments)
+                    {
+                        var timeSlot = await _context.TimeSlots.FindAsync(appointment.TimeSlotId);
+                        if (timeSlot != null)
+                        {
+                            timeSlot.isBooked = false;
+                            timeSlot.Appointment = null;
+                            _context.TimeSlots.Update(timeSlot);
+                        }
+
+                        _context.Appointments.Remove(appointment);
+                    }
+
+                    var schedules = await _context.Schedules
+                        .Where(s => s.DoctorId == id)
+                        .Include(s => s.AvailableSlots)
+                        .ToListAsync();
+
+                    foreach (var schedule in schedules)
+                    {
+                        _context.TimeSlots.RemoveRange(schedule.AvailableSlots);
+                        _context.Schedules.Remove(schedule);
+                    }
+
+                    var doctor = await _context.Doctors.FindAsync(id);
+                    if (doctor == null)
+                        return NotFound();
+
+                    _context.Doctors.Remove(doctor);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+
+                    Console.WriteLine($"Ошибка при удалении доктора: {ex.Message}");
+                    if (ex.InnerException != null)
+                        Console.WriteLine($"Внутренняя ошибка: {ex.InnerException.Message}");
+
+                    ModelState.AddModelError("", _localizer["DeleteError"] + ": " + ex.Message);
+
+                    var doctor = await _context.Doctors
+                        .Include(d => d.Hospital)
+                        .Include(d => d.Specialization)
+                        .Include(d => d.User)
+                        .FirstOrDefaultAsync(m => m.Id == id);
+
+                    return PartialView("~/Views/Doctors/_Delete.cshtml", doctor);
+                }
             }
-            return RedirectToAction(nameof(Index));
         }
+
+
 
         private bool DoctorExists(int id)
         {
