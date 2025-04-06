@@ -37,26 +37,35 @@
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Admin/Dashboard">Admin Dashboard</a>
+                                    <a class="nav-link text-dark" href="/Users">Users</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Patient/List">Пацієнти</a>
+                                    <a class="nav-link text-dark" href="/Patients">Patients</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Doctor/List">Лікарі</a>
+                                    <a class="nav-link text-dark" href="/Doctors">Doctors</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Doctor/Calendar">Календар</a>
+                                    <a class="nav-link text-dark" href="/Specializations">Specializations</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="/Patient/Book">Запис пацієнта</a>
+                                    <a class="nav-link text-dark" href="/Hospitals">Hospitals</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" href="/Appointments">Appointments</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" href="/Schedules">Schedules</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" href="/TimeSlots">TimeSlots</a>
                                 </li>
                             }
 
                             else if (User.IsInRole("Doctor"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" href="">Admin Dashboard</a>
+                                    <a class="nav-link text-dark" href="/Timetables/MyAppointments">Appointments Management</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" href="/Doctor/MyHistory">My History</a>

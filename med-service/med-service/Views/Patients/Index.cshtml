@@ -52,9 +52,6 @@
                     <button class="btn btn-sm btn-warning" onclick="showEdit('Patients', @item.Id)">@Localizer["Edit"]</button>
                     <button class="btn btn-sm btn-info" onclick="showDetails('Patients', @item.Id)">@Localizer["Details"]</button>
                     <button class="btn btn-sm btn-danger" onclick="confirmDelete('Patients', @item.Id)">@Localizer["Delete"]</button>
-                    <a href="@Url.Action("GetPatientHistory", "Appointments", new { patientId = item.Id })" class="btn btn-sm btn-outline-success">
-                        📅 @Localizer["History"]
-                    </a>
                 </td>
             </tr>
         }
