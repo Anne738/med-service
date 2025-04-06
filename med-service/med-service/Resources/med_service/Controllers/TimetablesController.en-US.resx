@@ -117,40 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblDetails" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblDoctorProfileNotFound" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblGeneralError" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblOnlyOwnAccount" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblOnlyPatientsOrAdmins" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblPatientProfileRequired" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblPleaseLogin" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblSaveError" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblSelectPatient" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblSlotBooked" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblSlotNotFound" xml:space="preserve">
-    <value />
-  </data>
-  <data name="lblValidationError" xml:space="preserve">
-    <value />
-  </data>
 </root>

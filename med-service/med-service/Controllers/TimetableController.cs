@@ -4,9 +4,9 @@ using med_service.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
@@ -16,11 +16,13 @@ namespace med_service.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly UserManager<User> _userManager;
+        private readonly IStringLocalizer<TimetablesController> _localizer;
 
-        public TimetablesController(ApplicationDbContext db, UserManager<User> userManager)
+        public TimetablesController(ApplicationDbContext db, UserManager<User> userManager, IStringLocalizer<TimetablesController> localizer)
         {
             _db = db;
             _userManager = userManager;
+            _localizer = localizer;
         }
 
         // GET: Timetables/Doctor/5
@@ -71,7 +73,7 @@ namespace med_service.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
             {
-                TempData["Error"] = "Будь ласка, увійдіть в систему для запису на прийом";
+                TempData["Error"] = _localizer["lblPleaseLogin"];
                 return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("Doctor", new { id = doctorId }) });
             }
 
@@ -87,7 +89,7 @@ namespace med_service.Controllers
 
                 if (patient == null)
                 {
-                    TempData["Error"] = "Тільки пацієнти або адміністратори можуть записатися на прийом";
+                    TempData["Error"] = _localizer["lblOnlyPatientsOrAdmins"];
                     return RedirectToAction("Doctor", new { id = doctorId });
                 }
             }
@@ -143,7 +145,7 @@ namespace med_service.Controllers
 
             if (slot.isBooked)
             {
-                TempData["Error"] = "Цей слот вже зайнятий.";
+                TempData["Error"] = _localizer["lblSlotBooked"];
                 return RedirectToAction("Doctor", new { id = doctorId });
             }
 
@@ -194,7 +196,7 @@ namespace med_service.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
-                    TempData["FormError"] = "Будь ласка, увійдіть в систему для запису на прийом";
+                    TempData["FormError"] = _localizer["lblPleaseLogin"];
                     return RedirectToAction("Login", "Account");
                 }
 
@@ -209,15 +211,15 @@ namespace med_service.Controllers
 
                     if (patient == null)
                     {
-                        TempData["FormError"] = "Тільки пацієнти або адміністратори можуть записатися на прийом";
+                        TempData["FormError"] = _localizer["lblOnlyPatientsOrAdmins"];
                         return RedirectToAction("Doctor", new { id = model.DoctorId });
                     }
 
                     // Перевіряємо, чи PatientId відповідає поточному користувачу
                     if (model.PatientId != patient.Id)
                     {
-                        ModelState.AddModelError("PatientId", "Ви можете записатися на прийом тільки для свого облікового запису");
-                        TempData["FormError"] = "Ви можете записатися на прийом тільки для свого облікового запису";
+                        ModelState.AddModelError("PatientId", _localizer["lblOnlyOwnAccount"]);
+                        TempData["FormError"] = _localizer["lblOnlyOwnAccount"];
                     }
                 }
 
@@ -227,7 +229,7 @@ namespace med_service.Controllers
                     var errorMessages = string.Join("; ", ModelState.Values
                                         .SelectMany(x => x.Errors)
                                         .Select(x => x.ErrorMessage));
-                    TempData["FormError"] = $"Помилка валідації: {errorMessages}";
+                    TempData["FormError"] = _localizer["lblValidationError"] + ": " + errorMessages;
                 }
                 else
                 {
@@ -237,16 +239,16 @@ namespace med_service.Controllers
 
                     if (timeSlot == null)
                     {
-                        ModelState.AddModelError("TimeSlotId", "Вказаний часовий слот не знайдено");
-                        TempData["FormError"] = "Вказаний часовий слот не знайдено";
+                        ModelState.AddModelError("TimeSlotId", _localizer["lblSlotNotFound"]);
+                        TempData["FormError"] = _localizer["lblSlotNotFound"];
                     }
                     else
                     {
                         // Перевіряємо, чи обрано пацієнта
                         if (model.PatientId <= 0)
                         {
-                            ModelState.AddModelError("PatientId", "Необхідно вибрати пацієнта");
-                            TempData["FormError"] = "Необхідно вибрати пацієнта";
+                            ModelState.AddModelError("PatientId", _localizer["lblSelectPatient"]);
+                            TempData["FormError"] = _localizer["lblSelectPatient"];
                         }
                         else
                         {
@@ -303,12 +305,12 @@ namespace med_service.Controllers
                             catch (Exception ex)
                             {
                                 // Логування помилки при збереженні
-                                ModelState.AddModelError("", $"Помилка при збереженні: {ex.Message}");
-                                TempData["FormError"] = $"Помилка при збереженні: {ex.Message}";
+                                ModelState.AddModelError("", _localizer["lblSaveError"] + ex.Message);
+                                TempData["FormError"] = _localizer["lblSaveError"] + ex.Message;
 
                                 if (ex.InnerException != null)
                                 {
-                                    TempData["FormError"] += $" Деталі: {ex.InnerException.Message}";
+                                    TempData["FormError"] += $" {_localizer["lblDetails"]}: {ex.InnerException.Message}";
                                 }
                             }
                         }
@@ -352,8 +354,8 @@ namespace med_service.Controllers
             catch (Exception ex)
             {
                 // Загальна обробка винятків
-                ModelState.AddModelError("", $"Помилка при обробці запиту: {ex.Message}");
-                TempData["FormError"] = $"Помилка при обробці запиту: {ex.Message}";
+                ModelState.AddModelError("", _localizer["lblGeneralError"] + ex.Message);
+                TempData["FormError"] = _localizer["lblGeneralError"] + ex.Message;
 
                 // Підготовка даних для повторного відображення форми
                 try
@@ -413,7 +415,7 @@ namespace med_service.Controllers
 
                 if (doctor == null)
                 {
-                    TempData["Error"] = "Профіль лікаря не знайдено";
+                    TempData["Error"] = _localizer["lblDoctorProfileNotFound"];
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -434,7 +436,7 @@ namespace med_service.Controllers
 
                 if (patient == null)
                 {
-                    TempData["Error"] = "Для перегляду записів ви повинні мати профіль пацієнта";
+                    TempData["Error"] = _localizer["lblPatientProfileRequired"];
                     return RedirectToAction("Index", "Home");
                 }
 

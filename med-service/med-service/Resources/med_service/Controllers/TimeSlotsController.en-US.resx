@@ -117,19 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblErrorDeleteHasAppointment" xml:space="preserve">
-    <value>Cannot delete a slot linked to an appointment.</value>
+  <data name="lblDetails" xml:space="preserve">
+    <value>Details</value>
   </data>
-  <data name="lblErrorSaving" xml:space="preserve">
-    <value>An error occurred while saving:</value>
+  <data name="lblDoctorProfileNotFound" xml:space="preserve">
+    <value>Doctor profile not found</value>
   </data>
-  <data name="lblErrorSlotExists" xml:space="preserve">
-    <value>A time slot for this schedule already exists: {0}:{1:D2}</value>
+  <data name="lblGeneralError" xml:space="preserve">
+    <value>An error occurred while processing the request</value>
   </data>
-  <data name="lblErrorSlotOutOfBounds" xml:space="preserve">
-    <value>Slot time must be within the working hours ({0}:00 - {1}:00)</value>
+  <data name="lblOnlyOwnAccount" xml:space="preserve">
+    <value>You can only book for your own account</value>
   </data>
-  <data name="lblErrorTimeInvalid" xml:space="preserve">
-    <value>Time must be within working hours ({0}:00 - {1}:00)</value>
+  <data name="lblOnlyPatientsOrAdmins" xml:space="preserve">
+    <value>Only patients or admins can book appointments</value>
+  </data>
+  <data name="lblPatientProfileRequired" xml:space="preserve">
+    <value>Patient profile is required</value>
+  </data>
+  <data name="lblPleaseLogin" xml:space="preserve">
+    <value>Please log in to book an appointment</value>
+  </data>
+  <data name="lblSaveError" xml:space="preserve">
+    <value>Error while saving</value>
+  </data>
+  <data name="lblSelectPatient" xml:space="preserve">
+    <value>You must select a patient</value>
+  </data>
+  <data name="lblSlotNotFound" xml:space="preserve">
+    <value>The selected time slot was not found</value>
+  </data>
+  <data name="lblValidationError" xml:space="preserve">
+    <value>Validation error</value>
   </data>
 </root>

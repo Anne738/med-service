@@ -117,19 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblErrorDeleteHasAppointment" xml:space="preserve">
-    <value>Неможливо видалити слот, пов'язаний з прийомом.</value>
+  <data name="lblDetails" xml:space="preserve">
+    <value>Деталі</value>
   </data>
-  <data name="lblErrorSaving" xml:space="preserve">
-    <value>Сталася помилка при збереженні:</value>
+  <data name="lblDoctorProfileNotFound" xml:space="preserve">
+    <value>Профіль лікаря не знайдено</value>
   </data>
-  <data name="lblErrorSlotExists" xml:space="preserve">
-    <value>Такий слот вже існує: {0}:{1:D2}</value>
+  <data name="lblGeneralError" xml:space="preserve">
+    <value>Помилка при обробці запиту</value>
   </data>
-  <data name="lblErrorSlotOutOfBounds" xml:space="preserve">
-    <value>Час повинен бути в межах {0}:00 - {1}:00</value>
+  <data name="lblOnlyOwnAccount" xml:space="preserve">
+    <value>Ви можете записатися тільки для себе</value>
   </data>
-  <data name="lblErrorTimeInvalid" xml:space="preserve">
-    <value>Час має бути в межах {0}:00 - {1}:00</value>
+  <data name="lblOnlyPatientsOrAdmins" xml:space="preserve">
+    <value>Тільки пацієнти або адміністратори можуть...</value>
+  </data>
+  <data name="lblPatientProfileRequired" xml:space="preserve">
+    <value>Необхідно мати профіль пацієнта</value>
+  </data>
+  <data name="lblPleaseLogin" xml:space="preserve">
+    <value>Будь ласка, увійдіть в систему для запису</value>
+  </data>
+  <data name="lblSaveError" xml:space="preserve">
+    <value>Помилка при збереженні</value>
+  </data>
+  <data name="lblSelectPatient" xml:space="preserve">
+    <value>Необхідно вибрати пацієнта</value>
+  </data>
+  <data name="lblSlotBooked" xml:space="preserve">
+    <value>Цей слот вже зайнятий</value>
+  </data>
+  <data name="lblSlotNotFound" xml:space="preserve">
+    <value>Вказаний часовий слот не знайдено</value>
+  </data>
+  <data name="lblValidationError" xml:space="preserve">
+    <value>Помилка валідації</value>
   </data>
 </root>
