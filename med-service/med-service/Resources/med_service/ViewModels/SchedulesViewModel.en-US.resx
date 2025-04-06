@@ -144,7 +144,4 @@
   <data name="lblScheduleWorkingHours" xml:space="preserve">
     <value>Working hours</value>
   </data>
-  <data name="lblTimeValidationMessage" xml:space="preserve">
-    <value>Workday end must be later than the start</value>
-  </data>
 </root>

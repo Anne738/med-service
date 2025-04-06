@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Authorization;
 using med_service.ViewModels;
 using med_service.Helpers;
 using System.Numerics;
+using med_service.Controllers;
+using Microsoft.Extensions.Localization;
+
 
 
 namespace med_service.Controllers
@@ -19,10 +22,11 @@ namespace med_service.Controllers
     public class SchedulesController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public SchedulesController(ApplicationDbContext context)
+        private readonly IStringLocalizer<SchedulesController> _localizer;
+        public SchedulesController(ApplicationDbContext context, IStringLocalizer<SchedulesController> localizer)
         {
             _context = context;
+            _localizer = localizer;
         }
 
         // GET: Schedules
@@ -158,7 +162,7 @@ namespace med_service.Controllers
         {
             if (model.WorkDayEnd <= model.WorkDayStart)
             {
-                ModelState.AddModelError("WorkDayEnd", "Кінець робочого дня повинен бути пізніше початку");
+                ModelState.AddModelError("WorkDayEnd", _localizer["lblTimeValidationMessage"]);
             }
 
             if (ModelState.IsValid)
@@ -231,7 +235,7 @@ namespace med_service.Controllers
                 DoctorId = schedule.DoctorId,
                 WorkDayStart = schedule.WorkDayStart,
                 WorkDayEnd = schedule.WorkDayEnd,
-                DoctorFullName = $"{schedule.Doctor?.User?.LastName} {schedule.Doctor?.User?.FirstName}" // ✅ ДОДАНО
+                DoctorFullName = $"{schedule.Doctor?.User?.LastName} {schedule.Doctor?.User?.FirstName}" 
             };
 
             var doctors = _context.Doctors
@@ -271,7 +275,7 @@ namespace med_service.Controllers
 
             if (model.WorkDayEnd <= model.WorkDayStart)
             {
-                ModelState.AddModelError("WorkDayEnd", "Кінець робочого дня повинен бути пізніше початку");
+                ModelState.AddModelError("WorkDayEnd", _localizer["lblTimeValidationMessage"]);
             }
 
             if (ModelState.IsValid)

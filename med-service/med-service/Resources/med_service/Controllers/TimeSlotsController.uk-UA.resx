@@ -117,31 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblScheduleDay" xml:space="preserve">
-    <value>День тижня</value>
+  <data name="lblErrorDeleteHasAppointment" xml:space="preserve">
+    <value>Неможливо видалити слот, пов'язаний з прийомом.</value>
   </data>
-  <data name="lblScheduleDayRequired" xml:space="preserve">
-    <value>День тижня обов’язковий</value>
+  <data name="lblErrorSaving" xml:space="preserve">
+    <value>Сталася помилка при збереженні:</value>
   </data>
-  <data name="lblScheduleDoctorId" xml:space="preserve">
-    <value>ID лікаря</value>
+  <data name="lblErrorSlotExists" xml:space="preserve">
+    <value>Такий слот вже існує: {0}:{1:D2}</value>
   </data>
-  <data name="lblScheduleDoctorRequired" xml:space="preserve">
-    <value>Лікар обов’язковий</value>
+  <data name="lblErrorSlotOutOfBounds" xml:space="preserve">
+    <value>Час повинен бути в межах {0}:00 - {1}:00</value>
   </data>
-  <data name="lblScheduleFieldRequired" xml:space="preserve">
-    <value>Поле обов’язкове</value>
-  </data>
-  <data name="lblScheduleHourRange" xml:space="preserve">
-    <value>Значення має бути між 0 та 23</value>
-  </data>
-  <data name="lblScheduleWorkDayEnd" xml:space="preserve">
-    <value>Кінець робочого дня</value>
-  </data>
-  <data name="lblScheduleWorkDayStart" xml:space="preserve">
-    <value>Початок робочого дня</value>
-  </data>
-  <data name="lblScheduleWorkingHours" xml:space="preserve">
-    <value>Робочі часи</value>
+  <data name="lblErrorTimeInvalid" xml:space="preserve">
+    <value>Час має бути в межах {0}:00 - {1}:00</value>
   </data>
 </root>

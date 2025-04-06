@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using med_service.ViewModels;
 using med_service.Helpers;
 using System.Numerics;
+using Microsoft.Extensions.Localization;
 
 namespace med_service.Controllers
 {
@@ -19,10 +20,12 @@ namespace med_service.Controllers
     public class TimeSlotsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IStringLocalizer<TimeSlotsController> _localizer;
 
-        public TimeSlotsController(ApplicationDbContext context)
+        public TimeSlotsController(ApplicationDbContext context, IStringLocalizer<TimeSlotsController> localizer)
         {
             _context = context;
+            _localizer = localizer;
         }
 
         // GET: TimeSlots
@@ -180,7 +183,7 @@ namespace med_service.Controllers
             if (existingSlot != null)
             {
                 ModelState.AddModelError("StartTime",
-                    $"Временной слот для этого расписания уже существует ({viewModel.StartTime.Hours:D2}:{viewModel.StartTime.Minutes:D2})");
+                   _localizer["lblErrorSlotExists", viewModel.StartTime.Hours, viewModel.StartTime.Minutes]);
             }
 
             // перевірка чи слот зноходиться в рамках робочого часу
@@ -192,7 +195,7 @@ namespace med_service.Controllers
                     (viewModel.StartTime.Hours == schedule.WorkDayEnd - 1 && viewModel.StartTime.Minutes > 0))
                 {
                     ModelState.AddModelError("StartTime",
-                        $"Время слота должно быть в рамках рабочего времени ({schedule.WorkDayStart}:00 - {schedule.WorkDayEnd}:00)");
+                        _localizer["lblErrorSlotOutOfBounds", schedule.WorkDayStart, schedule.WorkDayEnd]);
                 }
             }
 
@@ -214,7 +217,7 @@ namespace med_service.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError(string.Empty, "Произошла ошибка при сохранении: " + ex.Message);
+                    ModelState.AddModelError(string.Empty, _localizer["lblErrorSaving"] + ex.Message);
                 }
             }
 
@@ -344,8 +347,10 @@ namespace med_service.Controllers
                     viewModel.StartTime.Hours >= schedule.WorkDayEnd ||
                     (viewModel.StartTime.Hours == schedule.WorkDayEnd - 1 && viewModel.StartTime.Minutes > 0))
                 {
+                    //ModelState.AddModelError("StartTime",
+                    //    $"Час має бути в діапазоні робочого часу ({schedule.WorkDayStart}:00 - {schedule.WorkDayEnd}:00)");
                     ModelState.AddModelError("StartTime",
-                        $"Час має бути в діапазоні робочого часу ({schedule.WorkDayStart}:00 - {schedule.WorkDayEnd}:00)");
+                        _localizer["lblErrorTimeInvalid", schedule.WorkDayStart, schedule.WorkDayEnd]);
                 }
             }
 
@@ -446,7 +451,8 @@ namespace med_service.Controllers
 
             if (hasRelatedAppointment)
             {
-                TempData["ErrorMessage"] = "Неможна видалити слот, пов'язаний з прийомом.";
+                //TempData["ErrorMessage"] = "Неможна видалити слот, пов'язаний з прийомом.";
+                TempData["ErrorMessage"] = _localizer["lblErrorDeleteHasAppointment"];
             }
 
             //return View(timeSlot);
