@@ -14,14 +14,23 @@
 </p>
 
 <form asp-action="Index" method="get" class="mb-3">
+    <!-- Preserve filtering options -->
+    <input type="hidden" name="status" value="@Context.Request.Query["status"]" />
+    <input type="hidden" name="sortOrder" value="@Context.Request.Query["sortOrder"]" />
+    <input type="hidden" name="pageIndex" value="@Context.Request.Query["pageIndex"]" />
+
     <div class="input-group">
+        <!-- Search input -->
         <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="@Localizer["lblSearchText"]" />
         <div class="input-group-append">
+            <!-- Submit -->
             <button type="submit" class="btn btn-outline-secondary">@Localizer["lblSearchButton"]</button>
+            <!-- Reset -->
             <a asp-action="Index" class="btn btn-outline-secondary">@Localizer["lblClearButton"]</a>
         </div>
     </div>
 </form>
+
 
 <form method="get">
     <label for="status">@Localizer["lblFilterBy"]</label>

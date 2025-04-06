@@ -75,4 +75,7 @@
 <data name="SelectSpecialization" xml:space="preserve">
   <value>-- Оберіть спеціалізацію --</value>
 </data>
+<data name="InvalidValue" xml:space="preserve">
+  <value>Значення '' недійсне.</value>
+</data>
 </root>

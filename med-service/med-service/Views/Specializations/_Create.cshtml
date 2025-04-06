@@ -1,12 +1,12 @@
 ﻿@model med_service.ViewModels.SpecializationViewModel
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
+<partial name="_ValidationScriptsPartial" />
 
 @{
     ViewData["Title"] = Localizer["CreateSpecialization"];
 }
 
-<!-- Модальне вікно -->
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
@@ -38,8 +38,3 @@
     </div>
 </div>
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}

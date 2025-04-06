@@ -5,12 +5,16 @@
 @{
     ViewData["Title"] = Localizer["doctorScheduleTitle"];
 
-    // Дні тижня, на які складається розклад
-    var days = Enum.GetValues(typeof(Schedule.DayOfWeek)).Cast<Schedule.DayOfWeek>();
+    var availableDays = Model.Select(s => s.Day).ToList();
 
-    // Отримуємо вибраний день із запиту або встановлюємо за замовчуванням перший день із переліку
-    var selectedDay = Schedule.DayOfWeek.Monday;
-    if (ViewBag.SelectedDay != null)
+    if (!availableDays.Any())
+    {
+        availableDays = new List<Schedule.DayOfWeek>();
+    }
+
+    // Отримуємо вибраний день із запиту або встановлюємо за замовчуванням перший день із доступних
+    var selectedDay = availableDays.FirstOrDefault();
+    if (ViewBag.SelectedDay != null && availableDays.Contains((Schedule.DayOfWeek)ViewBag.SelectedDay))
     {
         selectedDay = (Schedule.DayOfWeek)ViewBag.SelectedDay;
     }
@@ -31,7 +35,7 @@
             <div class="input-group">
                 <label class="input-group-text" for="selectedDay">@Localizer["weekday"]:</label>
                 <select id="selectedDay" name="selectedDay" class="form-select" onchange="this.form.submit()">
-                    @foreach (var day in days)
+                    @foreach (var day in availableDays)
                     {
                         <option value="@((int)day)" selected="@(day == selectedDay)">@day</option>
                     }
@@ -77,7 +81,7 @@
                         }
                         else
                         {
-                            <button type="button" class="btn btn-sm btn-primary w-100" onclick="openBookModal('@ViewBag.DoctorId', '@((int)selectedDay)', '@hour')">
+                            <button type="button" class="btn btn-sm btn-primary w-100" onclick="openBookModal('@ViewBag.DoctorId', '@((int)selectedDay)', '@hour', '0')">
                                 @Localizer["book"]
                             </button>
 
@@ -85,7 +89,6 @@
                     </div>
                 </div>
             }
-
             // Друга половина години (XX:30-YY:00)
             {
                 var slotTime = new TimeSpan(hour, 30, 0);
@@ -109,15 +112,9 @@
                         }
                         else
                         {
-                            <a class="btn btn-sm btn-primary w-100"
-                               asp-controller="Appointment"
-                               asp-action="Book"
-                               asp-route-day="@((int)selectedDay)"
-                               asp-route-hour="@hour"
-                               asp-route-minute="30"
-                               asp-route-doctorId="@ViewBag.DoctorId">
+                            <button type="button" class="btn btn-sm btn-primary w-100" onclick="openBookModal('@ViewBag.DoctorId', '@((int)selectedDay)', '@hour', '30')">
                                 @Localizer["book"]
-                            </a>
+                            </button>
 
                         }
                     </div>

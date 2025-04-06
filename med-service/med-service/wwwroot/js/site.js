@@ -116,11 +116,11 @@ function confirmDelete(url, id) {
 }
 
 
-function openBookModal(doctorId, selectedDay, hour) {
+function openBookModal(doctorId, selectedDay, hour, minutes) {
     console.log('openBookModal called', doctorId, selectedDay, hour);
 
     $.ajax({
-        url: "/Timetables/Book?day=" + selectedDay + "&hour=" + hour + "&minute=0&doctorId=" + doctorId,
+        url: "/Timetables/Book?day=" + selectedDay + "&hour=" + hour + "&minute="+minutes+"&doctorId=" + doctorId,
         type: "GET",
         processData: false,
         contentType: false,
