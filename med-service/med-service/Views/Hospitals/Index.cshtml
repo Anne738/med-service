@@ -11,11 +11,30 @@
 <p>
     <button class="btn btn-primary" onclick="addEntity('Hospitals')">@Localizer["lblCreateNew"]</button>
 </p>
-<table class="table">
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="@Localizer["lblSearch"]" />
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-outline-secondary">@Localizer["lblSearch"]</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">@Localizer["lblClear"]</a>
+        </div>
+    </div>
+</form>
+
+<table class="table table-bordered">
     <thead>
         <tr>
-            <th>@Localizer["lblName"]</th>
-            <th>@Localizer["lblAddress"]</th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Localizer["lblName"]
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["AddressSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    @Localizer["lblAddress"]
+                </a>
+            </th>
             <th>@Localizer["lblContact"]</th>
             <th>@Localizer["lblActions"]</th>
         </tr>
@@ -36,6 +55,8 @@
         }
     </tbody>
 </table>
+
+@await Html.PartialAsync("_Pagination", (med_service.ViewModels.PaginationViewModel)ViewBag.PaginationInfo)
 
 @section Scripts {
     <script>

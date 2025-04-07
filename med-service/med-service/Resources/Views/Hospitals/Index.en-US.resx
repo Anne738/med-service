@@ -144,4 +144,13 @@
   <data name="lblContact" xml:space="preserve">
     <value>Contact Number</value>
   </data>
+  <data name="CurrentFilter" xml:space="preserve">
+    <value>Current filter</value>
+  </data>
+  <data name="lblSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="lblClear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
 </root>

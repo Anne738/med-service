@@ -144,4 +144,13 @@
   <data name="lblContact" xml:space="preserve">
     <value>Контактний номер</value>
   </data>
+  <data name="CurrentFilter" xml:space="preserve">
+    <value>Фільтер</value>
+  </data>
+  <data name="lblSearch" xml:space="preserve">
+    <value>Пошук</value>
+  </data>
+  <data name="lblClear" xml:space="preserve">
+    <value>Очистити</value>
+  </data>
 </root>
