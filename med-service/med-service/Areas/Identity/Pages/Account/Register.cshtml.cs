@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using med_service.Data;
 using med_service.Models;
 using Microsoft.Extensions.Logging;
+using med_service.ViewModels;
 
 namespace med_service.Areas.Identity.Pages.Account
 {
@@ -49,7 +50,7 @@ namespace med_service.Areas.Identity.Pages.Account
         }
 
         [BindProperty]
-        public InputModel Input { get; set; }
+        public RegisterViewModel Input { get; set; }
 
         public string ReturnUrl { get; set; }
 
@@ -58,52 +59,6 @@ namespace med_service.Areas.Identity.Pages.Account
         // Випадаючі списки
         public SelectList Hospitals { get; set; }
         public SelectList Specializations { get; set; }
-
-        public class InputModel
-        {
-            [Required(ErrorMessage = "Email є обов'язковим полем")]
-            [EmailAddress(ErrorMessage = "Введіть коректну email адресу")]
-            [Display(Name = "Email")]
-            public string Email { get; set; }
-
-            [Required(ErrorMessage = "Пароль є обов'язковим полем")]
-            [StringLength(100, ErrorMessage = "Пароль має бути довжиною від {2} до {1} символів", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "Пароль")]
-            public string Password { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Підтвердження пароля")]
-            [Compare("Password", ErrorMessage = "Паролі не співпадають")]
-            public string ConfirmPassword { get; set; }
-
-            [Required(ErrorMessage = "Ім'я є обов'язковим полем")]
-            [Display(Name = "Ім'я")]
-            public string FirstName { get; set; }
-
-            [Required(ErrorMessage = "Прізвище є обов'язковим полем")]
-            [Display(Name = "Прізвище")]
-            public string LastName { get; set; }
-
-            [Required(ErrorMessage = "Роль є обов'язковим полем")]
-            [Display(Name = "Роль")]
-            public User.UserRole Role { get; set; }
-
-            // Сделать поле датой с nullable, чтобы избежать ошибок при пустом вводе
-            [Display(Name = "Дата народження")]
-            [DataType(DataType.Date)]
-            public DateTime? DateOfBirth { get; set; }
-
-            [Display(Name = "Лікарня")]
-            public int? HospitalId { get; set; }
-
-            [Display(Name = "Спеціалізація")]
-            public int? SpecializationId { get; set; }
-
-            [Display(Name = "Стаж роботи (років)")]
-            [Range(0, 70, ErrorMessage = "Стаж має бути від 0 до 70 років")]
-            public int? ExperienceYears { get; set; }
-        }
 
         public async Task OnGetAsync(string returnUrl = null)
         {
@@ -123,16 +78,13 @@ namespace med_service.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-            // Log the form data for debugging
             _logger.LogInformation($"Registration attempt with role: {Input.Role}");
 
-            // Дополнительная проверка для поля Дата рождения, если роль - Пациент
             if (Input.Role == Models.User.UserRole.Patient && !Input.DateOfBirth.HasValue)
             {
                 ModelState.AddModelError("Input.DateOfBirth", "Укажіть дату народження!");
             }
 
-            // Если роль - Доктор, проверяем больницу и специализацию
             if (Input.Role == Models.User.UserRole.Doctor)
             {
                 if (!Input.HospitalId.HasValue)
@@ -210,7 +162,6 @@ namespace med_service.Areas.Identity.Pages.Account
                         }
                         else if (user.Role == Models.User.UserRole.Admin)
                         {
-                            // Admin doesn't need additional records/properties
                             _logger.LogInformation($"Створено адміністратора з ID {user.Id}");
                         }
                     }
@@ -253,7 +204,6 @@ namespace med_service.Areas.Identity.Pages.Account
             }
             else
             {
-                // Log validation errors
                 foreach (var modelState in ModelState.Values)
                 {
                     foreach (var error in modelState.Errors)
